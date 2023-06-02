@@ -8,17 +8,33 @@ This project provides a simple Web GUI for BQAT-API functionalities.
 
 ## Getting started
 
+Make sure you have `BQAT-API` running.
+
 ``` sh
+# setup python env
 poetry install
 
+# activate the env
 poetry shell
 
+# start the app
 python -m bqat_gui
 ```
 
+Find the GUI at `localhost:7860`.
+
 ## Test and Deploy
 
-__TODO__
+``` sh
+# build package wheel
+poetry build --format wheel
+
+# install into your env
+pip install bqat_gui-*.whl
+
+# run the app
+bqat-gui
+```
 
 ## Authors and acknowledgment
 

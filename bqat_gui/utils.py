@@ -10,7 +10,15 @@ from PIL import Image
 
 from bqat_gui import BQAT_API
 
-FILE_TYPE = (".jpg", ".jpeg", ".png", ".wsq", ".bmp", ".jp2")
+FILE_TYPE = [".jpg", ".jpeg", ".png", ".wsq", ".bmp", ".jp2"]
+INTRO = """
+1. Click the file widget to upload or drag in files;
+2. Select modality of the samples;
+3. Click `Submit` to send the task and you will get the `Task ID` below;
+4. Click `Check` to check if the task was finished;
+5. Click `Retrieve` to get results if you got the `Collection ID`;
+6. Click `Export` to generate downloadable CSV.
+"""
 TEMP = (
     tempfile.NamedTemporaryFile(
         prefix="results_",
@@ -60,7 +68,7 @@ def get_output(dataset_id):
 def check_upload(files):
     image_list = []
     for file in files:
-        if Path(file.name).suffix in (".jpg"):
+        if Path(file.name).suffix in FILE_TYPE:
             image_list.append(Image.open(file.name))
     return image_list
 
