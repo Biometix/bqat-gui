@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "bqat-gui"
+version = "0.1.0"
+description = ""
+authors = ["L.Wu <l.wu@biometix.com>"]
+readme = "README.md"
+packages = [{include = "bqat_gui"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+gradio = "^3.32.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
