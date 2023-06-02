@@ -1,3 +1,5 @@
+import atexit
+import platform
 import tempfile
 from pathlib import Path
 
@@ -9,7 +11,14 @@ from PIL import Image
 from bqat_gui import BQAT_API
 
 FILE_TYPE = (".jpg", ".jpeg", ".png", ".wsq", ".bmp", ".jp2")
-TEMP = tempfile.NamedTemporaryFile(prefix="results_", suffix=".csv")
+TEMP = (
+    tempfile.NamedTemporaryFile(
+        prefix="results_",
+        suffix=".csv",
+    )
+    if platform.system() != "Windows"
+    else Path("temp/results.csv")
+)
 
 
 def submit_task(samples, modality):
@@ -63,5 +72,17 @@ def check_version():
 
 
 def export_csv(df):
+    if platform.system() == "Windows":
+        if not TEMP.parent.exists():
+            TEMP.parent.mkdir(parents=True)
+        path = TEMP
+    else:
+        path = TEMP.name
+    atexit.register(clean_up, TEMP)
     df.to_csv(TEMP, index=False)
-    return gr.File.update(value=TEMP.name, visible=True)
+    return gr.File.update(path, visible=True)
+
+
+def clean_up(temp_file):
+    Path(temp_file).unlink(missing_ok=True)
+    Path(temp_file).parent.rmdir()

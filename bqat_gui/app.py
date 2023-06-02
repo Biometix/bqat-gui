@@ -1,5 +1,6 @@
 import gradio as gr
 
+from bqat_gui import SERVER
 from bqat_gui.utils import (
     check_task,
     check_upload,
@@ -77,5 +78,5 @@ with gr.Blocks() as demo:
     )
 
 
-# if __name__ == "__main__":
-#     demo.launch()
+def run():
+    demo.launch(server_name=SERVER)

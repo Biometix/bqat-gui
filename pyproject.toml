@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bqat-gui"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["L.Wu <l.wu@biometix.com>"]
 readme = "README.md"
@@ -14,3 +14,7 @@ gradio = "^3.32.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.poetry.scripts]
+bqat-gui = 'bqat_gui.app:run'
