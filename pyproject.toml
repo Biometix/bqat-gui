@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "bqat-gui"
 version = "0.1.2"
-description = ""
+description = "BQAT is a biometric quality assessment tool for generating and analysing given biometric samples’ quality to international standards as well as to customized metrics. The BQAT tool functions by taking an input directory of biometric data and will produce both the raw quality information as well as an analysis report."
 authors = ["L.Wu <l.wu@biometix.com>"]
 readme = "README.md"
 packages = [{include = "bqat_gui"}]
