@@ -25,6 +25,18 @@ Find the GUI at `localhost:7860`.
 
 ## Test and Deploy
 
+### Deploy as Docker container
+
+``` sh
+# Spin up the stack
+docker compose up -d
+
+# Stop the stack
+docker compose down
+```
+
+### Build to deploy as Python wheel
+
 ``` sh
 # build package wheel
 poetry build --format wheel

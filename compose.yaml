@@ -1,0 +1,86 @@
+version: '3.9'
+
+volumes:
+  mongo:
+
+services:
+  gui:
+    restart: on-failure
+    image: bqat-gui:latest
+    build:
+      context: .
+    ports:
+      - '7860:7860'
+    depends_on:
+      - api
+    # labels:
+    #   traefik.enable: true
+    #   traefik.http.routers.front.tls: true
+    #   traefik.http.routers.front.rule: Host(`bqat.biometix.com`)
+    #   traefik.http.routers.front.middlewares: default@file
+
+  api:
+    restart: on-failure
+    image: bqat-api:latest
+    shm_size: '8gb'
+    depends_on:
+      - mongo
+      - redis
+    environment:
+      DEBUG_MODE: NO
+      MGO_URL: mongodb://root:admin@mongo:27017/
+      SCAN_DB: scan
+      LOG_DB: log
+      RDS_URL: redis://redis:6379/
+      QUEUE_DB: 0
+    # labels:
+    #   traefik.enable: true
+    #   traefik.http.routers.api.tls: true
+    #   traefik.http.routers.api.rule: Host(`bqat-api.biometix.com`)
+    #   traefik.http.routers.api.middlewares: default@file
+    # ports:
+    #   - 8848:8848
+  
+  redis:
+    restart: on-failure
+    image: redis:latest
+
+  mongo:
+    restart: on-failure
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    volumes:
+      - mongo:/data/db
+
+  # mongo-express:
+  #   restart: on-failure
+  #   image: mongo-express:latest
+  #   build:
+  #     context: https://github.com/mongo-express/mongo-express.git
+  #   ports:
+  #     - 8081:8081
+  #   depends_on:
+  #     - mongo
+  #   environment:
+  #     ME_CONFIG_MONGODB_SERVER: mongo
+  #     ME_CONFIG_MONGODB_PORT: 27017
+  #     ME_CONFIG_MONGODB_ADMINUSERNAME: root
+  #     ME_CONFIG_MONGODB_ADMINPASSWORD: admin
+
+  # traefik:
+  #   restart: on-failure
+  #   image: traefik:v2.9
+  #   ports:
+  #     - "443:443"
+  #     - "80:80"
+  #   volumes:
+  #     - traefik:/etc/traefik:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   labels:
+  #     traefik.enable: true
+  #     traefik.http.routers.proxy.tls: true
+  #     traefik.http.routers.proxy.service: api@internal
+  #     # traefik.http.routers.proxy.rule: Host(`bqat-proxy.biometix.com`)
+  #     traefik.http.routers.proxy.middlewares: protected@file

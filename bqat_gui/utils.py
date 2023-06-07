@@ -1,5 +1,6 @@
 import atexit
 import platform
+import sys
 import tempfile
 from pathlib import Path
 
@@ -75,8 +76,11 @@ def check_upload(files):
 
 def check_version():
     r = requests.get(f"http://{BQAT_API}/scan/info")
-    body = r.json()
-    return body["version"]
+    if r.status_code == 200:
+        return r.json()["version"]
+    else:
+        print(f"Failed to start, BQAT-API ({BQAT_API}) not accessible.")
+        sys.exit()
 
 
 def export_csv(df):
