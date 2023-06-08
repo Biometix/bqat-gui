@@ -7,11 +7,7 @@ Biometric Quality Assessment Tool (BQAT) - GUI
 <img alt="GitHub issues" src="https://img.shields.io/github/issues-raw/biometix/bqat-gui">
 <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/biometix/bqat-gui">
 <img alt="GitHub" src="https://img.shields.io/github/license/biometix/bqat-gui">
-[![Build Status](https://github.com/Biometix/bqat-gui/actions/workflows/build.yml/badge.svg)](https://github.com/Biometix/bqat-gui/actions/workflows/build.yml)
-[![Test Status](https://github.com/Biometix/bqat-gui/actions/workflows/test.yml/badge.svg)](https://github.com/Biometix/bqat-gui/actions/workflows/test.yml)
 [![Release Status](https://github.com/Biometix/bqat-gui/actions/workflows/release.yml/badge.svg)](https://github.com/Biometix/bqat-gui/actions/workflows/release.yml)
-[![Tests Status](./reports/junit/tests-badge.svg?dummy=8585744)](https://htmlpreview.github.io/?https://github.com/Biometix/bqat-gui/blob/main/reports/junit/report.html)
-[![Coverage Status](./reports/coverage/coverage-badge.svg?dummy=8585744)](https://htmlpreview.github.io/?https://github.com/Biometix/bqat-gui/blob/main/reports/coverage/index.html)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 > [biometix.github.io](https://biometix.github.io/)
