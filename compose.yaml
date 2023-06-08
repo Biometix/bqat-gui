@@ -1,0 +1,59 @@
+version: '3.9'
+
+volumes:
+  mongo:
+
+services:
+  gui:
+    restart: on-failure
+    image: ghcr.io/biometix/bqat-gui:latest
+    build:
+      context: .
+    ports:
+      - '7860:7860'
+    depends_on:
+      - api
+
+  api:
+    restart: on-failure
+    image: ghcr.io/biometix/bqat-api:latest
+    shm_size: '8gb'
+    depends_on:
+      - mongo
+      - redis
+    environment:
+      MGO_URL: mongodb://root:admin@mongo:27017/
+      SCAN_DB: scan
+      LOG_DB: log
+      RDS_URL: redis://redis:6379/
+      QUEUE_DB: 0
+    # ports:
+    #   - 8848:8848
+  
+  redis:
+    restart: on-failure
+    image: redis:latest
+
+  mongo:
+    restart: on-failure
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    volumes:
+      - mongo:/data/db
+
+  # mongo-express:
+  #   restart: on-failure
+  #   image: mongo-express:latest
+  #   build:
+  #     context: https://github.com/mongo-express/mongo-express.git
+  #   ports:
+  #     - 8081:8081
+  #   depends_on:
+  #     - mongo
+  #   environment:
+  #     ME_CONFIG_MONGODB_SERVER: mongo
+  #     ME_CONFIG_MONGODB_PORT: 27017
+  #     ME_CONFIG_MONGODB_ADMINUSERNAME: root
+  #     ME_CONFIG_MONGODB_ADMINPASSWORD: admin
