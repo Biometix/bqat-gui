@@ -4,7 +4,7 @@ volumes:
   mongo:
 
 services:
-  gui:
+  web:
     restart: on-failure
     image: bqat-gui:latest
     build:

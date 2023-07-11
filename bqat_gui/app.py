@@ -1,28 +1,22 @@
 import gradio as gr
 
-from bqat_gui import SERVER
+from bqat_gui import SERVER, TITLE
 from bqat_gui.utils import (
     FILE_TYPE,
-    INTRO,
     check_task,
     check_upload,
-    check_version,
     export_csv,
+    get_footnote,
+    get_heading,
+    get_intro,
     get_output,
     submit_task,
 )
 
-VERSION = check_version()
-HEADING = f"""
-![logo](https://www.biometix.com/wp-content/uploads/2020/10/logo-square.png)
-# Biometric Quality Assessment Tool (BQAT) - Web GUI
-### Engine: _{VERSION}_
-"""
-
-
-with gr.Blocks() as demo:
-    gr.Markdown(HEADING)
-    gr.Markdown(INTRO)
+with gr.Blocks(title=TITLE) as demo:
+    gr.Markdown(get_heading())
+    gr.Markdown(get_intro())
+    gr.Markdown("---")
 
     with gr.Accordion(label="Upload"):
         file_upload = gr.Files(file_count="multiple", file_types=FILE_TYPE)
@@ -47,13 +41,19 @@ with gr.Blocks() as demo:
 
     task_status = gr.Markdown(label="Task Status")
 
-    dataset_id = gr.Textbox(label="Collection ID")
+    with gr.Accordion(label="Results ID", open=False):
+        dataset_id = gr.Textbox(label="Collection")
     retrieve_btn = gr.Button("Retrieve Results")
 
-    with gr.Accordion(label="Results"):
-        task_output = gr.Dataframe(interactive=False)
+    # with gr.Accordion(label="Results"):
+    task_output = gr.Dataframe(
+        interactive=False,
+    )
     export_btn = gr.Button("Export")
     csv = gr.File(interactive=False, visible=False)
+
+    gr.Markdown("---")
+    gr.Markdown(get_footnote())
 
     file_upload.upload(
         fn=check_upload,
