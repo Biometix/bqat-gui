@@ -4,7 +4,7 @@ volumes:
   mongo:
 
 services:
-  gui:
+  web:
     restart: on-failure
     image: ghcr.io/biometix/bqat-gui:latest
     build:
