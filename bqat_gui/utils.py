@@ -3,31 +3,14 @@ import platform
 import sys
 import tempfile
 from pathlib import Path
+from secrets import token_urlsafe
 
 import gradio as gr
 import pandas as pd
 import requests
 from PIL import Image
 
-from bqat_gui import BQAT_API
-
-FILE_TYPE = [".jpg", ".jpeg", ".png", ".wsq", ".bmp", ".jp2"]
-INTRO = """
-1. Click the file widget to upload or drag in files;
-2. Select modality of the samples;
-3. Click `Submit` to send the task and you will get the `Task ID` below;
-4. Click `Check` to check if the task was finished;
-5. Click `Retrieve` to get results if you got the `Collection ID`;
-6. Click `Export` to generate downloadable CSV.
-"""
-TEMP = (
-    tempfile.NamedTemporaryFile(
-        prefix="results_",
-        suffix=".csv",
-    )
-    if platform.system() != "Windows"
-    else Path("temp/results.csv")
-)
+from bqat_gui import BQAT_API, FILE_TYPE, WEB_VERSION
 
 
 def submit_task(samples, modality):
@@ -55,7 +38,7 @@ def check_task(task_id):
         case 1:
             status = "__Processing...__"
         case 2:
-            status = "__Finished.__"
+            status = "__Finished!__"
     collection = r.get("collection")
     return status, collection
 
@@ -84,6 +67,14 @@ def check_version():
 
 
 def export_csv(df):
+    TEMP = (
+        tempfile.NamedTemporaryFile(
+            prefix="results_",
+            suffix=".csv",
+        )
+        if platform.system() != "Windows"
+        else Path(f"temp/results_{token_urlsafe(5)}.csv")
+    )
     if platform.system() == "Windows":
         if not TEMP.parent.exists():
             TEMP.parent.mkdir(parents=True)
@@ -98,3 +89,33 @@ def export_csv(df):
 def clean_up(temp_file):
     Path(temp_file).unlink(missing_ok=True)
     Path(temp_file).parent.rmdir()
+
+
+def get_heading():
+    return """
+![logo](https://www.biometix.com/wp-content/uploads/2020/10/logo-square.png)
+# Biometric Quality Assessment Tool (BQAT) - Web GUI
+## _by Biometix_
+---
+"""
+
+
+def get_footnote():
+    return f"""
+Web: **_v{WEB_VERSION}_**
+
+Engine: **_v{check_version()}_**
+"""
+
+
+def get_intro():
+    return """
+### Instruction
+
+1. Upload biometric samples;
+2. Select modality of the samples;
+3. Click `Submit` to send the task;
+4. Click `Check` to check if the task was finished;
+5. Click `Retrieve` to get results;
+6. Click `Export` to generate downloadable CSV.
+"""
