@@ -75,9 +75,9 @@ def export_csv(df):
         if platform.system() != "Windows"
         else Path(f"temp/results_{token_urlsafe(5)}.csv")
     )
-    if not TEMP.exists():
-        TEMP.mkdir(parents=True)
     if platform.system() == "Windows":
+        if not TEMP.exists():
+            TEMP.mkdir(parents=True)
         path = TEMP
     else:
         path = TEMP.name
