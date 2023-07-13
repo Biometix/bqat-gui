@@ -75,9 +75,9 @@ def export_csv(df):
         if platform.system() != "Windows"
         else Path(f"temp/results_{token_urlsafe(5)}.csv")
     )
+    if not TEMP.exists():
+        TEMP.mkdir(parents=True)
     if platform.system() == "Windows":
-        if not TEMP.parent.exists():
-            TEMP.parent.mkdir(parents=True)
         path = TEMP
     else:
         path = TEMP.name
@@ -94,9 +94,8 @@ def clean_up(temp_file):
 def get_heading():
     return """
 ![logo](https://www.biometix.com/wp-content/uploads/2020/10/logo-square.png)
-# Biometric Quality Assessment Tool (BQAT) - Web GUI
-## _by Biometix_
----
+# BQAT - Biometric Quality Assessment Tool
+### _by Biometix_
 """
 
 
@@ -110,12 +109,12 @@ Engine: **_v{check_version()}_**
 
 def get_intro():
     return """
-### Instruction
+### Instructions
 
 1. Upload biometric samples;
 2. Select modality of the samples;
 3. Click `Submit` to send the task;
-4. Click `Check` to check if the task was finished;
+4. Click `Check` to check task status, retry if not finished;
 5. Click `Retrieve` to get results;
 6. Click `Export` to generate downloadable CSV.
 """

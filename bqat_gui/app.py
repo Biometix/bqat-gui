@@ -15,6 +15,7 @@ from bqat_gui.utils import (
 
 with gr.Blocks(title=TITLE) as demo:
     gr.Markdown(get_heading())
+    gr.Markdown("---")
     gr.Markdown(get_intro())
     gr.Markdown("---")
 
