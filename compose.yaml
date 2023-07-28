@@ -43,6 +43,7 @@ services:
     volumes:
       - mongo:/data/db
 
+
   # mongo-express:
   #   restart: on-failure
   #   image: mongo-express:latest
@@ -53,7 +54,23 @@ services:
   #   depends_on:
   #     - mongo
   #   environment:
-  #     ME_CONFIG_MONGODB_SERVER: mongo
-  #     ME_CONFIG_MONGODB_PORT: 27017
-  #     ME_CONFIG_MONGODB_ADMINUSERNAME: root
-  #     ME_CONFIG_MONGODB_ADMINPASSWORD: admin
+  #     ME_CONFIG_MONGODB_URL: mongodb://root:admin@mongo:27017/
+  #     ME_CONFIG_SITE_COOKIESECRET: 'cookiesecret'
+  #     ME_CONFIG_SITE_SESSIONSECRET: 'sessionsecret'
+
+
+  # traefik:
+  #   restart: on-failure
+  #   image: traefik:v2.9
+  #   ports:
+  #     - "443:443"
+  #     - "80:80"
+  #   volumes:
+  #     - traefik:/etc/traefik:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   labels:
+  #     traefik.enable: true
+  #     traefik.http.routers.proxy.tls: true
+  #     traefik.http.routers.proxy.service: api@internal
+  #     # traefik.http.routers.proxy.rule: Host(`bqat-proxy.biometix.com`)
+  #     traefik.http.routers.proxy.middlewares: protected@file

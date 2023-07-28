@@ -44,8 +44,16 @@ def check_task(task_id):
 
 
 def get_output(dataset_id):
-    r = requests.get(f"http://{BQAT_API}/scan/{dataset_id}/profiles").json()
-    df = pd.DataFrame(r)
+    raw_items = requests.get(f"http://{BQAT_API}/scan/{dataset_id}/profiles").json()
+    cleaned_items = []
+    for item in raw_items:
+        if item.get("log"):
+            item.pop("log")
+        if item.get("tag"):
+            item.pop("tag")
+        item["file"] = item["file"].split("temp/")[1]
+        cleaned_items.append(item)
+    df = pd.DataFrame(cleaned_items)
     return df
 
 
