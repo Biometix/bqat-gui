@@ -54,6 +54,7 @@ services:
     volumes:
       - mongo:/data/db
 
+
   # mongo-express:
   #   restart: on-failure
   #   image: mongo-express:latest
@@ -64,10 +65,10 @@ services:
   #   depends_on:
   #     - mongo
   #   environment:
-  #     ME_CONFIG_MONGODB_SERVER: mongo
-  #     ME_CONFIG_MONGODB_PORT: 27017
-  #     ME_CONFIG_MONGODB_ADMINUSERNAME: root
-  #     ME_CONFIG_MONGODB_ADMINPASSWORD: admin
+  #     ME_CONFIG_MONGODB_URL: mongodb://root:admin@mongo:27017/
+  #     ME_CONFIG_SITE_COOKIESECRET: 'cookiesecret'
+  #     ME_CONFIG_SITE_SESSIONSECRET: 'sessionsecret'
+
 
   # traefik:
   #   restart: on-failure
