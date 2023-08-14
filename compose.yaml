@@ -38,8 +38,8 @@ services:
     #   traefik.http.routers.api.tls: true
     #   traefik.http.routers.api.rule: Host(`bqat-api.biometix.com`)
     #   traefik.http.routers.api.middlewares: default@file
-    ports:
-      - 8848:8848
+    # ports:
+    #   - 8848:8848
   
   redis:
     restart: on-failure
@@ -55,19 +55,19 @@ services:
     #   - mongo:/data/db
 
 
-  mongo-express:
-    restart: on-failure
-    image: mongo-express:latest
-    build:
-      context: https://github.com/mongo-express/mongo-express.git
-    ports:
-      - 8081:8081
-    depends_on:
-      - mongo
-    environment:
-      ME_CONFIG_MONGODB_URL: mongodb://root:admin@mongo:27017/
-      ME_CONFIG_SITE_COOKIESECRET: 'cookiesecret'
-      ME_CONFIG_SITE_SESSIONSECRET: 'sessionsecret'
+  # mongo-express:
+  #   restart: on-failure
+  #   image: mongo-express:latest
+  #   build:
+  #     context: https://github.com/mongo-express/mongo-express.git
+  #   ports:
+  #     - 8081:8081
+  #   depends_on:
+  #     - mongo
+  #   environment:
+  #     ME_CONFIG_MONGODB_URL: mongodb://root:admin@mongo:27017/
+  #     ME_CONFIG_SITE_COOKIESECRET: 'cookiesecret'
+  #     ME_CONFIG_SITE_SESSIONSECRET: 'sessionsecret'
 
 
   # traefik:

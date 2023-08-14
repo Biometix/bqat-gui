@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bqat-gui"
-version = "0.1.7"
+version = "0.1.8"
 description = ""
 authors = ["L.Wu <l.wu@biometix.com>"]
 readme = "README.md"
