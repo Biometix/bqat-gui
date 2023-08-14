@@ -5,6 +5,7 @@ from bqat_gui.utils import (
     FILE_TYPE,
     check_task,
     check_upload,
+    clear_task,
     export_csv,
     get_footnote,
     get_heading,
@@ -22,7 +23,7 @@ with gr.Blocks(title=TITLE) as demo:
     with gr.Accordion(label="Upload"):
         file_upload = gr.Files(file_count="multiple", file_types=FILE_TYPE)
     with gr.Accordion(label="Preview", open=False):
-        file_display = gr.Gallery().style(preview=True)
+        file_display = gr.Gallery(preview=True)
 
     file_mode = gr.Dropdown(
         [
@@ -37,19 +38,29 @@ with gr.Blocks(title=TITLE) as demo:
 
     submit_btn = gr.Button("Submit")
 
+    gr.Markdown("---")
+
     task_id = gr.Textbox(label="Task ID")
     check_btn = gr.Button("Check Status")
 
-    task_status = gr.Markdown(label="Task Status")
+    task_status = gr.Textbox(
+        label="Task Status",
+        interactive=False,
+        # info="You can `Retrieve Results` when it was finished.",
+    )
 
     with gr.Accordion(label="Results ID", open=False):
         dataset_id = gr.Textbox(label="Collection")
-    retrieve_btn = gr.Button("Retrieve Results")
 
+    gr.Markdown("---")
+
+    with gr.Row():
+        retrieve_btn = gr.Button("Retrieve Results")
+        clear_btn = gr.Button("Clear Task")
+
+    info_box = gr.Markdown()
     # with gr.Accordion(label="Results"):
-    task_output = gr.Dataframe(
-        interactive=False,
-    )
+    task_output = gr.Dataframe(interactive=False)
     export_btn = gr.Button("Export")
     csv = gr.File(interactive=False, visible=False)
 
@@ -76,6 +87,12 @@ with gr.Blocks(title=TITLE) as demo:
         fn=get_output,
         inputs=dataset_id,
         outputs=task_output,
+        scroll_to_output=True,
+    )
+    clear_btn.click(
+        fn=clear_task,
+        inputs=dataset_id,
+        outputs=info_box,
     )
     export_btn.click(
         fn=export_csv,
