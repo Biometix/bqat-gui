@@ -14,6 +14,7 @@ from bqat_gui import BQAT_API, FILE_TYPE, WEB_VERSION
 
 
 def submit_task(samples, modality):
+    clear_task()
     payloads = []
     for sample in samples:
         payloads.append(
@@ -34,11 +35,11 @@ def check_task(task_id):
     r = requests.get(f"http://{BQAT_API}/task/{task_id}/").json()
     match r["status"]:
         case 0:
-            status = "__Pending...__"
+            status = "Pending..."
         case 1:
-            status = "__Processing...__"
+            status = "Processing..."
         case 2:
-            status = "__Finished!__"
+            status = "Finished!"
     collection = r.get("collection")
     return status, collection
 
@@ -54,7 +55,24 @@ def get_output(dataset_id):
         item["file"] = item["file"].split("temp/")[1]
         cleaned_items.append(item)
     df = pd.DataFrame(cleaned_items)
+
+    clear_task(dataset_id)
+
     return df
+
+
+def clear_task(dataset_id=""):
+    if not dataset_id:
+        logs = requests.get(f"http://{BQAT_API}/scan/logs").json()
+        dataset_ids = [item.get("collection") for item in logs]
+    else:
+        dataset_ids = [dataset_id]
+
+    for item in dataset_ids:
+        requests.delete(f"http://{BQAT_API}/scan/{item}/profiles")
+        requests.delete(f"http://{BQAT_API}/scan/logs/{item}")
+
+    return "__Task cleared!__"
 
 
 def check_upload(files):
@@ -122,7 +140,10 @@ def get_intro():
 1. Upload biometric samples;
 2. Select modality of the samples;
 3. Click `Submit` to send the task;
-4. Click `Check` to check task status, retry if not finished;
-5. Click `Retrieve` to get results;
-6. Click `Export` to generate downloadable CSV.
+4. Click `Check` to check task status, retry if not finished yet;
+5. Click `Get` to retrieve results;
+6. Click `Export` to download output as CSV.
+
+> Note: Data will be cleared once retrieved or manually cleared by user.
+
 """
