@@ -10,7 +10,7 @@ services:
     build:
       context: .
     ports:
-      - '7860:7860'
+      - 7860:7860
     depends_on:
       - api
     # labels:
@@ -32,14 +32,14 @@ services:
       SCAN_DB: scan
       LOG_DB: log
       RDS_URL: redis://redis:6379/
-      QUEUE_DB: 0
+      QUEUE_DB: 10
     # labels:
     #   traefik.enable: true
     #   traefik.http.routers.api.tls: true
     #   traefik.http.routers.api.rule: Host(`bqat-api.biometix.com`)
     #   traefik.http.routers.api.middlewares: default@file
-    # ports:
-    #   - 8848:8848
+    ports:
+      - 8848:8848
   
   redis:
     restart: on-failure
