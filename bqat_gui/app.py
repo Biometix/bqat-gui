@@ -49,13 +49,13 @@ with gr.Blocks(title=TITLE) as demo:
         # info="You can `Retrieve Results` when it was finished.",
     )
 
-    with gr.Accordion(label="Results ID", open=False):
+    with gr.Accordion(label="Output ID", open=False):
         dataset_id = gr.Textbox(label="Collection")
 
     gr.Markdown("---")
 
     with gr.Row():
-        retrieve_btn = gr.Button("Retrieve Results")
+        retrieve_btn = gr.Button("Get Output")
         clear_btn = gr.Button("Clear Task")
 
     info_box = gr.Markdown()
@@ -63,6 +63,11 @@ with gr.Blocks(title=TITLE) as demo:
     task_output = gr.Dataframe(interactive=False)
     export_btn = gr.Button("Export")
     csv = gr.File(interactive=False, visible=False)
+
+    doc_link = gr.Markdown(
+        """Find info about the output at: [biometix.github.io](https://biometix.github.io/getting_started/getting_started.html)
+"""
+    )
 
     gr.Markdown("---")
     gr.Markdown(get_footnote())

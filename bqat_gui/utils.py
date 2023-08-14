@@ -141,8 +141,8 @@ def get_intro():
 2. Select modality of the samples;
 3. Click `Submit` to send the task;
 4. Click `Check` to check task status, retry if not finished yet;
-5. Click `Retrieve` to get results;
-6. Click `Export` to download results as CSV.
+5. Click `Get` to retrieve results;
+6. Click `Export` to download output as CSV.
 
 > Note: Data will be cleared once retrieved or manually cleared by user.
 
