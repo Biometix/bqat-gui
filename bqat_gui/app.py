@@ -54,15 +54,25 @@ with gr.Blocks(title=TITLE) as demo:
 
     gr.Markdown("---")
 
-    with gr.Row():
-        retrieve_btn = gr.Button("Get Output")
-        clear_btn = gr.Button("Clear Task")
+    retrieve_btn = gr.Button("Get Output")
 
-    info_box = gr.Markdown()
-    # with gr.Accordion(label="Results"):
     task_output = gr.Dataframe(interactive=False)
-    export_btn = gr.Button("Export")
     csv = gr.File(interactive=False, visible=False)
+    with gr.Row():
+        export_btn = gr.Button("Export")
+        clear_btn = gr.ClearButton(
+            components=[
+                file_upload,
+                file_display,
+                file_mode,
+                task_status,
+                task_id,
+                dataset_id,
+                task_output,
+                csv,
+            ],
+        )
+    # info_box = gr.Markdown()
 
     doc_link = gr.Markdown(
         """Find info about the output at: [biometix.github.io](https://biometix.github.io/getting_started/getting_started.html)
@@ -97,7 +107,7 @@ with gr.Blocks(title=TITLE) as demo:
     clear_btn.click(
         fn=clear_task,
         inputs=dataset_id,
-        outputs=info_box,
+        # outputs=info_box,
     )
     export_btn.click(
         fn=export_csv,

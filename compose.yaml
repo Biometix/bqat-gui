@@ -10,7 +10,7 @@ services:
     build:
       context: .
     ports:
-      - '7860:7860'
+      - 7860:7860
     depends_on:
       - api
 
@@ -26,9 +26,9 @@ services:
       SCAN_DB: scan
       LOG_DB: log
       RDS_URL: redis://redis:6379/
-      QUEUE_DB: 0
-    # ports:
-    #   - 8848:8848
+      QUEUE_DB: 10
+    ports:
+      - 8848:8848
   
   redis:
     restart: on-failure
