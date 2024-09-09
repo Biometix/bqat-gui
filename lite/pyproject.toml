@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "bqat_gui"}]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 gradio = "==3.39.0"
 
 
@@ -17,4 +17,4 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.poetry.scripts]
-bqat-gui = 'bqat_gui.app:run'
+bqat-gui = 'lite.app:run'
