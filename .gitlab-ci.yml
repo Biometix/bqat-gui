@@ -101,3 +101,14 @@ release:
         #   url: '${PACKAGE_REGISTRY_URL}/${WIN_BIN}'
   rules:
     - if: $CI_COMMIT_BRANCH == "main" && $CI_COMMIT_TAG
+
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  script:
+    - echo "releasing with new version tag"
+  release:
+    tag_name: '$CI_COMMIT_TAG'
+    description: '$CI_COMMIT_TAG'
+  rules:
+    - $CI_COMMIT_TAG
