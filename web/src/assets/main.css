@@ -1,0 +1,56 @@
+@import './base.css';
+
+#app {
+  max-width: 3840px;
+  min-width: 800px;
+  margin: 0 1rem;
+  padding: 2rem;
+  font-weight: normal;
+}
+
+a:not(.introItem) {
+  text-decoration: none;
+  color: rgb(122, 118, 118);
+  transition: color 0.4s, background-color 0.4s; /* Specify which properties to transition */
+  padding: 3px;
+}
+
+.body {
+  display: flex;
+  place-items: top;
+  justify-content: center;
+  width: 100%;
+  padding: 2rem 1rem;
+  min-height:800px;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: rgba(165, 162, 162, 0.384);
+    border-radius: 10px;
+    padding: 8px 20px;
+  }
+
+}
+
+@media (min-width: 1024px) {
+  header{
+    display: flex;
+    place-items: top;
+    margin-top: 1rem;
+    height: 120px;
+    justify-content: center;
+    align-items: center;
+    margin: 0 6rem;
+    padding: 2rem 1rem;
+    width: 100%;
+  }
+
+  #app {
+    margin: 0 6rem;
+    padding: 0 1rem;
+  }
+  .body {
+    margin-top: 1rem;
+  }
+}
