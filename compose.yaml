@@ -1,5 +1,3 @@
-version: '3.9'
-
 volumes:
   mongo:
 
@@ -8,15 +6,26 @@ services:
     restart: on-failure
     image: ghcr.io/biometix/bqat-gui:latest
     build:
-      context: .
+      context:web
     ports:
-      - 7860:7860
+      - 5173:5173
     depends_on:
       - api
-
+  
+  # web-lite:
+  #   restart: on-failure
+  #   image: bqat-gui-lite:latest
+  #   # image: ghcr.io/biometix/bqat-gui-lite:latest
+  #   build:
+  #     context: lite/bqat_gui
+  #   ports:
+  #     - 7860:7860
+  #   depends_on:
+  #     - api
+      
   api:
     restart: on-failure
-    image: ghcr.io/biometix/bqat-api:latest
+    image: ghcr.io/biometix/bqat-api:v1.4.0-beta
     shm_size: '8gb'
     depends_on:
       - mongo
@@ -29,10 +38,13 @@ services:
       QUEUE_DB: 10
     ports:
       - 8848:8848
+    user: 0:0
   
   redis:
     restart: on-failure
     image: redis:latest
+    ports:
+      - 6379:6379
 
   mongo:
     restart: on-failure
@@ -40,37 +52,5 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: admin
-    # volumes:
-    #   - mongo:/data/db
-
-
-  # mongo-express:
-  #   restart: on-failure
-  #   image: mongo-express:latest
-  #   build:
-  #     context: https://github.com/mongo-express/mongo-express.git
-  #   ports:
-  #     - 8081:8081
-  #   depends_on:
-  #     - mongo
-  #   environment:
-  #     ME_CONFIG_MONGODB_URL: mongodb://root:admin@mongo:27017/
-  #     ME_CONFIG_SITE_COOKIESECRET: 'cookiesecret'
-  #     ME_CONFIG_SITE_SESSIONSECRET: 'sessionsecret'
-
-
-  # traefik:
-  #   restart: on-failure
-  #   image: traefik:v2.9
-  #   ports:
-  #     - "443:443"
-  #     - "80:80"
-  #   volumes:
-  #     - traefik:/etc/traefik:ro
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #   labels:
-  #     traefik.enable: true
-  #     traefik.http.routers.proxy.tls: true
-  #     traefik.http.routers.proxy.service: api@internal
-  #     # traefik.http.routers.proxy.rule: Host(`bqat-proxy.biometix.com`)
-  #     traefik.http.routers.proxy.middlewares: protected@file
+    volumes:
+      - mongo:/data/db

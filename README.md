@@ -28,9 +28,9 @@ The face image assessment provides metrics includes head pose, smile detection, 
 
 The iris sample assessment module provides various quality attributes, features, and ISO metrics.
 
-<!-- ### Speech:
+### Speech
 
-The speech assessment provides various quality metrics, including naturalness, coloration, noisiness, etc. -->
+The speech assessment provides various quality metrics, including naturalness, coloration, noisiness, etc.
 
 ## __Contributing__
 
