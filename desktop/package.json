@@ -13,7 +13,9 @@
     "format": "prettier --write src/",
     "build-win": "vue-tsc --noEmit && vite build && electron-builder -w",
     "build-mac": "vue-tsc --noEmit && vite build && electron-builder -m --universal",
-    "build-linux": "vite build && electron-builder -l"
+    "build-linux": "vite build && electron-builder -l",
+    "build-electron": "electron-builder",
+    "dist-electron": "electron-builder --dir"
   },
   "dependencies": {
     "ant-design-vue": "^4.1.2",
