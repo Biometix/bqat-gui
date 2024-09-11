@@ -36,9 +36,11 @@ services:
       LOG_DB: log
       RDS_URL: redis://redis:6379/
       QUEUE_DB: 10
+      DATA: data/
     ports:
       - 8848:8848
-    user: 0:0
+    volumes:
+      - ./data:/app/data
   
   redis:
     restart: on-failure
