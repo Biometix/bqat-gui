@@ -101,10 +101,14 @@ jobs:
           npm install
       -
         name: Build Electron app
-        run: npm run build-electron
+        run: |
+          cd desktop
+          npm run build-electron
       -
         name: Package Electron app
-        run: npm run dist-electron
+        run: |
+          cd desktop
+          npm run dist-electron
       -
         name: Upload artifact
         uses: actions/upload-artifact@v3
@@ -121,7 +125,6 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-
       -
         name: Upload Release Asset
         uses: actions/upload-release-asset@v1
