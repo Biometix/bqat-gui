@@ -7,7 +7,7 @@ services:
     image: bqat-gui:latest
     # image: ghcr.io/biometix/bqat-gui:latest
     build:
-      context:web
+      context: web
     ports:
       - 7860:7860
     depends_on:
@@ -59,7 +59,6 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: admin
     volumes:
       - mongo:/data/db
-
 
   mongo-express:
     restart: on-failure

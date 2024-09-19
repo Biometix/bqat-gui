@@ -1,3 +1,13 @@
+<a name="v0.3.1"></a>
+# v0.3.1 (2024-09-19)
+
+## 🛠 Fixes
+
+- Task log loading issue
+
+- Collapse input folder view
+
+
 <a name="v0.3.0"></a>
 # v0.3.0 (2024-09-09)
 
