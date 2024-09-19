@@ -281,7 +281,7 @@ export const useApi = defineStore('api', () => {
             });
         });
         
-        inputTree.value = nestedStructure[0].children
+        inputTree.value = nestedStructure ? nestedStructure[0]?.children : [];
         // console.log(inputTree.value)
     }
 
