@@ -54,7 +54,3 @@ a:not(.introItem) {
     margin-top: 1rem;
   }
 }
-
-::-webkit-scrollbar {
-  display: none;
-}
