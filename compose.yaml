@@ -1,17 +1,18 @@
 volumes:
   mongo:
 
+
 services:
   web:
     restart: on-failure
     image: ghcr.io/biometix/bqat-gui:latest
     build:
-      context:web
+      context: web
     ports:
       - 7860:7860
     depends_on:
       - api
-  
+
   # web-lite:
   #   restart: on-failure
   #   image: bqat-gui-lite:latest
@@ -22,7 +23,7 @@ services:
   #     - 7860:7860
   #   depends_on:
   #     - api
-      
+
   api:
     restart: on-failure
     image: ghcr.io/biometix/bqat-api:v1.4.0-beta
@@ -35,14 +36,14 @@ services:
       SCAN_DB: scan
       LOG_DB: log
       RDS_URL: redis://redis:6379/
-      QUEUE_DB: 10
+      QUEUE_DB: 0
       DATA: data/
       WEB: http://localhost:7860
     ports:
       - 8848:8848
     volumes:
       - ./data:/app/data
-  
+
   redis:
     restart: on-failure
     image: redis:latest

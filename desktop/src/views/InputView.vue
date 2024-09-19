@@ -49,7 +49,6 @@
                 allow-clear
                 tree-line
                 treeIcon
-                tree-default-expand-all
                 :tree-data="API.inputTree"
                 :field-names="{
                   children: 'children',
@@ -574,18 +573,6 @@
       </a-tab-pane>
     </a-tabs>
 
-    <!-- <h3 style="text-align: center">
-      Current status is :
-      {{
-        scanStatus.scan == 0
-          ? 'Not started'
-          : scanStatus.scan == 1
-            ? 'Ongoing'
-            : scanStatus.scan == 2
-              ? 'Success'
-              : 'Error'
-      }}
-    </h3> -->
   </a-flex>
 </template>
 
@@ -593,11 +580,10 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useStatus, useInfo, useApi } from '../stores/dataStore.js'
 import { InboxOutlined } from '@ant-design/icons-vue'
-import { message, Upload } from 'ant-design-vue'
+import { message} from 'ant-design-vue'
 import type { UploadChangeParam, UploadProps } from 'ant-design-vue'
 import { onBeforeRouteLeave, useRouter } from 'vue-router'
-import type { CascaderProps, SelectProps } from 'ant-design-vue'
-// import { CloudTwoTone, FolderOpenTwoTone, FolderOutlined, AimOutlined } from '@ant-design/icons-vue'
+import type { CascaderProps } from 'ant-design-vue'
 import { h } from 'vue'
 import { SyncOutlined } from '@ant-design/icons-vue'
 import mime from 'mime'
@@ -637,16 +623,7 @@ const openNotificationWithIcon = (type: string) => {
   }
 }
 let checkInternalStatus = null
-const searchItem = ref(null)
-const showItem = ref(null)
-const searchOptions = computed(() => {
-  return preprocessInfo.value.preprocess.log.map((item) => {
-    return {
-      value: item.target,
-      label: item.target
-    }
-  })
-})
+
 const activeKey = ref(['0'])
 
 const preprocessStatus = useStatus()
@@ -820,7 +797,7 @@ const checkInputFolder = async () => {
     })
     .then((data) => {
       if (data) {
-        console.log(data)
+        // console.log(data)
         API.updateInputFolder(data)
         API.updateInputTree(data)
       }
