@@ -280,8 +280,9 @@ export const useApi = defineStore('api', () => {
                 }
             });
         });
-        // console.log(nestedStructure)
-        inputTree.value = nestedStructure
+        
+        inputTree.value = nestedStructure[0].children
+        // console.log(inputTree.value)
     }
 
     return { api, apiList, updateApi, folderPath, updateFolderPath, updateInputFolder, inputFolder, inputTree, updateInputTree }

@@ -688,7 +688,7 @@ const initResultLoad = async (otherInfos) => {
 }
 
 const initialiseTask = async () => {
-  const url = `${API.api}/task/logs/scan/`
+  const url = `${API.api}/task/logs/scan`
   try {
     const response = await fetch(url, {
       method: 'GET',

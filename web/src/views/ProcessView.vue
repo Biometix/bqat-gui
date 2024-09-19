@@ -18,7 +18,7 @@
                   ? processInfo.process.taskStatus.filter((item) => item.status != 2)[0].name
                   : 'NA'
               "
-              style="text-align: center;"
+              style="text-align: center"
             >
               <template #suffix>
                 <i class="bi bi-terminal"></i>
@@ -578,14 +578,14 @@
 
 <script setup lang="ts">
 import { useStatus, useInfo, useApi } from '../stores/dataStore.js'
-import { ref, computed, watchEffect, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { json2csv } from 'json-2-csv'
 import { DeleteOutlined } from '@ant-design/icons-vue'
 import type { SelectProps, CascaderProps } from 'ant-design-vue'
 import { notification } from 'ant-design-vue'
 import { h } from 'vue'
-import { LoadingOutlined, SyncOutlined } from '@ant-design/icons-vue'
+import { SyncOutlined } from '@ant-design/icons-vue'
 import Papa from 'papaparse'
 
 const csvdata = ref([])
@@ -599,6 +599,7 @@ const showReport = ref(false)
 const showOutlier = ref(false)
 const uploadRef = ref(null)
 const generateExternal = ref(false)
+const tasksToUpdateOnPage = ref([])
 
 const outlierEta = ref(-1)
 const outlierLength = ref(0)
@@ -1270,7 +1271,7 @@ const deleteTask = async () => {
     if (statusIndex !== -1) {
       processInfo.value.process.taskStatus.splice(statusIndex, 1)
     }
-    const url = `${API.api}/task/${item.tid}`
+    const url = `${API.api}/task/${item.tid}/`
     await fetch(url, {
       method: 'DELETE',
       headers: { accept: 'application/json' }
@@ -1533,7 +1534,21 @@ const formatETA = computed(() => {
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
 })
 
+const intervalGap = ref(1000)
+//Interval to check whether there are tasks need to update progress
+//update task withid(no new) and unfinished task
+const checkTaskStatus = setInterval(() => {
+  tasksToUpdateOnPage.value = processInfo.value.process.taskStatus.filter(
+    (item) => item.status != 2
+  )
+  if (tasksToUpdateOnPage.value.length > 0) {
+      getTaskETA(tasksToUpdateOnPage.value)
+  } else {
+    clearInterval(checkTaskStatus)
+  }
+}, intervalGap.value)
 //Update the progress as task going
+//Notes: update to only one task can be runnning at one time
 const getTaskETA = async (tasksToUpdate) => {
   for (const item of tasksToUpdate) {
     const url = `${API.api}/task/${item.tid}/status`
@@ -1557,10 +1572,33 @@ const getTaskETA = async (tasksToUpdate) => {
             (x) => x.collection === item.collection
           )
           if (index == -1) processInfo.value.process.taskList.push(item)
+          processStatus.updateStatus('process', 2)
         }
       }
     } catch (error) {
+      // If the task status can not be found, finish too fast
       console.error('Error getting task status:', error)
+
+      const url1 = `${API.api}/task/logs/scan/${item.tid}`
+      const response = await fetch(url1, {
+        method: 'GET',
+        headers: { accept: 'application/json' }
+      })
+      if (!response.ok) {
+        console.log('can not find task log')
+      }
+      const data = await response.json()
+      if (data[0].status == 2) {
+        item.eta = 0
+        item.percent = 100
+        item.status = 2
+
+        const index = processInfo.value.process.taskList.findIndex(
+          (x) => x.collection === item.collection
+        )
+        if (index == -1) processInfo.value.process.taskList.push(item)
+        processStatus.updateStatus('process', 2)
+      }
     }
   }
 }
@@ -1587,6 +1625,25 @@ const updateTaskStatus = async (tasksToUpdate) => {
         item.num = data.total
         item.modified = data.modified
         item.input = data.input
+        item.status = data.status
+      }
+      if (data.total > 500) {
+        intervalGap.value = 5000
+        console.log('update interval gep')
+        clearInterval(checkTaskStatus)
+        const largecheckTaskStatus = setInterval(() => {
+          tasksToUpdateOnPage.value = processInfo.value.process.taskStatus.filter(
+            (item) => item.status != 2
+          )
+          if (tasksToUpdateOnPage.value.length > 0) {
+            setTimeout(() => {
+              getTaskETA(tasksToUpdateOnPage.value)
+            }, 1000)
+          } else {
+            processStatus.updateStatus('process', 2)
+            clearInterval(largecheckTaskStatus)
+          }
+        }, intervalGap.value)
       }
     } catch (error) {
       console.error('Error logging task:', error)
@@ -1595,7 +1652,7 @@ const updateTaskStatus = async (tasksToUpdate) => {
 }
 
 const initialiseTask = async () => {
-  const url = `${API.api}/task/logs/scan/`
+  const url = `${API.api}/task/logs/scan`
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -1670,19 +1727,13 @@ const initialiseTask = async () => {
   }
 }
 
-//Interval to check whether there are tasks need to update progress
-//update task withid(no new) and unfinished task
-const checkTaskStatus = setInterval(() => {
-  const tasksToUpdate = processInfo.value.process.taskStatus.filter((item) => item.status != 2)
-  if (tasksToUpdate.length > 0) {
-    setTimeout(() => {
-      getTaskETA(tasksToUpdate)
-    }, 800)
-  } else {
-    clearInterval(checkTaskStatus)
-    processStatus.updateStatus('process', 2)
-  }
-}, 5000)
+// Note: this only effect on page, so before navigate to this page, the status wouldn't change
+// watch(tasksToUpdateOnPage, (val) => {
+//   if (val.length == 0) {
+//     processStatus.updateStatus('process', 2)
+//     clearInterval(checkTaskStatus)
+//   }
+// })
 
 //everytime entry this page, check whether there are more tasks need to update taskStatus
 onMounted(async () => {
@@ -1699,10 +1750,12 @@ onMounted(async () => {
       initialiseTask()
     }
   }
-  const tasksToUpdate = processInfo.value.process.taskStatus.filter((item) => item.status != 2)
-  if (tasksToUpdate.filter((item) => item.num == 0).length > 0) {
+  tasksToUpdateOnPage.value = processInfo.value.process.taskStatus.filter(
+    (item) => item.status != 2
+  )
+  if (tasksToUpdateOnPage.value.filter((item) => item.num == 0).length > 0) {
     console.log('update task info')
-    updateTaskStatus(tasksToUpdate)
+    updateTaskStatus(tasksToUpdateOnPage.value)
   }
 })
 
