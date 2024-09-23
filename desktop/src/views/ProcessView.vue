@@ -1272,7 +1272,7 @@ const deleteTask = async () => {
       processInfo.value.process.taskStatus.splice(statusIndex, 1)
     }
     const url = `${API.api}/task/${item.tid}/`
-    await fetch(url, {
+    await API.authFetch(url, {
       method: 'DELETE',
       headers: { accept: 'application/json' }
     })
@@ -1291,7 +1291,7 @@ const deleteTask = async () => {
         console.error('Error delete task:', error)
       })
     const url2 = `${API.api}/scan/${item.id}/profiles`
-    await fetch(url2, {
+    await API.authFetch(url2, {
       method: 'DELETE',
       headers: { accept: 'application/json' }
     })
@@ -1316,7 +1316,7 @@ const clearTask = async () => {
   const task_id = data.tid
   const type = data.type
   const url2 = `${API.api}/task/${task_id}/cancel?type=${type}`
-  await fetch(url2, {
+  await API.authFetch(url2, {
     method: 'POST',
     headers: { accept: 'application/json' }
   })
@@ -1338,7 +1338,7 @@ const clearTask = async () => {
 const checkRunning = async () => {
   const url = `${API.api}/task/metadata`
   try {
-    const response = await fetch(url, {
+    const response = await API.authFetch(url, {
       method: 'GET',
       headers: { accept: 'application/json' }
     })
@@ -1358,7 +1358,7 @@ const checkRunning = async () => {
 // const clearTask = async () => {
 //   const url = `${API.api}/scan/clear`
 //   try {
-//     const response = await fetch(url, {
+//     const response = await API.authFetch(url, {
 //       method: 'POST',
 //       headers: { accept: 'application/json' }
 //     })
@@ -1378,7 +1378,7 @@ const checkRunning = async () => {
 // const resumeTask = async (tasksToStart) => {
 //   const url = `${API.api}/scan/resume`
 //   try {
-//     const response = await fetch(url, {
+//     const response = await API.authFetch(url, {
 //       method: 'POST',
 //       headers: { accept: 'application/json' }
 //     })
@@ -1432,7 +1432,7 @@ const checkModeTab = () => {
 const getCsv = async (type) => {
   for (const item of processInfo.value.process.selectedItems) {
     const url = `${API.api}/scan/${item.id}/profiles`
-    const response = await fetch(url, {
+    const response = await API.authFetch(url, {
       method: 'GET',
       headers: { accept: 'application/json' }
     })
@@ -1553,7 +1553,7 @@ const getTaskETA = async (tasksToUpdate) => {
   for (const item of tasksToUpdate) {
     const url = `${API.api}/task/${item.tid}/status`
     try {
-      const response = await fetch(url, {
+      const response = await API.authFetch(url, {
         method: 'GET',
         headers: { accept: 'application/json' }
       })
@@ -1580,7 +1580,7 @@ const getTaskETA = async (tasksToUpdate) => {
       console.error('Error getting task status:', error)
 
       const url1 = `${API.api}/task/logs/scan/${item.tid}`
-      const response = await fetch(url1, {
+      const response = await API.authFetch(url1, {
         method: 'GET',
         headers: { accept: 'application/json' }
       })
@@ -1608,7 +1608,7 @@ const updateTaskStatus = async (tasksToUpdate) => {
   for (const item of tasksToUpdate) {
     const url = `${API.api}/task/logs/scan/${item.tid}`
     try {
-      const response = await fetch(url, {
+      const response = await API.authFetch(url, {
         method: 'GET',
         headers: { accept: 'application/json' }
       })
@@ -1654,7 +1654,7 @@ const updateTaskStatus = async (tasksToUpdate) => {
 const initialiseTask = async () => {
   const url = `${API.api}/task/logs/scan`
   try {
-    const response = await fetch(url, {
+    const response = await API.authFetch(url, {
       method: 'GET',
       headers: { accept: 'application/json' }
     })
@@ -1682,7 +1682,7 @@ const initialiseTask = async () => {
       })
       if (data.filter((displayItem) => displayItem.status == 1).length > 0) {
         const url = `${API.api}/task/metadata`
-        await fetch(url, {
+        await API.authFetch(url, {
           method: 'GET',
           headers: { accept: 'application/json' }
         })
@@ -1762,7 +1762,7 @@ onMounted(async () => {
 const stopOutlierTask = async () => {
   processInfo.value.outlier.iconLoading = false
   const url = `${API.api}/task/${processInfo.value.outlier.id}/cancel?type=outlier`
-  await fetch(url, {
+  await API.authFetch(url, {
     method: 'POST',
     headers: { accept: 'application/json' }
   })
@@ -1939,7 +1939,7 @@ const startOutlierTask = async () => {
   const url = `${API.api}/scan/${id}/outliers/detect?trigger=true`
   // console.log(processInfo.value.outlier.detector, optionColumns)
   try {
-    const response = await fetch(url, {
+    const response = await API.authFetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1977,7 +1977,7 @@ const startOutlierTask = async () => {
 const checkOutlier = async (id) => {
   if (processInfo.value.outlier.id != '') {
     const url2 = `${API.api}/scan/${id}/outliers`
-    await fetch(url2, {
+    await API.authFetch(url2, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
     })
@@ -2010,7 +2010,7 @@ const checkOutlier = async (id) => {
 const getOutlierETA = async (tid) => {
   const url = `${API.api}/task/${tid}/status`
   try {
-    const response = await fetch(url, {
+    const response = await API.authFetch(url, {
       method: 'GET',
       headers: { accept: 'application/json' }
     })
@@ -2062,7 +2062,7 @@ const csvGenerateReport = async () => {
     processInfo.value.result.selectedCsv[0].name
   )
   const url = `${API.api}/scan/report/remote?trigger=true`
-  await fetch(url, {
+  await API.authFetch(url, {
     method: 'POST',
     body: formData
   })
@@ -2105,7 +2105,7 @@ const submitGenerate = async () => {
         processInfo.value.result.downsample > 0 ? processInfo.value.result.downsample / 100 : 1,
       minimal: processInfo.value.result.minimal
     }
-    await fetch(url, {
+    await API.authFetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(requestBody)

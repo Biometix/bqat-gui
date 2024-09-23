@@ -395,7 +395,7 @@ const stopReportTask = async () => {
   setTimeout(async () => {
     if (resultInfo.value.result.generatedReport.id) {
       const url2 = `${API.api}/task/${resultInfo.value.result.generatedReport.id}/cancel?type=report`
-      await fetch(url2, {
+      await API.authFetch(url2, {
         method: 'POST',
         headers: { accept: 'application/json' }
       })
@@ -417,7 +417,7 @@ const stopReportTask = async () => {
       resultInfo.value.result.generating = []
       cancelTasks.map(async (item) => {
         const url2 = `${API.api}/task/${item}/cancel?type=report`
-        await fetch(url2, {
+        await API.authFetch(url2, {
           method: 'POST',
           headers: { accept: 'application/json' }
         })
@@ -453,7 +453,7 @@ const openReportInfo = (item) => {
 
 const deleteReport = async (item) => {
   const url = `${API.api}/scan/${item.id}/report`
-  await fetch(url, {
+  await API.authFetch(url, {
     method: 'DELETE',
     headers: { accept: 'application/json' }
   })
@@ -482,7 +482,7 @@ const deleteReport = async (item) => {
 const checkGeneratedReport = async () => {
   try {
     const url = `${API.api}/scan/${resultInfo.value.result.generatedReport.id}/report`
-    const response = await fetch(url, {
+    const response = await API.authFetch(url, {
       method: 'GET',
       headers: { accept: 'text/html' }
     })
@@ -516,7 +516,7 @@ const checkGeneratedReport = async () => {
 const checkReportDetails = async (item) => {
   const url2 = `${API.api}/task/logs/report`
 
-  await fetch(url2, {
+  await API.authFetch(url2, {
     method: 'GET',
     headers: { accept: 'application/json' }
   })
@@ -551,7 +551,7 @@ const checkReport = async (item) => {
   // console.log(item.id)
   try {
     const url = `${API.api}/scan/${item.id}/report`
-    const response = await fetch(url, {
+    const response = await API.authFetch(url, {
       method: 'GET',
       headers: { accept: 'text/html' }
     })
@@ -614,7 +614,7 @@ const checkExternalStatus = setInterval(async () => {
 const fetchReport = async (item) => {
   console.log(item.id)
   const url = `${API.api}/scan/${item.id}/report`
-  const response = await fetch(url, {
+  const response = await API.authFetch(url, {
     method: 'GET',
     headers: { accept: 'text/html' }
   }) // 5 seconds timeout
@@ -640,7 +640,7 @@ const fetchReport = async (item) => {
 const initResultLoad = async (otherInfos) => {
   // console.log(otherInfos)
   const url = `${API.api}/task/logs/report`
-  await fetch(url, {
+  await API.authFetch(url, {
     method: 'GET',
     headers: { accept: 'application/json' }
   })
@@ -690,7 +690,7 @@ const initResultLoad = async (otherInfos) => {
 const initialiseTask = async () => {
   const url = `${API.api}/task/logs/scan`
   try {
-    const response = await fetch(url, {
+    const response = await API.authFetch(url, {
       method: 'GET',
       headers: { accept: 'application/json' }
     })
@@ -718,7 +718,7 @@ const initialiseTask = async () => {
       })
       if (data.filter((displayItem) => displayItem.status == 1).length > 0) {
         const url = `${API.api}/task/metadata`
-        await fetch(url, {
+        await API.authFetch(url, {
           method: 'GET',
           headers: { accept: 'application/json' }
         })
@@ -766,7 +766,7 @@ const initialiseTask = async () => {
 
 const checkRunning = async (newItem) => {
   const url = `${API.api}/task/metadata`
-  await fetch(url, {
+  await API.authFetch(url, {
     method: 'GET',
     headers: { accept: 'application/json' }
   })
