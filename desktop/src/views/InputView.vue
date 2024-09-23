@@ -28,6 +28,7 @@
                     :showUploadList="false"
                     accept=".zip,.tar,.gz"
                     :action="API.api + '/dataset'"
+                    :withCredentials="true"
                     @change="uploadZip"
                     >Select zip file (Click or Drag here)</a-upload-dragger
                   >

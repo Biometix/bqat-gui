@@ -28,6 +28,7 @@
                     :showUploadList="false"
                     accept=".zip,.tar,.gz"
                     :action="API.api + '/dataset'"
+                    :withCredentials="true"
                     @change="uploadZip"
                     >Select zip file (Click or Drag here)</a-upload-dragger
                   >
@@ -779,8 +780,7 @@ const updateModality = () => {
   // console.log('modality updated, so do outlier:', scanInfo.value.outlier.columns)
 }
 const handleGotToFolder = (item) => {
-  const linkToFolder = `${API.api}/${item}/?username=${btoa(API.username)}&password=${btoa(API.password)}`;
-  // const linkToFolder = API.api + '/' + item + '/'
+  const linkToFolder = API.api + '/' + item + '/'
   window.open(linkToFolder, '_blank')
 }
 //do not claim two value in one const
