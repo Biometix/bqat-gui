@@ -223,7 +223,6 @@ const validateUrl = async () => {
 }
 
 const requestUrl = async (signal) => {
-  console.log('request', tempApi.value)
   requestApi.value = true
   const myRequest = new Request(`${tempApi.value}/scan/info`, {
     method: 'GET',
@@ -232,7 +231,7 @@ const requestUrl = async (signal) => {
 
   try {
     // Await the fetch response
-    const response = await fetch(myRequest)
+    const response = await API.authFetch(myRequest)
     // Check if the response is OK
     if (!response.ok) {
       console.log('There was a problem with the new API address')

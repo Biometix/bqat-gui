@@ -239,11 +239,12 @@ export const useApi = defineStore('api', () => {
     };
     // Create a wrapper around fetch to automatically add the Authorization header
     const authFetch = (url, options: FetchOptions = {}) => {
-        // Set default headers if not already set
-        options.headers = options.headers || {};
-        options.headers['Authorization'] = 'Basic ' + btoa(`${username.value}:${password.value}`);
-
-        return fetch(url, options);
+      // Set default headers if not already set
+      // options.headers = options.headers || {};
+      // options.headers['Authorization'] = 'Basic ' + btoa(`${username.value}:${password.value}`);
+      options.credentials = "include";
+      options.mode = "cors";
+      return fetch(url, options);
     };
     function updateApi(newapi) {
         api.value = newapi
