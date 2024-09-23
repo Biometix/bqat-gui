@@ -17,7 +17,7 @@
           <!-- Input Section -->
           <a-card hoverable>
             <h2><span class="bi bi-folder2-open"> </span> Select Input Folder:</h2>
-            <br>
+            <br />
             <h3>Import folder to the backend:</h3>
             <a-collapse v-model:activeKey="activeKey">
               <a-collapse-panel key="1" header="Import zip">
@@ -43,7 +43,7 @@
                 v-model:value="scanInfo.scan.folderPath"
                 @select="handleFiles"
                 show-search
-                style="width: 100%; margin-right: 10px"
+                style="width: 80%; margin-right: 10px"
                 :height="233"
                 placeholder="Select folder"
                 allow-clear
@@ -63,7 +63,7 @@
                 ><i class="bi bi-aspect-ratio" style="margin-right: 5px"></i> view</a-button
               >
               <a-tooltip title="Refresh Input Directory">
-                <a-button shape="circle" style="margin-left: 10px">
+                <a-button shape="circle" style="margin-inline: 10px">
                   <span
                     class="bi bi-arrow-clockwise"
                     style="font-size: 15px"
@@ -71,6 +71,17 @@
                   ></span>
                 </a-button>
               </a-tooltip>
+              <div v-if="!requestFolder">
+                <CheckCircleTwoTone
+                  v-if="loadInputFolder"
+                  style="font-size: 23px; margin-top: 3px"
+                  twoToneColor="#52c41a"
+                />
+                <CloseCircleTwoTone v-else style="font-size: 23px; margin-top: 3px" twoToneColor="#9b2015" />
+              </div>
+              <div v-else>
+                <SyncOutlined style="font-size: 23px; margin-top: 3px" spin />
+              </div>
             </a-flex>
           </a-card>
 
@@ -268,9 +279,11 @@
           </a-card>
 
           <a-card hoverable>
-            <h3>Input file count: <span style="font-weight: bold;">{{ scanInfo.scan.length }}</span></h3>
+            <h3>
+              Input file count: <span style="font-weight: bold">{{ scanInfo.scan.length }}</span>
+            </h3>
           </a-card>
-          
+
           <!-- Modality section  -->
           <a-card hoverable>
             <a-flex gap="middle" vertical>
@@ -313,7 +326,7 @@
             >
             <a-col :span="12"> -->
             <a-button
-              style="width: 100%;"
+              style="width: 100%"
               type="primary"
               size="large"
               @click="submitScan2"
@@ -520,7 +533,10 @@
           </a-card>
 
           <a-card hoverable>
-            <h3>Input file count: <span style="font-weight: bold;">{{ scanInfo.scan.validFileList.length }}</span></h3>
+            <h3>
+              Input file count:
+              <span style="font-weight: bold">{{ scanInfo.scan.validFileList.length }}</span>
+            </h3>
           </a-card>
 
           <!-- Modality Section  -->
@@ -572,7 +588,6 @@
         </a-flex>
       </a-tab-pane>
     </a-tabs>
-
   </a-flex>
 </template>
 
@@ -580,12 +595,12 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useStatus, useInfo, useApi } from '../stores/dataStore.js'
 import { InboxOutlined } from '@ant-design/icons-vue'
-import { message} from 'ant-design-vue'
+import { message } from 'ant-design-vue'
 import type { UploadChangeParam, UploadProps } from 'ant-design-vue'
 import { onBeforeRouteLeave, useRouter } from 'vue-router'
 import type { CascaderProps } from 'ant-design-vue'
 import { h } from 'vue'
-import { SyncOutlined } from '@ant-design/icons-vue'
+import { SyncOutlined, CheckCircleTwoTone, CloseCircleTwoTone } from '@ant-design/icons-vue'
 import mime from 'mime'
 import { notification } from 'ant-design-vue'
 
@@ -616,8 +631,8 @@ const openNotificationWithIcon = (type: string) => {
     })
   } else if (type === 'input') {
     notification['success']({
-      message: 'Update Input Directory',
-      description: 'Upload input directory successful.',
+      message: 'Reload Input Directory',
+      description: 'Reload input directory successful.',
       placement: 'top'
     })
   }
@@ -782,27 +797,36 @@ const handleFiles = (event) => {
   preprocessInfo.value.preprocess.folderPath = event
 }
 
+const loadInputFolder = ref(true)
+const requestFolder = ref(false)
 const checkInputFolder = async () => {
+  requestFolder.value=true
   const exts = scanInfo.value.scan.inputType.map((ext) => `exts=${ext.toLowerCase()}`).join('&')
   const pattern = scanInfo.value.scan.name ? `&pattern=${scanInfo.value.scan.name}` : ''
   const myRequest = new Request(`${API.api}/task/inputs?${exts}${pattern}`, {
     method: 'GET'
   })
-  await fetch(myRequest)
+  await API.authFetch(myRequest)
     .then((response) => {
       if (!response.ok) {
+        loadInputFolder.value = false
+        requestFolder.value=false
         throw new Error('Mounted folder is not exist')
       }
       return response.json()
     })
     .then((data) => {
       if (data) {
+        loadInputFolder.value = true
+        requestFolder.value=false
         // console.log(data)
         API.updateInputFolder(data)
         API.updateInputTree(data)
       }
     })
     .catch((error) => {
+      loadInputFolder.value = false
+      requestFolder.value=false
       console.error('the API can not be reach', error)
     })
 }
@@ -887,7 +911,6 @@ watch(
 const refreshDirectory = async () => {
   await checkInputFolder()
   scanInfo.value.scan.folderPath = null
-  openNotificationWithIcon('input')
 }
 
 const count = ref(0)
@@ -1025,7 +1048,7 @@ const convertImageBackend = async (file, name) => {
     format: 'webp' // Desired format (adjust as needed)
   }
   const url = API.api + '/convert'
-  await fetch(url, {
+  await API.authFetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json' // Specify content type as JSON
@@ -1080,7 +1103,7 @@ const clearScan = () => {
 // const startNewTask = async (tid) => {
 //   const url = `${API.api}/scan/resume/${tid}`
 //   try {
-//     const response = await fetch(url, {
+//     const response = await API.authFetch(url, {
 //       method: 'POST',
 //       headers: { accept: 'application/json' }
 //     })
@@ -1124,7 +1147,7 @@ const submitScan1 = async () => {
     : ''
   const url = `${API.api}/scan/remote?modality=${modality.toLowerCase()}${engine}`
   try {
-    const response = await fetch(url, {
+    const response = await API.authFetch(url, {
       method: 'POST',
       body: formData
     })
@@ -1195,7 +1218,7 @@ const submitScan2 = async () => {
   // console.log(requestBody)
   const url = `${API.api}/scan/local?modality=${modality.toLowerCase()}`
   try {
-    const response = await fetch(url, {
+    const response = await API.authFetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody)
@@ -1259,6 +1282,8 @@ onMounted(async () => {
       console.log(selectedItem)
       scanInfo.value.scan.length = selectedItem[0].count
     }
+  } else {
+    checkInputFolder()
   }
 })
 
@@ -1269,7 +1294,7 @@ const updateSelect = (item) => {
 const clearTask = async () => {
   preprocessInfo.value.preprocess.loading = false
   const url = `${API.api}/task/${preprocessInfo.value.preprocess.id}/cancel?type=preprocessing`
-  await fetch(url, {
+  await API.authFetch(url, {
     method: 'POST',
     headers: { accept: 'application/json' }
   })
@@ -1336,7 +1361,7 @@ const submitPreprocess = async () => {
   }
   const url = `${API.api}/scan/preprocessing`
   try {
-    const response = await fetch(url, {
+    const response = await API.authFetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody)
@@ -1373,7 +1398,7 @@ const checkPreprocess = async () => {
   // console.log('get')
   if (preprocessInfo.value.preprocess.id != '') {
     const url2 = `${API.api}/scan/preprocessing/${preprocessInfo.value.preprocess.id}`
-    await fetch(url2, {
+    await API.authFetch(url2, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
     })
@@ -1413,7 +1438,7 @@ const checkPreprocess = async () => {
 const getETA = async (tid) => {
   const url = `${API.api}/task/${tid}/status`
   try {
-    const response = await fetch(url, {
+    const response = await API.authFetch(url, {
       method: 'GET',
       headers: { accept: 'application/json' }
     })

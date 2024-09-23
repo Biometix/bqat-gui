@@ -40,7 +40,7 @@ export const useInfo = defineStore('info', () => {
         length: 0,
         limit: 0,
         type: [],
-        inputType: ['PNG', 'JPG', 'JPEG', 'JP2', 'WSQ', 'BMP','WAV'],
+        inputType: ['PNG', 'JPG', 'JPEG', 'JP2', 'WSQ', 'BMP', 'WAV'],
         name: '',
         modality: ['Fingerprint'],
         submit: false,
@@ -48,7 +48,7 @@ export const useInfo = defineStore('info', () => {
         percent: 0,
         activeKeys: [3],
         tabKey: 1,
-        converted:[]
+        converted: []
     })
     const process = ref({
         taskIds: [], // current running time all task ids(including pending tasks)
@@ -141,7 +141,7 @@ export const useInfo = defineStore('info', () => {
             percent: 0,
             activeKeys: [3],
             tabKey: 1,
-            converted:[]
+            converted: []
         }
         scan.value = newScan
     }
@@ -226,10 +226,25 @@ export const useInfo = defineStore('info', () => {
 export const useApi = defineStore('api', () => {
     const api = ref(import.meta.env.VITE_API.toString())
     const apiList = ref([import.meta.env.VITE_API.toString()])
+    const username = ref(import.meta.env.VITE_USERNAME.toString())
+    const password = ref(import.meta.env.VITE_PASSWORD.toString())
 
     const folderPath = ref('')
     const inputFolder = ref([])
     const inputTree = ref([])
+
+    // Define a type for the fetch options with optional headers
+    type FetchOptions = RequestInit & {
+        headers?: HeadersInit;
+    };
+    // Create a wrapper around fetch to automatically add the Authorization header
+    const authFetch = (url, options: FetchOptions = {}) => {
+        // Set default headers if not already set
+        options.headers = options.headers || {};
+        options.headers['Authorization'] = 'Basic ' + btoa(`${username.value}:${password.value}`);
+
+        return fetch(url, options);
+    };
     function updateApi(newapi) {
         api.value = newapi
         const index = apiList.value.findIndex(item => item == newapi)
@@ -280,11 +295,11 @@ export const useApi = defineStore('api', () => {
                 }
             });
         });
-        
-        inputTree.value = nestedStructure ? nestedStructure[0]?.children : []
+
+        inputTree.value = nestedStructure ? nestedStructure[0] ?.children : []
         // console.log(inputTree.value)
     }
 
-    return { api, apiList, updateApi, folderPath, updateFolderPath, updateInputFolder, inputFolder, inputTree, updateInputTree }
+    return { api, apiList, updateApi, folderPath, updateFolderPath, updateInputFolder, inputFolder, inputTree, updateInputTree, password, username, authFetch }
 })
 

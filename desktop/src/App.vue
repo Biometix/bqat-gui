@@ -8,7 +8,7 @@ import {
 } from '@ant-design/icons-vue'
 import { RouterLink, RouterView } from 'vue-router'
 import { useInfo, useStatus, useApi } from './stores/dataStore.js'
-import { ref, watchEffect, watch, computed } from 'vue'
+import { ref, watchEffect, watch, computed, onMounted } from 'vue'
 import { notification } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 const openSetting = ref(false)
@@ -36,15 +36,13 @@ const defaultSetting = {
 const colorTheme = ref(prefersDarkScheme.matches ? darkSetting : defaultSetting)
 document.documentElement.setAttribute('data-theme', prefersDarkScheme.matches ? 'dark' : 'light')
 const currrentTheme = ref('light')
-const buttonType = computed(() => {
-  return currrentTheme.value === 'dark' ? 'primary' : 'text'
-})
+
 const info = ref(useInfo())
 const status = useStatus()
 const API = useApi()
 const router = useRouter()
 const tempApi = ref(API.api)
-const validApi = ref(true)
+const validApi = ref(false)
 const requestApi = ref(false)
 const options = ref<{ value: string }[]>(API.apiList.slice(1))
 const version = import.meta.env.VITE_VERSION
@@ -61,27 +59,27 @@ const openNotificationWithIcon = (type: string) => {
       message: 'Deletion failed',
       description: 'Delete database failed, Please check and try again.',
       placement: 'top',
-      duration: 0
+      duration: 3
     })
   } else if (type === 'purgeSuccess') {
     notification['success']({
-      message: 'Database Purged',
-      description: 'Successfully reset the database .',
+      message: 'Database purged',
+      description: 'Successfully reset the database.',
       placement: 'top',
       duration: 3
     })
   }
   if (type === 'hostError') {
     notification['error']({
-      message: 'Update failed',
-      description: 'Update host info failed, Please check and try again.',
+      message: 'Fail to Connect',
+      description: 'Connection to host server failed, Please check your configuration and try again.',
       placement: 'top',
-      duration: 0
+      duration: 3
     })
-  } else if (type === 'HostSuccess') {
+  } else if (type === 'hostSuccess') {
     notification['success']({
-      message: 'Host info updated',
-      description: 'Successfully update host info.',
+      message: 'Connect to Server',
+      description: 'Successfully connect to current server.',
       placement: 'top',
       duration: 3
     })
@@ -106,7 +104,7 @@ const openNotificationWithIcon = (type: string) => {
       message: 'No input folder info',
       description: 'Failed to retrieve input folder info , Please check and try again.',
       placement: 'top',
-      duration: 0
+      duration: 3
     })
   } else if (type === 'folderSuccess') {
     notification['success']({
@@ -148,7 +146,7 @@ watch(API.apiList, () => {
 
 const checkRunning = async () => {
   const url = `${API.api}/task/metadata`
-  await fetch(url, {
+  await API.authFetch(url, {
     method: 'GET',
     headers: { accept: 'application/json' }
   })
@@ -198,9 +196,13 @@ const intervalId = setInterval(() => {
 
 const updateApiUrl = () => {
   API.updateApi(tempApi.value)
-  console.log(API.apiList)
+  // console.log(API.apiList)
   openSetting.value = false
-  openNotificationWithIcon('hostSuccess')
+  if (validApi.value) {
+    // openNotificationWithIcon('hostSuccess')
+  } else {
+    openNotificationWithIcon('hostError')
+  }
 }
 
 let currentRequest = null
@@ -221,30 +223,40 @@ const validateUrl = async () => {
 }
 
 const requestUrl = async (signal) => {
+  console.log('request', tempApi.value)
   requestApi.value = true
   const myRequest = new Request(`${tempApi.value}/scan/info`, {
     method: 'GET',
     signal: signal
   })
-  currentRequest = fetch(myRequest)
-    .then((response) => {
-      if (!response.ok) {
-        console.log('There was a problem with the new API address1')
-        validApi.value = false
-        requestApi.value = false
-      }
-      return response.json()
-    })
-    .then((data) => {
-      validApi.value = true
-      requestApi.value = false
-      console.log(data)
-    })
-    .catch((error) => {
-      console.log('There was a problem with the new API address1')
+
+  try {
+    // Await the fetch response
+    const response = await fetch(myRequest)
+    // Check if the response is OK
+    if (!response.ok) {
+      console.log('There was a problem with the new API address')
       validApi.value = false
       requestApi.value = false
-    })
+      return false // Early return if response is not OK
+    }
+
+    // Await the parsed JSON data
+    const data = await response.json()
+
+    // Set the API status as valid
+    validApi.value = true
+    requestApi.value = false
+
+    console.log(data)
+    return true // Return true if everything is OK
+  } catch (error) {
+    // Catch any errors (e.g., network errors, aborted requests)
+    console.log('There was a problem with the new API address:', error)
+    validApi.value = false
+    requestApi.value = false
+    return false // Return false if an error occurs
+  }
 }
 
 // const checkMountedFolder =async () => {
@@ -271,7 +283,8 @@ const checkInputFolder = async () => {
   const myRequest = new Request(`${API.api}/task/inputs`, {
     method: 'GET'
   })
-  await fetch(myRequest)
+
+  await API.authFetch(myRequest)
     .then((response) => {
       if (!response.ok) {
         throw new Error('Mounted folder is not exist')
@@ -280,20 +293,20 @@ const checkInputFolder = async () => {
     })
     .then((data) => {
       if (data) {
-        console.log(data)
-        openNotificationWithIcon('folderSuccess')
+        // console.log(data)
+        // openNotificationWithIcon('folderSuccess')
         API.updateInputFolder(data)
         API.updateInputTree(data)
       }
     })
     .catch((error) => {
-      openNotificationWithIcon('folderError')
+      // openNotificationWithIcon('folderError')
       console.error('the API can not be reach', error)
     })
 }
 const purgeDatabase = async () => {
   const url = `${API.api}/purge`
-  await fetch(url, {
+  await API.authFetch(url, {
     method: 'POST',
     headers: { accept: 'application/json' }
   })
@@ -326,11 +339,38 @@ const switchTheme = () => {
     openNotificationWithIcon('themeDark')
   }
 }
-// checkMountedFolder()
-checkInputFolder()
+
 const goToTaskBoard = () => {
   router.push({ path: '/task' })
 }
+
+const showBadge = ref(
+  computed(() => {
+    if (validApi.value) {
+      return { dot: false }
+    } else {
+      return { dot: true }
+    }
+  })
+)
+
+onMounted(async () => {
+  try {
+    currentController = new AbortController()
+    const res = await requestUrl(currentController.signal)
+    console.log(res) // This should log the response
+
+    if (res) {
+      // openNotificationWithIcon('hostSuccess')
+    } else {
+      openNotificationWithIcon('hostError')
+    }
+
+    checkInputFolder()
+  } catch (error) {
+    console.error('Error in onMounted:', error)
+  }
+})
 </script>
 
 <template>
@@ -366,20 +406,32 @@ const goToTaskBoard = () => {
         bottom: '1400px',
         top: '70px',
         width: '140px'
-        }"
+      }"
       type="primary"
     >
-    <!-- :type="buttonType" -->
       <template #description>
-        <h2 style="color: white; font-weight: normal; font-size: 20px; text-align: center; margin:0 auto">
+        <h2
+          style="
+            color: white;
+            font-weight: normal;
+            font-size: 20px;
+            text-align: center;
+            margin: 0 auto;
+          "
+        >
           Task List
         </h2>
       </template>
     </a-float-button>
-    <a-float-button-group trigger="hover" type="primary" class="floatButtons" >
+
+    <a-float-button-group trigger="hover" type="primary" class="floatButtons">
       <template #icon>
-        <SettingOutlined :style="{ color: colorTheme.token.colorPrimary == 'orange' ? 'white' : 'white' }" />
+        <a-badge v-if="!validApi" color="red" style="position: absolute; top: 0px; left: 20px" />
+        <SettingOutlined
+          :style="{ color: colorTheme.token.colorPrimary == 'orange' ? 'white' : 'white' }"
+        />
       </template>
+
       <a-float-button tooltip="Switch Theme" @click="switchTheme">
         <template #icon>
           <span
@@ -394,10 +446,9 @@ const goToTaskBoard = () => {
         </template>
       </a-float-button>
 
-      <a-float-button tooltip="Config Host" @click="openSetting = true">
+      <a-float-button tooltip="Config Host" @click="openSetting = true" :badge="showBadge">
         <template #icon>
-          <span 
-          class="bi bi-database-fill-gear"></span>
+          <span class="bi bi-database-fill-gear"></span>
         </template>
       </a-float-button>
     </a-float-button-group>
@@ -405,12 +456,12 @@ const goToTaskBoard = () => {
 
     <a-modal
       v-model:open="openSetting"
-      title="Server Host Configuration"
+      title="Host Configuration"
       centered
       @ok="updateApiUrl()"
     >
       <!-- :ok-button-props="{ disabled: validApi ? false : true }" -->
-      <p>BQAT-API backend server connected to:</p>
+      <p>BQAT server address:</p>
       <a-flex horizontal>
         <a-auto-complete
           v-model:value="tempApi"
@@ -485,9 +536,9 @@ nav a {
 nav a:first-of-type {
   border: 0;
 }
-  .floatButtons {
-    right: 60px;
-  }
+.floatButtons {
+  right: 60px;
+}
 @media (min-width: 1024px) {
   .logo {
     margin: 0 1rem 0 0;
@@ -496,14 +547,14 @@ nav a:first-of-type {
 
   nav {
     justify-content: left;
-    margin-left: -15rem;
+    margin-right: 15rem;
+    /* margin-left: -15rem; */
     align-items: end;
     display: flex;
     font-size: 1.5rem;
     height: 100px;
     max-width: 1200px;
     width: 80%;
-    /* justify-content: center; */
   }
 }
 </style>
