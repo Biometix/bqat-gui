@@ -248,7 +248,6 @@ const requestUrl = async (signal) => {
     validApi.value = true
     requestApi.value = false
 
-    console.log(data)
     return true // Return true if everything is OK
   } catch (error) {
     // Catch any errors (e.g., network errors, aborted requests)
@@ -293,7 +292,6 @@ const checkInputFolder = async () => {
     })
     .then((data) => {
       if (data) {
-        // console.log(data)
         // openNotificationWithIcon('folderSuccess')
         API.updateInputFolder(data)
         API.updateInputTree(data)
@@ -317,7 +315,6 @@ const purgeDatabase = async () => {
       return response.json()
     })
     .then((data) => {
-      console.log(data)
       openNotificationWithIcon('purgeSuccess')
       window.location.reload()
     })
@@ -358,7 +355,7 @@ onMounted(async () => {
   try {
     currentController = new AbortController()
     const res = await requestUrl(currentController.signal)
-    console.log(res) // This should log the response
+    // console.log(res) // This should log the response
 
     if (res) {
       // openNotificationWithIcon('hostSuccess')
