@@ -11,6 +11,7 @@ import { useInfo, useStatus, useApi } from './stores/dataStore.js'
 import { ref, watchEffect, watch, computed, onMounted } from 'vue'
 import { notification } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
+
 const openSetting = ref(false)
 const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)')
 const darkSetting = {
@@ -33,6 +34,7 @@ const defaultSetting = {
     }
   }
 }
+
 const colorTheme = ref(prefersDarkScheme.matches ? darkSetting : defaultSetting)
 document.documentElement.setAttribute('data-theme', prefersDarkScheme.matches ? 'dark' : 'light')
 const currrentTheme = ref('light')
@@ -46,6 +48,7 @@ const validApi = ref(false)
 const requestApi = ref(false)
 const options = ref<{ value: string }[]>(API.apiList.slice(1))
 const version = import.meta.env.VITE_VERSION
+
 let timer = setInterval(() => {
   if (info.value.process.timer != -1) {
     info.value.process.timeRecord = info.value.process.timeRecord + 1
@@ -72,7 +75,8 @@ const openNotificationWithIcon = (type: string) => {
   if (type === 'hostError') {
     notification['error']({
       message: 'Fail to Connect',
-      description: 'Connection to host server failed, Please check your configuration and try again.',
+      description:
+        'Connection to host server failed, Please check your configuration and try again.',
       placement: 'top',
       duration: 3
     })
@@ -115,6 +119,7 @@ const openNotificationWithIcon = (type: string) => {
     })
   }
 }
+
 //start timer and stop timer
 watchEffect(() => {
   if (info.value.process.taskStatus.length > 0) {
@@ -205,10 +210,8 @@ const updateApiUrl = () => {
   }
 }
 
-let currentRequest = null
 let currentController = null
 const validateUrl = async () => {
-  // If there's an ongoing request, abort it
   // If there's an ongoing request, abort it
   if (currentController) {
     console.log('cancel')
@@ -223,7 +226,6 @@ const validateUrl = async () => {
 }
 
 const requestUrl = async (signal) => {
-  console.log('request', tempApi.value)
   requestApi.value = true
   const myRequest = new Request(`${tempApi.value}/scan/info`, {
     method: 'GET',
@@ -238,46 +240,25 @@ const requestUrl = async (signal) => {
       console.log('There was a problem with the new API address')
       validApi.value = false
       requestApi.value = false
-      return false // Early return if response is not OK
+      return false
     }
 
-    // Await the parsed JSON data
     const data = await response.json()
 
     // Set the API status as valid
     validApi.value = true
     requestApi.value = false
 
-    return true // Return true if everything is OK
+    return true
   } catch (error) {
     // Catch any errors (e.g., network errors, aborted requests)
     console.log('There was a problem with the new API address:', error)
     validApi.value = false
     requestApi.value = false
-    return false // Return false if an error occurs
+    return false
   }
 }
 
-// const checkMountedFolder =async () => {
-//   const myRequest = new Request(`${API.api}/task/cwd`, {
-//     method: 'GET'
-//   })
-//   await fetch(myRequest)
-//     .then((response) => {
-//       if(!response.ok){
-//         throw new Error('Mounted folder is not exist')
-//       }
-//       return response.json()
-//     })
-//     .then(data=>{
-//       if(data){
-//         console.log(data)
-//         API.updateFolderPath(data)
-//       }
-//     }).catch(error=>{
-//       console.error("the API can not be reach",error)
-//     })
-// }
 const checkInputFolder = async () => {
   const myRequest = new Request(`${API.api}/task/inputs`, {
     method: 'GET'
@@ -292,16 +273,15 @@ const checkInputFolder = async () => {
     })
     .then((data) => {
       if (data) {
-        // openNotificationWithIcon('folderSuccess')
         API.updateInputFolder(data)
         API.updateInputTree(data)
       }
     })
     .catch((error) => {
-      // openNotificationWithIcon('folderError')
       console.error('the API can not be reach', error)
     })
 }
+
 const purgeDatabase = async () => {
   const url = `${API.api}/purge`
   await API.authFetch(url, {
@@ -323,6 +303,7 @@ const purgeDatabase = async () => {
       console.error(error)
     })
 }
+
 const switchTheme = () => {
   if (colorTheme.value.token.colorPrimary == 'orange') {
     colorTheme.value = defaultSetting
@@ -355,10 +336,8 @@ onMounted(async () => {
   try {
     currentController = new AbortController()
     const res = await requestUrl(currentController.signal)
-    // console.log(res) // This should log the response
 
     if (res) {
-      // openNotificationWithIcon('hostSuccess')
     } else {
       openNotificationWithIcon('hostError')
     }
@@ -383,15 +362,12 @@ onMounted(async () => {
         <div style="margin-bottom: 8px; margin-left: 20px">
           <RouterLink to="/">Home</RouterLink>
           <RouterLink to="/scan">Scan</RouterLink>
-
-          <!-- <RouterLink to="/outlier">Outliers</RouterLink> -->
           <RouterLink to="/result">Report</RouterLink>
-          <!-- <RouterLink to="/preprocess">Tools</RouterLink> -->
-          <!-- <RouterLink to="/task"><span style="font-weight: bold">Tasks</span></RouterLink> -->
         </div>
       </a-config-provider>
     </nav>
   </header>
+
   <body class="body">
     <a-float-button
       :badge="{ count: info.process.taskStatus.filter((item) => item.status != 2).length }"
@@ -399,7 +375,6 @@ onMounted(async () => {
       @click="goToTaskBoard"
       :style="{
         right: '70px',
-        // left:'800px',
         bottom: '1400px',
         top: '70px',
         width: '140px'
@@ -449,15 +424,8 @@ onMounted(async () => {
         </template>
       </a-float-button>
     </a-float-button-group>
-    <!-- button to set api -->
 
-    <a-modal
-      v-model:open="openSetting"
-      title="Host Configuration"
-      centered
-      @ok="updateApiUrl()"
-    >
-      <!-- :ok-button-props="{ disabled: validApi ? false : true }" -->
+    <a-modal v-model:open="openSetting" title="Host Configuration" centered @ok="updateApiUrl()">
       <p>BQAT server address:</p>
       <a-flex horizontal>
         <a-auto-complete
@@ -514,12 +482,6 @@ nav a.router-link-exact-active {
   color: red;
 }
 
-/* [data-theme='dark']{
-  nav a.router-link-exact-active {
-  color: orange
-}
-} */
-
 nav a.router-link-exact-active:hover {
   background-color: transparent;
 }
@@ -545,7 +507,6 @@ nav a:first-of-type {
   nav {
     justify-content: left;
     margin-right: 15rem;
-    /* margin-left: -15rem; */
     align-items: end;
     display: flex;
     font-size: 1.5rem;

@@ -42,7 +42,7 @@ a:not(.introItem) {
     justify-content: center;
     align-items: center;
     margin: 0 6rem;
-    padding: 2rem 1rem;
+    padding: 0rem 1rem;
     width: 100%;
   }
 

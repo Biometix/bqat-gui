@@ -9,6 +9,7 @@
         class="centered-spin"
       />
     </div>
+
     <a-tabs v-model:activeKey="scanInfo.scan.tabKey" animated size="large">
       <!-- Select Local Folder Section -->
       <a-tab-pane :key="1">
@@ -38,7 +39,6 @@
             <a-divider />
             <h3>Select folder from the backend:</h3>
             <a-flex horizontal justify="start" align="center">
-              <!-- <h3 style="padding-top: 5px; min-width: 100px">Input folder:</h3> -->
               <a-tree-select
                 size="large"
                 v-model:value="scanInfo.scan.folderPath"
@@ -78,7 +78,11 @@
                   style="font-size: 23px; margin-top: 3px"
                   twoToneColor="#52c41a"
                 />
-                <CloseCircleTwoTone v-else style="font-size: 23px; margin-top: 3px" twoToneColor="#9b2015" />
+                <CloseCircleTwoTone
+                  v-else
+                  style="font-size: 23px; margin-top: 3px"
+                  twoToneColor="#9b2015"
+                />
               </div>
               <div v-else>
                 <SyncOutlined style="font-size: 23px; margin-top: 3px" spin />
@@ -116,7 +120,6 @@
               <li>To match filenames which contain "sample": [*sample*]</li>
             </ul>
             <a-divider />
-            <!-- <a-flex horizontal justify="space-between" align="center">-->
 
             <a-alert
               v-if="showError"
@@ -127,6 +130,7 @@
               closable
             />
           </a-card>
+
           <a-card hoverable>
             <!-- Preprocess Image Section -->
             <a-collapse :bordered="false" style="padding: 5px">
@@ -271,7 +275,6 @@
                     <p>
                       Output:<a @click="handleGoToFolder(outputPath)">{{ outputPath }}</a>
                     </p>
-                    <!-- :description="'Output is under your work directory:'+linkToFolder"  -->
                   </template>
                 </a-alert>
               </a-collapse-panel>
@@ -306,26 +309,8 @@
             </a-flex>
           </a-card>
 
-          <!-- Match section -->
-          <!-- <a-card hoverable>
-              <a-flex gap="middle" vertical>
-                <h2 style="margin-block: 10px">
-                  <span class="bi bi-funnel"></span> Match File Name Pattern:
-                </h2>
-                <a-input size="large" v-model:value="scanInfo.scan.name" placeholder="Example: face (this will match any filename containing the word 'face').">
-                  <template #prefix> Contain String: </template>
-                </a-input>
-              </a-flex>
-            </a-card> -->
-
           <!-- Submit section  -->
           <a-row justify="center" style="margin-block: 2rem">
-            <!-- <a-col :span="12"
-              ><a-button style="width: 100%" size="large" danger @click="clearScan">
-                Clear Page</a-button
-              ></a-col
-            >
-            <a-col :span="12"> -->
             <a-button
               style="width: 100%"
               type="primary"
@@ -337,7 +322,6 @@
               <span class="bi bi-play" style="font-style: normal; margin-inline: 5px"></span>
               Start Task</a-button
             >
-            <!-- </a-col> -->
           </a-row>
         </a-flex>
       </a-tab-pane>
@@ -358,7 +342,7 @@
                   :header="'Uploaded: ' + scanInfo.scan.fileList.length"
                   class="customStyle1"
                 >
-                  <!-- :max-count="scanInfo.scan.limit" not work for directory -->
+                  <!-- Note: :max-count="scanInfo.scan.limit" not work for directory -->
                   <a-upload-dragger
                     name="file"
                     style="margin-top: 20px"
@@ -560,18 +544,6 @@
             </a-flex>
           </a-card>
 
-          <!-- Match section -->
-          <!-- <a-card hoverable>
-              <a-flex gap="middle" vertical>
-                <h2 style="margin-block: 10px">
-                  <span class="bi bi-funnel"></span> Match File Name Pattern:
-                </h2>
-                <a-input size="large" v-model:value="scanInfo.scan.name" placeholder="*String*">
-                  <template #prefix> Contain String: </template>
-                </a-input>
-              </a-flex>
-            </a-card> -->
-
           <!-- Submit Section -->
           <a-row justify="center" style="margin-block: 2rem">
             <a-button
@@ -650,10 +622,9 @@ const outputPath = ref('')
 
 const eta = ref(-1)
 
-// const hasLimit = ref(false)
 const scanStatus = useStatus()
 const API = useApi()
-//0:not started / 1:ongoing / 2:finished /-1:failed
+
 const scanInfo = ref(useInfo())
 const router = useRouter()
 const showError = ref(false)
@@ -662,13 +633,13 @@ const errorMessage = ref('')
 const indicator = h(SyncOutlined, {
   style: {
     fontSize: '50px',
-    // color:'red',
     fontWeight: 'bold',
     marginLeft: '-25px',
     marginTop: '-40px'
   },
   spin: true
 })
+
 const typeOptions = [
   {
     label: 'PNG',
@@ -723,10 +694,6 @@ const tip = computed(() => {
   }
 })
 
-// const disableWsq = computed(() => {
-//   return scanInfo.value.scan.modality[0] == 'Fingerprint' ? false : true
-// })
-
 const fileUrl = (file) => {
   return URL.createObjectURL(file)
 }
@@ -777,13 +744,13 @@ const cascadeModalityOptions = ref<CascaderProps['options']>([
 const updateModality = () => {
   scanInfo.value.outlier.columns = [scanInfo.value.scan.modality[0]]
   scanInfo.value.scan.type = []
-  // console.log('modality updated, so do outlier:', scanInfo.value.outlier.columns)
 }
 const handleGoToFolder = (item) => {
   const linkToFolder = API.api + '/warehouse/' + item + '/'
   window.open(linkToFolder, '_blank')
 }
-//do not claim two value in one const
+
+//Note: do not claim two value in one const
 const previewStyle = ref(
   computed(() => {
     if (scanInfo.value.scan.fileList.length < 100) {
@@ -800,8 +767,9 @@ const handleFiles = (event) => {
 
 const loadInputFolder = ref(true)
 const requestFolder = ref(false)
+
 const checkInputFolder = async () => {
-  requestFolder.value=true
+  requestFolder.value = true
   const exts = scanInfo.value.scan.inputType.map((ext) => `exts=${ext.toLowerCase()}`).join('&')
   const pattern = scanInfo.value.scan.name ? `&pattern=${scanInfo.value.scan.name}` : ''
   const myRequest = new Request(`${API.api}/task/inputs?${exts}${pattern}`, {
@@ -811,7 +779,7 @@ const checkInputFolder = async () => {
     .then((response) => {
       if (!response.ok) {
         loadInputFolder.value = false
-        requestFolder.value=false
+        requestFolder.value = false
         throw new Error('Mounted folder is not exist')
       }
       return response.json()
@@ -819,15 +787,14 @@ const checkInputFolder = async () => {
     .then((data) => {
       if (data) {
         loadInputFolder.value = true
-        requestFolder.value=false
-        // console.log(data)
+        requestFolder.value = false
         API.updateInputFolder(data)
         API.updateInputTree(data)
       }
     })
     .catch((error) => {
       loadInputFolder.value = false
-      requestFolder.value=false
+      requestFolder.value = false
       console.error('the API can not be reach', error)
     })
 }
@@ -853,8 +820,7 @@ watch(
     //prevent reload the local direcotry when the inputType is changed on remote uploading
     if (scanInfo.value.scan.tabKey == 1) {
       checkInputFolder()
-    } // Assuming you want to call your updateFiles function
-    else {
+    } else {
       scanInfo.value.scan.validFileList = scanInfo.value.scan.fileList.filter((item) =>
         validateFile(item)
       )
@@ -957,7 +923,7 @@ const validateFile = (file) => {
 //get type & convertImageBackend
 const beforeUpload: UploadProps['beforeUpload'] = async (file) => {
   if (count.value == 0) {
-    console.log('scanning on going-------')
+    // console.log('scanning on going-------')
     scanStatus.updateStatus('scan', 1)
   }
   count.value = count.value + 1
@@ -1004,7 +970,6 @@ const beforeUpload: UploadProps['beforeUpload'] = async (file) => {
       const res = await convertToBase64(file)
       convertImageBackend(res, file.name)
     } else {
-      //setup mock progress
       if (count.value == 1) {
         setTimeout(() => {
           scanInfo.value.scan.percent = 100
@@ -1045,14 +1010,14 @@ const convertToBase64 = async (file) => {
 
 const convertImageBackend = async (file, name) => {
   const requestBody = {
-    file: file, // Base64-encoded image string
-    format: 'webp' // Desired format (adjust as needed)
+    file: file,
+    format: 'webp'
   }
   const url = API.api + '/convert'
   await API.authFetch(url, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json' // Specify content type as JSON
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify(requestBody)
   })
@@ -1075,7 +1040,7 @@ const handleScroll = (e) => {
   const container = e.target
   if (container.scrollHeight - container.scrollTop === container.clientHeight && !loading.value) {
     loadMoreFiles()
-    console.log('loading------')
+    // console.log('loading------')
   }
 }
 
@@ -1101,24 +1066,6 @@ const clearScan = () => {
   console.log('Clear Scan')
 }
 
-// const startNewTask = async (tid) => {
-//   const url = `${API.api}/scan/resume/${tid}`
-//   try {
-//     const response = await API.authFetch(url, {
-//       method: 'POST',
-//       headers: { accept: 'application/json' }
-//     })
-
-//     if (!response.ok) {
-//       throw new Error('Failed to get task status')
-//     }
-//     const data = await response.json()
-//     scanStatus.updateStatus('process', 1)
-//   } catch (error) {
-//     console.error('Error getting task status:', error)
-//   }
-// }
-
 const transferPatterns = (pattern) => {
   let regexPattern = null
 
@@ -1135,6 +1082,7 @@ const transferPatterns = (pattern) => {
   console.log(regexPattern)
   return regexPattern
 }
+
 //Notes: reason for bloacking resend the task, it's some engine can not be responsed when running task(for default engine, the engine would respond with delay)
 //submit the scan task, update status & taskIDs, start a new process timer, redirect to process page
 const submitScan1 = async () => {
@@ -1177,7 +1125,6 @@ const submitScan1 = async () => {
     scanInfo.value.process.timeRecord = 0
 
     scanInfo.value.process.taskStatus.unshift(newTaskStatus)
-    // await startNewTask(data.tid)
     scanStatus.updateStatus('process', 1)
     clearScan()
     scanStatus.updateStatus('scan', 2)
@@ -1216,7 +1163,6 @@ const submitScan2 = async () => {
       input: input
     }
   }
-  // console.log(requestBody)
   const url = `${API.api}/scan/local?modality=${modality.toLowerCase()}`
   try {
     const response = await API.authFetch(url, {
@@ -1311,7 +1257,6 @@ const clearTask = async () => {
       preprocessStatus.updateStatus('preprocess', 2)
       preprocessInfo.value.preprocess.id = ''
       eta.value = -1
-      // console.log(data)
       openNotificationWithIcon('stop')
     })
     .catch((error) => {
@@ -1335,6 +1280,7 @@ const uploadZip = async (e) => {
     }
   }
 }
+
 //submit the preprocess task, update status & taskIDs, start a new process timer, redirect to process page
 const submitPreprocess = async () => {
   const requestBody = {
@@ -1343,7 +1289,6 @@ const submitPreprocess = async () => {
       convert: preprocessInfo.value.preprocess.type
         ? preprocessInfo.value.preprocess.type.toLowerCase()
         : null,
-      // grayscale: preprocessInfo.value.preprocess.grayscale,
       mode: preprocessInfo.value.preprocess.color
         ? preprocessInfo.value.preprocess.color.toLowerCase()
         : null,
@@ -1396,7 +1341,6 @@ const submitPreprocess = async () => {
 }
 
 const checkPreprocess = async () => {
-  // console.log('get')
   if (preprocessInfo.value.preprocess.id != '') {
     const url2 = `${API.api}/scan/preprocessing/${preprocessInfo.value.preprocess.id}`
     await API.authFetch(url2, {
@@ -1427,7 +1371,6 @@ const checkPreprocess = async () => {
           }
           checkInputFolder()
           preprocessInfo.value.scan.folderPath = outputPath.value
-          // checkPreprocessLog()
         }
       })
       .catch((error) => {
@@ -1448,7 +1391,6 @@ const getETA = async (tid) => {
       console.log(eta.value)
     }
     const data = await response.json()
-    // console.log(data)
     if (data.done != 0) {
       eta.value = data.eta
       if (data.eta == 0) {
@@ -1466,7 +1408,7 @@ const getETA = async (tid) => {
 <style>
 .hover-zoom {
   position: relative;
-  z-index: 2; /* Default z-index */
+  z-index: 2;
   transition: transform 0.3s ease; /* Smooth transition effect */
 }
 
@@ -1479,7 +1421,6 @@ const getETA = async (tid) => {
   height: 350px;
   display: flex;
   flex-wrap: wrap;
-  /* background-color: lightgrey; */
   border: 1px dotted grey;
   border-radius: 10px;
   justify-content: center;
@@ -1495,7 +1436,6 @@ const getETA = async (tid) => {
 }
 
 .scanContainer {
-  /* min-height: 100vh; */
   width: 80%;
   max-width: 1200px;
   margin-top: 1rem;
@@ -1509,14 +1449,12 @@ const getETA = async (tid) => {
 }
 
 .customStyle1:hover {
-  /* border: solid #1677ff 0.5px; */
   border: solid gray 0.5px;
 }
 
 .image-card-container {
   display: flex;
   flex-wrap: wrap;
-  /* justify-content: space-around; */
   height: 350px;
   overflow-y: scroll;
 }
@@ -1533,15 +1471,16 @@ const getETA = async (tid) => {
 i {
   transition: opacity 0.3s ease;
 }
+
 .fixed-center-spin {
   position: fixed;
   left: 0%;
   top: 0%;
-  z-index: 5; /* Ensure it stays above other content */
-  width: 100%; /* Optional: To ensure full coverage */
+  z-index: 5;
+  width: 100%;
   height: 100%;
   background-color: rgba(242, 242, 242, 0.3);
-  border-radius: 15px; /* Adds rounded corners */
+  border-radius: 15px;
   cursor: not-allowed; /* Shows stop cursor */
   pointer-events: auto;
 }

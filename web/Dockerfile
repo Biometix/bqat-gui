@@ -22,7 +22,7 @@ RUN rm -rf ./*
 
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 
-EXPOSE 7860
+EXPOSE 9949
 
 ARG Version
 LABEL bqat_gui.version=$Version
