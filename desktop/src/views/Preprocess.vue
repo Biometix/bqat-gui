@@ -51,7 +51,7 @@
                     </a-tree-select>
                     <a-button
                       size="large"
-                      @click="handleGotToFolder(preprocessInfo.preprocess.folderPath)"
+                      @click="handleGoToFolder(preprocessInfo.preprocess.folderPath)"
                       ><i class="bi bi-aspect-ratio" style="margin-right: 5px"></i> view</a-button
                     >
                   </a-flex>
@@ -114,7 +114,7 @@
                       <a-button
                         size="middle"
                         style="margin-left: 5px"
-                        @click="handleGotToFolder(preprocessInfo.preprocess.folderPath)"
+                        @click="handleGoToFolder(preprocessInfo.preprocess.folderPath)"
                         ><i class="bi bi-aspect-ratio" style="margin-right: 5px"></i> view</a-button
                       >
                     </h3>
@@ -258,7 +258,7 @@
                           <a-tooltip title="Click to check folder">
                             <img
                               style="z-index: 3; margin-top: -25px"
-                              @click="handleGotToFolder(item.target)"
+                              @click="handleGoToFolder(item.target)"
                               src="../assets/folder.png"
                               alt="folder image"
                             />
@@ -323,7 +323,7 @@
                           <a-tooltip title="Click to check folder">
                             <img
                               style="z-index: 3; margin-top: -25px"
-                              @click="handleGotToFolder(item.target)"
+                              @click="handleGoToFolder(item.target)"
                               src="../assets/folder.png"
                               alt="folder image"
                             />
@@ -418,7 +418,7 @@
         <a-alert v-if="outputPath" message="Finished" type="success" show-icon closable>
           <template #description>
             <p>
-              Output:<a @click="handleGotToFolder(outputPath)">{{ outputPath }}</a>
+              Output:<a @click="handleGoToFolder(outputPath)">{{ outputPath }}</a>
             </p>
             <!-- :description="'Output is under your work directory:'+linkToFolder"  -->
           </template>
@@ -623,8 +623,8 @@ const GoToScan = (item) => {
   router.push({ path: '/scan' })
 }
 
-const handleGotToFolder = (item) => {
-  const linkToFolder = API.api + '/' + item + '/'
+const handleGoToFolder = (item) => {
+  const linkToFolder = API.api + '/warehouse/' + item + '/'
   window.open(linkToFolder, '_blank')
 }
 

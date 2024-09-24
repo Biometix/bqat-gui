@@ -60,8 +60,8 @@
               >
               </a-tree-select>
 
-              <a-button size="large" @click="handleGotToFolder(scanInfo.scan.folderPath)"
-                ><i class="bi bi-aspect-ratio" style="margin-right: 5px"></i> view</a-button
+              <a-button size="large" @click="handleGoToFolder(scanInfo.scan.folderPath)"
+                ><i class="bi bi-aspect-ratio" style="margin-right: 5px"></i> View</a-button
               >
               <a-tooltip title="Refresh Input Directory">
                 <a-button shape="circle" style="margin-inline: 10px">
@@ -269,7 +269,7 @@
                 >
                   <template #description>
                     <p>
-                      Output:<a @click="handleGotToFolder(outputPath)">{{ outputPath }}</a>
+                      Output:<a @click="handleGoToFolder(outputPath)">{{ outputPath }}</a>
                     </p>
                     <!-- :description="'Output is under your work directory:'+linkToFolder"  -->
                   </template>
@@ -779,8 +779,8 @@ const updateModality = () => {
   scanInfo.value.scan.type = []
   // console.log('modality updated, so do outlier:', scanInfo.value.outlier.columns)
 }
-const handleGotToFolder = (item) => {
-  const linkToFolder = API.api + '/' + item + '/'
+const handleGoToFolder = (item) => {
+  const linkToFolder = API.api + '/warehouse/' + item + '/'
   window.open(linkToFolder, '_blank')
 }
 //do not claim two value in one const
