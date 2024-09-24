@@ -10,44 +10,21 @@ const router = createRouter({
             component: HomeView
         },
         {
-            path: '/preprocess',
-            name: 'preprocess',
-            // route level code-splitting
-            // this generates a separate chunk (About.[hash].js) for this route
-            // which is lazy-loaded when the route is visited.
-            component: () => import('../views/Preprocess.vue')
-        },
-        {
             path: '/scan',
             name: 'scan',
             // route level code-splitting
-            // this generates a separate chunk (About.[hash].js) for this route
+            // this generates a separate chunk for this route
             // which is lazy-loaded when the route is visited.
             component: () => import('../views/InputView.vue')
         },
         {
-            path: '/outlier',
-            name: 'outlier',
-            // route level code-splitting
-            // this generates a separate chunk (About.[hash].js) for this route
-            // which is lazy-loaded when the route is visited.
-            component: () => import('../views/Outlier.vue')
-        },
-        {
             path: '/task',
             name: 'task',
-
-            // route level code-splitting
-            // this generates a separate chunk (About.[hash].js) for this route
-            // which is lazy-loaded when the route is visited.
             component: () => import('../views/ProcessView.vue')
         },
         {
             path: '/result',
             name: 'result',
-            // route level code-splitting
-            // this generates a separate chunk (About.[hash].js) for this route
-            // which is lazy-loaded when the route is visited.
             component: () => import('../views/OutputView.vue')
         },
         {

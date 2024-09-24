@@ -8,6 +8,7 @@ export const useStatus = defineStore('status', () => {
     const outlier = ref(0)
     const preprocess = ref(0)
     const app = ref(0)
+
     function updateStatus(item, statusCode) {
         if (item === 'scan') {
             scan.value = statusCode
@@ -50,6 +51,7 @@ export const useInfo = defineStore('info', () => {
         tabKey: 1,
         converted: []
     })
+
     const process = ref({
         taskIds: [], // current running time all task ids(including pending tasks)
         timeStamp: '',
@@ -60,6 +62,7 @@ export const useInfo = defineStore('info', () => {
         selectedItems: [],
         selectedExternal: false
     })
+
     const result = ref({
         activeKey: 0,
         downsample: 100,
@@ -70,6 +73,7 @@ export const useInfo = defineStore('info', () => {
         treeSelected: [],
         generatedReport: { id: '', html: new Blob() }
     })
+
     const outlier = ref({
         id: '',
         detector: 'ECOD',
@@ -79,6 +83,7 @@ export const useInfo = defineStore('info', () => {
         activeKeys: [6],
         iconLoading: false
     })
+
     const preprocess = ref({
         id: '',
         size: 100,
@@ -100,7 +105,6 @@ export const useInfo = defineStore('info', () => {
         ],
         color: 'RGB',
         loading: false,
-        // grayscale: false,
         folderPath: null,
         length: 0,
         log: [],
@@ -125,6 +129,7 @@ export const useInfo = defineStore('info', () => {
             preprocess.value = data
         }
     }
+
     function initialiseScan() {
         const newScan = {
             fileList: [],
@@ -237,27 +242,31 @@ export const useApi = defineStore('api', () => {
     type FetchOptions = RequestInit & {
         headers?: HeadersInit;
     };
+
     // Create a wrapper around fetch to automatically add the Authorization header
     const authFetch = (url, options: FetchOptions = {}) => {
-      // Set default headers if not already set
-      options.headers = options.headers || {};
-      options.headers["Authorization"] =
-        "Basic " + btoa(`${username.value}:${password.value}`);
-      options.credentials = "include";
-      return fetch(url, options);
+        // Set default headers if not already set
+        options.headers = options.headers || {}
+        options.headers['Authorization'] = 'Basic ' + btoa(`${username.value}:${password.value}`)
+        options.credentials = 'include'
+        return fetch(url, options)
     };
+
     function updateApi(newapi) {
         api.value = newapi
         const index = apiList.value.findIndex(item => item == newapi)
         if (index == -1)
             apiList.value.push(newapi.toString())
     }
+
     function updateFolderPath(newpath) {
         folderPath.value = newpath
     }
+
     function updateInputFolder(newpath) {
         inputFolder.value = newpath
     }
+
     function updateInputTree(data) {
         const nestedStructure = [];
 
