@@ -103,7 +103,6 @@
                       margin-bottom: 5px;
                     "
                   >
-                    <!-- <a-tooltip :title="'Name:' + item.input"> -->
                     <div class="checkboxStyle">
                       <a-checkbox
                         :disabled="item.status != 2"
@@ -122,7 +121,6 @@
                         </h3>
                       </a-checkbox>
                     </div>
-                    <!-- </a-tooltip> -->
 
                     <a-progress
                       class="progressStyle"
@@ -130,10 +128,6 @@
                       :stroke-color="{ '0%': '#ff1a2d', '100%': '#99000d' }"
                       :percent="item.percent"
                     />
-                    <!-- <div v-if="item.percent<100">
-                <loading-outlined />
-              </div> -->
-                    <!-- <p style="margin-block: 10px; align-self: flex-end ">{{ item.eta }} sec</p> -->
                   </div>
                   <div style="text-align: center; height: 40px; padding-top: 5px">
                     <p style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
@@ -141,7 +135,6 @@
                       {{ item.engine }} | Files:
                       {{ item.num }}
                     </p>
-                    <!-- <p style="margin-block: 10px; align-self: flex-end ">{{ item.eta }} sec</p> -->
                   </div>
                 </div>
               </a-tooltip>
@@ -257,7 +250,6 @@
               @click="deleteTask"
               :disabled="processInfo.process.selectedItems.length < 1"
             >
-              <!-- <i class="bi bi-trash-fill" style="font-size: 18px"></i> -->
               <DeleteOutlined />
             </a-button>
           </a-col>
@@ -323,21 +315,6 @@
               <i class="bi bi-clipboard-data" style="margin-right: 5px; font-size: 18px"></i>Get
               Report</a-button
             >
-
-            <!-- <a-col :span="10">
-              <a-row>
-                <a-checkbox v-model:checked="processInfo.result.minimal">Minimal</a-checkbox></a-row
-              >
-              <a-row
-                ><a-input-number
-                  v-model:value="processInfo.result.downsample"
-                  addon-before="Downsample"
-                  addon-after="%"
-                  placeholder="100"
-                  min="1"
-                  max="100"
-              /></a-row>
-            </a-col> -->
           </a-col>
         </a-row>
 
@@ -474,42 +451,6 @@
                   </a-row>
                 </a-radio-group>
 
-                <!-- <a-row :gutter="20" style="width: 100%">
-          <a-col :span="12">
-            <a-tree-select
-              v-model:value="processInfo.result.treeSelected"
-              style="width: 100%"
-              :tree-data="treeData"
-              allow-clear
-              tree-checkable
-              :show-checked-strategy="SHOW_PARENT"
-              placeholder="Please Go to Task Board To Select"
-              tree-node-filter-prop="label"
-              size="large"
-            />
-          </a-col>
-          <a-col :span="12">
-            <input
-              type="file"
-              ref="uploadRef"
-              accept=".csv"
-              style="display: none"
-              @change="selectCsv"
-            />
-            <a-button
-              size="large"
-              @click="uploadCsv"
-              style="width: 85%; text-overflow: ellipsis; overflow: hidden"
-              :disabled="tip !== false || processStatus.outlier == 1 || processStatus.preprocess == 1"
-            >
-              {{
-                processInfo.result.selectedCsv[0]
-                  ? processInfo.result.selectedCsv[0].name
-                  : 'Select external CSV'
-              }}
-            </a-button>
-          </a-col>
-        </a-row> -->
                 <h3>Report configurations:</h3>
                 <a-row justify="center" :gutter="40">
                   <a-col :span="12">
@@ -540,19 +481,6 @@
 
             <!-- Submit Report Task-->
             <a-row justify="center" :gutter="40" style="margin-block: 2rem">
-              <!-- <a-col :span="12">
-              <a-button
-                style="width: 100%"
-                :disabled="processStatus.result != 1"
-                size="large"
-                type="primary"
-                danger
-                @click="clearReportTask"
-              >
-                <i class="bi bi-stop-circle" style="font-size: 18px; margin-inline: 5px"></i>
-                Stop
-              </a-button>
-            </a-col> -->
               <a-col :span="24">
                 <a-button
                   size="large"
@@ -1297,15 +1225,15 @@ const deleteTask = async () => {
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error('Failed to delete profiles')
+          throw new Error('Failed to delete test profiles')
         }
         return response.json()
       })
       .then((data) => {
-        console.log('delete profiles', data)
+        console.log('delete test profiles', data)
       })
       .catch((error) => {
-        console.error('Error delete profiles:', error)
+        console.error('Error delete test profiles:', error)
       })
   }
   processInfo.value.process.selectedItems = []
@@ -1324,7 +1252,6 @@ const clearTask = async () => {
       return response.json()
     })
     .then((data) => {
-      console.log(data)
       openNotificationWithIcon('stop')
       initialiseTask()
       processInfo.value.process.timer == -1
@@ -1344,54 +1271,13 @@ const checkRunning = async () => {
     })
     if (!response.ok) {
       openNotificationWithIcon('error')
-      console.log(response)
-      // throw new Error('Failed to clear task')
     }
     const data = await response.json()
-    console.log(data)
     return data
   } catch (error) {
     console.error('Error check runnning task:', error)
   }
 }
-
-// const clearTask = async () => {
-//   const url = `${API.api}/scan/clear`
-//   try {
-//     const response = await API.authFetch(url, {
-//       method: 'POST',
-//       headers: { accept: 'application/json' }
-//     })
-
-//     if (!response.ok) {
-//       throw new Error('Failed to clear task')
-//     }
-//     const data = await response.json()
-//     console.log(data)
-//     processInfo.value.process.timer == -1
-//     processInfo.value.process.timeRecord == 0
-//     initialiseTask()
-//   } catch (error) {
-//     console.error('Error clear task:', error)
-//   }
-// }
-// const resumeTask = async (tasksToStart) => {
-//   const url = `${API.api}/scan/resume`
-//   try {
-//     const response = await API.authFetch(url, {
-//       method: 'POST',
-//       headers: { accept: 'application/json' }
-//     })
-
-//     if (!response.ok) {
-//       throw new Error('Failed to resume task')
-//     }
-//     const data = await response.json()
-//     console.log(data)
-//   } catch (error) {
-//     console.error('Error resume task:', error)
-//   }
-// }
 
 //add selected item to generating report
 const getReport = () => {
@@ -1403,6 +1289,7 @@ const getReport = () => {
     generateExternal.value = true
   }
 }
+
 //Get the last scan task and go check result page
 const checkModeTab = () => {
   if (generateExternal.value) {
@@ -1542,7 +1429,7 @@ const checkTaskStatus = setInterval(() => {
     (item) => item.status != 2
   )
   if (tasksToUpdateOnPage.value.length > 0) {
-      getTaskETA(tasksToUpdateOnPage.value)
+    getTaskETA(tasksToUpdateOnPage.value)
   } else {
     clearInterval(checkTaskStatus)
   }
@@ -1727,14 +1614,6 @@ const initialiseTask = async () => {
   }
 }
 
-// Note: this only effect on page, so before navigate to this page, the status wouldn't change
-// watch(tasksToUpdateOnPage, (val) => {
-//   if (val.length == 0) {
-//     processStatus.updateStatus('process', 2)
-//     clearInterval(checkTaskStatus)
-//   }
-// })
-
 //everytime entry this page, check whether there are more tasks need to update taskStatus
 onMounted(async () => {
   if (processInfo.value.process.timeStamp != '') {
@@ -1754,7 +1633,6 @@ onMounted(async () => {
     (item) => item.status != 2
   )
   if (tasksToUpdateOnPage.value.filter((item) => item.num == 0).length > 0) {
-    console.log('update task info')
     updateTaskStatus(tasksToUpdateOnPage.value)
   }
 })
@@ -1776,7 +1654,6 @@ const stopOutlierTask = async () => {
       clearInterval(checkOutlierInterval)
       processStatus.updateStatus('outlier', 2)
       processInfo.value.outlier.id = ''
-      console.log(data)
       outlierEta.value = -1
     })
     .catch((error) => {
@@ -1933,11 +1810,10 @@ const startOutlierTask = async () => {
       ]
     }
   }
-  // console.log(JSON.stringify(options))
+
   const id = processInfo.value.process.selectedItems[0].id
-  // const id = '8228cacc-3c7f-48f5-abd4-14f7095ece7b'
   const url = `${API.api}/scan/${id}/outliers/detect?trigger=true`
-  // console.log(processInfo.value.outlier.detector, optionColumns)
+
   try {
     const response = await API.authFetch(url, {
       method: 'POST',
@@ -1953,14 +1829,13 @@ const startOutlierTask = async () => {
       throw new Error('Failed to detect outlier')
     }
     const temp = await response.json()
-    console.log(temp)
+
     processInfo.value.outlier.id = temp['outlier detection task in progress']
     processInfo.value.outlier.iconLoading = true
     processStatus.updateStatus('outlier', 1)
     checkOutlierInterval = setInterval(() => {
       if (processInfo.value.outlier.id != '' && processStatus.outlier == 1) {
         getOutlierETA(processInfo.value.outlier.id)
-        // await getETA(processInfo.value.outlier.id)
         if (outlierEta.value <= 0 || outlierEta.value == null) {
           checkOutlier(id)
         }
@@ -1989,7 +1864,6 @@ const checkOutlier = async (id) => {
         return data
       })
       .then((data) => {
-        // console.log(data)
         processStatus.updateStatus('outlier', 2)
         processInfo.value.outlier.id = ''
         processInfo.value.outlier.iconLoading = false
@@ -2018,7 +1892,6 @@ const getOutlierETA = async (tid) => {
       console.log('can not find task progress')
     }
     const data = await response.json()
-    // console.log(data)
     if (data.done != 0) {
       outlierEta.value = data.eta
       if (data.eta == 0) {
@@ -2122,7 +1995,6 @@ const submitGenerate = async () => {
       })
       .then((data) => {
         item.tid = data['reporting in progress']
-        // console.log(item)
       })
       .catch((error) => {
         console.error('Error generating task report:', error)
@@ -2141,7 +2013,6 @@ const uploadCsv = () => {
 }
 
 const validateCsv = (fileContent) => {
-  // console.log(fileContent)
   // Check if semicolons or spaces are used as delimiters
   const hasInvalidDelimiter = /[\r\n][^,]*[; ][^,]*[;\r\n]/.test(fileContent)
   // Check if the content contains semicolons used as delimiters
@@ -2153,9 +2024,7 @@ const validateCsv = (fileContent) => {
     // Parse the file with PapaParse
     Papa.parse(fileContent, {
       delimiter: ',', // Specify comma as the delimiter
-      complete: function (results) {
-        // console.log('Parsed Results:', results.data)
-      },
+      complete: function (results) {},
       error: function (error) {
         console.log('Parsing Error:', error)
         openNotificationWithIcon('csverror')
@@ -2189,13 +2058,9 @@ const generateReport = async () => {
     await csvGenerateReport()
     processInfo.value.process.selectedExternal = false
   } else {
-    // processInfo.value.result.generating = processInfo.value.process.selectedItems.filter(
-    //   (item) => !processInfo.value.result.generatedReports.some((report) => report.id === item.id)
-    // )
     const items = processInfo.value.process.selectedItems
     processInfo.value.result.generating = items
     console.log('generating', processInfo.value.result.generating.length, ' reports')
-    //just selectedItems
     await submitGenerate()
   }
   checkModeTab()
@@ -2205,9 +2070,9 @@ const generateReport = async () => {
 <style>
 .table-container {
   width: 100%;
-  max-height: 500px; /* Adjust as needed */
-  overflow-y: auto; /* Makes the table scrollable */
-  border: 1px solid #ccc; /* Border around the table container */
+  max-height: 500px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
 }
 
 table {
@@ -2217,22 +2082,21 @@ table {
 
 th,
 td {
-  border: 1px solid #ccc; /* Border around table cells */
+  border: 1px solid #ccc;
   padding: 5px;
   text-align: left;
   height: 40px;
-  vertical-align: middle; /* Center content vertically */
+  vertical-align: middle;
   white-space: nowrap;
 }
 td {
-  width: auto; /* Width adjusts based on content */
+  width: auto;
 }
 
 th {
   background-color: rgba(200, 200, 200, 0.5);
 }
 .processContainer {
-  /* min-height: 100vh; */
   margin-top: 1rem;
   width: 80%;
   max-width: 1200px;

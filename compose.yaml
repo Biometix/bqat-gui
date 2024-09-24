@@ -9,7 +9,7 @@ services:
     build:
       context: web
     ports:
-      - 7860:7860
+      - 9949:9949
     depends_on:
       - api
 
@@ -38,7 +38,7 @@ services:
       RDS_URL: redis://redis:6379/
       QUEUE_DB: 0
       DATA: data/
-      WEB: http://localhost:7860
+      WEB: http://localhost:9949
     ports:
       - 8848:8848
     volumes:

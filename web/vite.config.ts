@@ -12,6 +12,7 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
+  //get version num from pakcage.json and set to global variable
   define: {
     'import.meta.env.VITE_VERSION': JSON.stringify(require('./package.json').version)
   }

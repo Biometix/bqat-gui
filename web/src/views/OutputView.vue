@@ -28,7 +28,7 @@
         <a-tab-pane :key="tabIndex" v-for="(tabItem, tabIndex) in modalityNames">
           <template #tab>
             <i :class="iconNames[tabIndex]"></i>
-            {{ tabIndex == 4 ? 'External CSV' : tabIndex == 3 ? 'Voice':tabItem }}
+            {{ tabIndex == 4 ? 'External CSV' : tabIndex == 3 ? 'Voice' : tabItem }}
           </template>
           <!-- Reports Board -->
           <div
@@ -284,25 +284,25 @@
     </a-card>
     <!-- Stop Task Section -->
     <a-row justify="center" style="margin-block: 10px">
-        <a-col :span="8">
-          <a-button
-            style="width: 100%; height: 100%; min-width: 200px"
-            :disabled="resultStatus.result != 1"
-            size="large"
-            danger
-            @click="stopReportTask"
-          >
-            <i class="bi bi-stop-circle" style="font-size: 18px; margin-inline: 5px"></i>
-            Stop
-          </a-button>
-        </a-col>
-      </a-row>
+      <a-col :span="8">
+        <a-button
+          style="width: 100%; height: 100%; min-width: 200px"
+          :disabled="resultStatus.result != 1"
+          size="large"
+          danger
+          @click="stopReportTask"
+        >
+          <i class="bi bi-stop-circle" style="font-size: 18px; margin-inline: 5px"></i>
+          Stop
+        </a-button>
+      </a-col>
+    </a-row>
   </a-flex>
 </template>
 
 <script setup lang="ts">
 import { useStatus, useInfo, useApi } from '../stores/dataStore.js'
-import { ref, computed, watchEffect, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { DownloadOutlined, BarChartOutlined } from '@ant-design/icons-vue'
 import { Modal, message } from 'ant-design-vue'
 import { h } from 'vue'
@@ -345,7 +345,6 @@ const iconNames = [
 ]
 const modalityNames = ['Face', 'Fingerprint', 'Iris', 'Speech', 'Generated']
 //No need to handle pending Tasks, because the task will be added to datasetIds when it is done in Process interval
-// const APIurl = import.meta.env.VITE_API
 
 const searchItem = ref(null)
 const showItem = ref(null)
@@ -369,14 +368,12 @@ const handleSearch = () => {
   const newitem = resultInfo.value.result.generatedReports.filter((item) =>
     item.id.includes(searchItem.value)
   )
-  // console.log(newitem[0].modality)
   if (newitem) {
     showItem.value = newitem
     const capitalizedModality =
       newitem[0].modality.charAt(0).toUpperCase() + newitem[0].modality.slice(1)
     const index = modalityNames.indexOf(capitalizedModality)
     if (index != -1) resultInfo.value.result.activeKey = index
-    // console.log(index)
   }
 }
 
@@ -391,7 +388,6 @@ const tip = computed(() => {
 })
 
 const stopReportTask = async () => {
-  //get the number of cancel
   setTimeout(async () => {
     if (resultInfo.value.result.generatedReport.id) {
       const url2 = `${API.api}/task/${resultInfo.value.result.generatedReport.id}/cancel?type=report`
@@ -403,8 +399,6 @@ const stopReportTask = async () => {
           return response.json()
         })
         .then((data) => {
-          // const item = { id: resultInfo.value.result.generatedReport.id }
-          // deleteReport(item)
           openNotificationWithIcon('stop')
           resultInfo.value.result.generatedReport = { id: '', html: new Blob() }
         })
@@ -426,9 +420,6 @@ const stopReportTask = async () => {
           })
           .then((data) => {
             openNotificationWithIcon('stop')
-            // const cancelItem={id:item}
-            // deleteReport(cancelItem)
-            // console.log(data)
           })
           .catch((error) => {
             console.error('Error cancel task:', error)
@@ -506,7 +497,6 @@ const checkGeneratedReport = async () => {
       }
       resultStatus.updateStatus('result', 2)
     }
-    // console.log(data)
   } catch (error) {
     resultStatus.updateStatus('result', 1)
     console.error('Error getting task report:', error)
@@ -546,9 +536,9 @@ const checkReportDetails = async (item) => {
       console.error(error)
     })
 }
+
 //Update the pending reports
 const checkReport = async (item) => {
-  // console.log(item.id)
   try {
     const url = `${API.api}/scan/${item.id}/report`
     const response = await API.authFetch(url, {
@@ -570,7 +560,6 @@ const checkReport = async (item) => {
         modified: ''
       }
       await checkReportDetails(generated)
-      // console.log(generated)
       resultInfo.value.result.generating.splice(item, 1)
       const index = resultInfo.value.result.generatedReports.findIndex(
         (report) => report.id === generated.id
@@ -617,7 +606,7 @@ const fetchReport = async (item) => {
   const response = await API.authFetch(url, {
     method: 'GET',
     headers: { accept: 'text/html' }
-  }) // 5 seconds timeout
+  })
   if (!response.ok) {
     console.error('Error get report')
   }
@@ -670,7 +659,6 @@ const initResultLoad = async (otherInfos) => {
             modified: item.modified,
             status: item.status
           }
-          // console.log('Fetched item:', newItem)
           if (item.status == 2) {
             await fetchReport(newItem)
           } else {
@@ -749,7 +737,6 @@ const initialiseTask = async () => {
                 input: runningItem.input,
                 modified: runningItem.modified
               }
-              // info.value.process.taskList.push(runningItem)
               resultInfo.value.process.taskStatus.unshift(runningItemStatus)
             }
           })
@@ -804,14 +791,7 @@ onMounted(async () => {
   ) {
     resultStatus.updateStatus('app', 1)
     initResultLoad(resultInfo.value.process.taskList.filter((item) => item.status == 2))
-    //the taskList contains finished & running task
   }
-  // if (resultStatus.result != 1) {
-  //   console.log('new to generate')
-  //   addItemToSelect()
-  // } else {
-  //   console.log('back to check status')
-  // }
 })
 
 //Tool to open the html file in new tab
@@ -859,7 +839,6 @@ const downloadHtml = (item) => {
   align-self: center;
 }
 .outputContainer {
-  /* min-height: 100vh; */
   width: 80%;
   max-width: 1200px;
   margin-top: 1rem;
@@ -869,7 +848,6 @@ const downloadHtml = (item) => {
   height: 500px;
   display: flex;
   flex-wrap: wrap;
-  /* background-color: lightgrey; */
   border: 1px dotted grey;
   border-radius: 10px;
   justify-content: center;
@@ -881,15 +859,12 @@ const downloadHtml = (item) => {
 .res-card-container {
   display: flex;
   flex-wrap: wrap;
-  /* justify-content: space-around; */
   margin-top: 1rem;
-  /* padding:2px; */
   height: 500px;
   border: 1px dotted grey;
   border-radius: 10px;
   overflow-y: scroll;
   background-color: rgba(245, 245, 245, 0.4);
-  /* opacity: 0.5;  */
 }
 
 .cardContainerStyle {
