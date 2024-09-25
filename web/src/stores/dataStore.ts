@@ -66,7 +66,7 @@ export const useInfo = defineStore('info', () => {
     const result = ref({
         activeKey: 0,
         downsample: 100,
-        minimal: false,
+        minimal: true,
         generatedReports: [], // all generated data set on result page
         generating: [],
         selectedCsv: [],
@@ -170,7 +170,7 @@ export const useInfo = defineStore('info', () => {
             dataSet: [],// all finished data set(including pending report)
             activeKey: 0,
             downsample: 0,
-            minimal: false,
+            minimal: true,
             generatedReports: [], // all generated data set on result page
             generating: [],
             selectedCsv: [],

@@ -248,7 +248,11 @@
               size="large"
               danger
               @click="deleteTask"
-              :disabled="processInfo.process.selectedItems.length < 1"
+              :disabled="
+                processInfo.process.selectedItems.length < 1 ||
+                processStatus.outlier == 1 ||
+                processStatus.result == 1
+              "
             >
               <DeleteOutlined />
             </a-button>
@@ -259,7 +263,11 @@
             <a-button
               style="width: 100%; height: 100%; padding: 0"
               size="large"
-              :disabled="processInfo.process.selectedItems.length != 1"
+              :disabled="
+                processInfo.process.selectedItems.length != 1 ||
+                processStatus.outlier == 1 ||
+                processStatus.result == 1
+              "
               @click="getCsv('preview')"
             >
               <i id="test" class="bi bi-table" style="margin-right: 5px; font-size: 18px"></i>
@@ -272,7 +280,11 @@
             <a-button
               style="width: 100%; height: 100%; padding: 0"
               size="large"
-              :disabled="processInfo.process.selectedItems.length < 1"
+              :disabled="
+                processInfo.process.selectedItems.length < 1 ||
+                processStatus.outlier == 1 ||
+                processStatus.result == 1
+              "
               @click="getCsv('download')"
             >
               <i
@@ -291,7 +303,10 @@
               size="large"
               @click="getOutlier()"
               :disabled="
-                processInfo.process.selectedItems.length != 1 || processStatus.process == 1
+                processInfo.process.selectedItems.length != 1 ||
+                processStatus.process == 1 ||
+                processStatus.outlier == 1 ||
+                processStatus.result == 1
               "
             >
               <i class="bi bi-radar" style="margin-right: 5px; font-size: 18px"></i>
@@ -309,7 +324,9 @@
               :disabled="
                 (processInfo.process.selectedItems.length < 1 &&
                   !processInfo.process.selectedExternal) ||
-                processStatus.process == 1
+                processStatus.process == 1 ||
+                processStatus.outlier == 1 ||
+                processStatus.result == 1
               "
             >
               <i class="bi bi-clipboard-data" style="margin-right: 5px; font-size: 18px"></i>Get
@@ -347,156 +364,170 @@
 
           <!-- Outlier Section  -->
           <a-flex v-if="showOutlier" gap="middle" vertical>
-            <!-- Select Detector -->
-            <a-card hoverable>
-              <a-flex vertical gap="middle">
-                <h2><i class="bi bi-exclamation-square"></i> Select Outlier Detector:</h2>
+            <a-spin
+              size="large"
+              :indicator="indicator"
+              :spinning="processStatus.outlier == 1"
+              tip="Task is running..."
+            >
+              <!-- Select Detector -->
+              <a-card hoverable>
+                <a-flex vertical gap="middle">
+                  <h2><i class="bi bi-exclamation-square"></i> Select Outlier Detector:</h2>
 
-                <a-select
-                  size="large"
-                  ref="select"
-                  style="width: 100%; margin-block: 10px"
-                  v-model:value="processInfo.outlier.detector"
-                  :options="detectorSelect"
-                  @click="
-                    () => {
-                      processInfo.outlier.iconLoading = false
-                    }
-                  "
-                >
-                </a-select>
-              </a-flex>
-            </a-card>
+                  <a-select
+                    size="large"
+                    ref="select"
+                    style="width: 100%; margin-block: 10px"
+                    v-model:value="processInfo.outlier.detector"
+                    :options="detectorSelect"
+                    @click="
+                      () => {
+                        processInfo.outlier.iconLoading = false
+                      }
+                    "
+                  >
+                  </a-select>
+                </a-flex>
+              </a-card>
 
-            <!-- Advanced Configuration -->
-            <a-card hoverable>
-              <a-flex vertical gap="middle">
-                <h2><i class="bi bi-columns-gap"></i> Configure Detection Parameters:</h2>
+              <!-- Advanced Configuration -->
+              <a-card hoverable>
+                <a-flex vertical gap="middle">
+                  <h2><i class="bi bi-columns-gap"></i> Configure Detection Parameters:</h2>
 
-                <a-cascader
-                  popupClassName="popupClass"
-                  expand-trigger="hover"
-                  multiple
-                  size="large"
-                  style="width: 100%; margin-block: 10px"
-                  v-model:value="processInfo.outlier.columns"
-                  change-on-select
-                  placeholder="Please select the columns to detect"
-                  :options="columnSelect"
-                />
-              </a-flex>
-            </a-card>
+                  <a-cascader
+                    popupClassName="popupClass"
+                    expand-trigger="hover"
+                    multiple
+                    size="large"
+                    style="width: 100%; margin-block: 10px"
+                    v-model:value="processInfo.outlier.columns"
+                    change-on-select
+                    placeholder="Please select the columns to detect"
+                    :options="columnSelect"
+                  />
+                </a-flex>
+              </a-card>
 
-            <!-- Submit Detection -->
-            <a-row justify="center" :gutter="40" style="margin-top: 2rem">
-              <a-col :span="12">
-                <a-button
-                  :disabled="!processInfo.outlier.iconLoading"
-                  style="width: 100%; padding: 0"
-                  size="large"
-                  type="primary"
-                  danger
-                  @click="stopOutlierTask"
-                >
-                  <i class="bi bi-stop-circle" style="font-size: 18px; margin-inline: 5px"></i>
-                  Stop
-                </a-button>
-              </a-col>
-              <a-col :span="12">
-                <a-button
-                  style="width: 100%"
-                  size="large"
-                  type="primary"
-                  :loading="processInfo.outlier.iconLoading"
-                  :disabled="
-                    processInfo.process.selectedItems.length !== 1 ||
-                    processInfo.outlier.columns.length == 0
-                  "
-                  @click="startOutlierTask"
-                >
-                  <i v-if="outlierEta > 0">ETA: {{ outlierEta }} s</i>
-                  <i v-else class="bi bi-play" style="font-style: normal; margin-inline: 5px"></i>
-                  Start
-                </a-button>
-              </a-col>
-            </a-row>
+              <!-- Submit Detection -->
+              <a-row justify="center" :gutter="40" style="margin-top: 2rem">
+                <a-col :span="12">
+                  <a-button
+                    :disabled="!processInfo.outlier.iconLoading"
+                    style="width: 100%; padding: 0"
+                    size="large"
+                    type="primary"
+                    danger
+                    @click="stopOutlierTask"
+                  >
+                    <i class="bi bi-stop-circle" style="font-size: 18px; margin-inline: 5px"></i>
+                    Stop
+                  </a-button>
+                </a-col>
+                <a-col :span="12">
+                  <a-button
+                    style="width: 100%"
+                    size="large"
+                    type="primary"
+                    :loading="processInfo.outlier.iconLoading"
+                    :disabled="
+                      processInfo.process.selectedItems.length !== 1 ||
+                      processInfo.outlier.columns.length == 0
+                    "
+                    @click="startOutlierTask"
+                  >
+                    <i v-if="outlierEta > 0">ETA: {{ outlierEta }} s</i>
+                    <i v-else class="bi bi-play" style="font-style: normal; margin-inline: 5px"></i>
+                    Start
+                  </a-button>
+                </a-col>
+              </a-row>
 
-            <!-- Outlier Result -->
-            <a-alert
-              v-if="processStatus.outlier == 2"
-              style="margin-top: 2rem"
-              message="Outliers"
-              :description="'There are ' + outlierLength + ' outliers'"
-              type="info"
-              show-icon
-              closable
-            />
+              <!-- Outlier Result -->
+              <a-alert
+                v-if="processStatus.outlier == 2"
+                style="margin-top: 2rem"
+                message="Outliers"
+                :description="'There are ' + outlierLength + ' outliers'"
+                type="info"
+                show-icon
+                closable
+              />
+            </a-spin>
           </a-flex>
 
           <!-- Report Section -->
           <a-flex v-if="showReport" gap="middle" vertical>
-            <!-- Config Report -->
-            <a-card hoverable>
-              <a-flex gap="middle" vertical style="width: 100%">
-                <h2><i class="bi bi-kanban"></i> Generate EDA Report:</h2>
-                <h3>Select data source:</h3>
-                <a-radio-group v-model:value="generateExternal">
-                  <a-row>
+            <a-spin
+              size="large"
+              :indicator="indicator"
+              :spinning="processStatus.result == 1"
+              tip="Task is running..."
+            >
+              <!-- Config Report -->
+              <a-card hoverable>
+                <a-flex gap="middle" vertical style="width: 100%">
+                  <h2><i class="bi bi-kanban"></i> Generate EDA Report:</h2>
+                  <h3>Select data source:</h3>
+                  <a-radio-group v-model:value="generateExternal">
+                    <a-row>
+                      <a-col :span="12">
+                        <a-radio :value="false">From Scan Task</a-radio>
+                      </a-col>
+                      <a-col :span="12">
+                        <a-radio :value="true">External CSV</a-radio>
+                      </a-col>
+                    </a-row>
+                  </a-radio-group>
+
+                  <h3>Report configurations:</h3>
+                  <a-row justify="center" :gutter="40">
                     <a-col :span="12">
-                      <a-radio :value="false">From Scan Task</a-radio>
+                      <a-input-number
+                        size="large"
+                        style="width: 85%"
+                        v-model:value="processInfo.result.downsample"
+                        addon-before="Subsample"
+                        addon-after="%"
+                        placeholder="100"
+                        min="1"
+                        max="100"
+                        :disabled="generateExternal"
+                      />
                     </a-col>
                     <a-col :span="12">
-                      <a-radio :value="true">External CSV</a-radio>
+                      <a-checkbox
+                        :disabled="generateExternal"
+                        style="font-size: 17px"
+                        size="large"
+                        v-model:checked="processInfo.result.minimal"
+                        >Minimal</a-checkbox
+                      >
                     </a-col>
                   </a-row>
-                </a-radio-group>
+                </a-flex>
+              </a-card>
 
-                <h3>Report configurations:</h3>
-                <a-row justify="center" :gutter="40">
-                  <a-col :span="12">
-                    <a-input-number
-                      size="large"
-                      style="width: 85%"
-                      v-model:value="processInfo.result.downsample"
-                      addon-before="Subsample"
-                      addon-after="%"
-                      placeholder="100"
-                      min="1"
-                      max="100"
-                      :disabled="generateExternal"
-                    />
-                  </a-col>
-                  <a-col :span="12">
-                    <a-checkbox
-                      :disabled="generateExternal"
-                      style="font-size: 17px"
-                      size="large"
-                      v-model:checked="processInfo.result.minimal"
-                      >Minimal</a-checkbox
-                    >
-                  </a-col>
-                </a-row>
-              </a-flex>
-            </a-card>
-
-            <!-- Submit Report Task-->
-            <a-row justify="center" :gutter="40" style="margin-block: 2rem">
-              <a-col :span="24">
-                <a-button
-                  size="large"
-                  :disabled="
-                    processStatus.result == 1 ||
-                    (generateExternal && !processInfo.process.selectedExternal) ||
-                    (!generateExternal && processInfo.process.selectedItems.length < 1)
-                  "
-                  style="width: 100%"
-                  type="primary"
-                  @click="generateReport"
-                  ><i class="bi bi-play" style="font-size: 18px; margin-inline: 5px"></i>
-                  Start</a-button
-                >
-              </a-col>
-            </a-row>
+              <!-- Submit Report Task-->
+              <a-row justify="center" :gutter="40" style="margin-block: 2rem">
+                <a-col :span="24">
+                  <a-button
+                    size="large"
+                    :disabled="
+                      processStatus.result == 1 ||
+                      (generateExternal && !processInfo.process.selectedExternal) ||
+                      (!generateExternal && processInfo.process.selectedItems.length < 1)
+                    "
+                    style="width: 100%"
+                    type="primary"
+                    @click="generateReport"
+                    ><i class="bi bi-play" style="font-size: 18px; margin-inline: 5px"></i>
+                    Start</a-button
+                  >
+                </a-col>
+              </a-row>
+            </a-spin>
           </a-flex>
         </div>
       </a-spin>
@@ -545,7 +576,7 @@ const indicator = h(SyncOutlined, {
 })
 
 const tip = computed(() => {
-  if (processStatus.result == 1 || processStatus.preprocess == 1 || processStatus.outlier == 1) {
+  if (processStatus.preprocess == 1) {
     return 'Task is running...'
   } else if (processStatus.app == 1) {
     return 'Getting data from server...'
