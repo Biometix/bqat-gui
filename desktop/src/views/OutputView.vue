@@ -197,7 +197,15 @@
               <a-spin size="middle" tip="Generating...">
                 <a-card size="small">
                   <template #cover>
-                    <i class="bi bi-x-square" style="font-size: 18px; margin-left: 5px"></i>
+                    <i
+                    class="bi bi-x-square"
+                    style="
+                      display: flex;
+                      flex-direction: row-reverse;
+                      padding: 5px;
+                      font-size: 18px;
+                    "
+                  ></i>
                     <a-qrcode
                       style="margin: 5px auto"
                       error-level="H"
@@ -239,7 +247,15 @@
               <a-spin size="middle" tip="Generating...">
                 <a-card size="small">
                   <template #cover>
-                    <i class="bi bi-x-square" style="font-size: 18px; margin-left: 5px"></i>
+                    <i
+                    class="bi bi-x-square"
+                    style="
+                      display: flex;
+                      flex-direction: row-reverse;
+                      padding: 5px;
+                      font-size: 18px;
+                    "
+                  ></i>
                     <a-qrcode
                       style="margin: 5px auto"
                       error-level="H"
