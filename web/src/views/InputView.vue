@@ -22,18 +22,20 @@
             <h3>Import folder to the backend:</h3>
             <a-collapse v-model:activeKey="activeKey">
               <a-collapse-panel key="1" header="Import zip">
-                <a-flex justify="flex-start" horizontal>
-                  <a-upload-dragger
-                    style="width: 100%; min-width: 400px"
-                    name="file"
-                    :showUploadList="false"
-                    accept=".zip,.tar,.gz"
-                    :action="API.api + '/dataset'"
-                    :withCredentials="true"
-                    @change="uploadZip"
-                    >Select zip file (Click or Drag here)</a-upload-dragger
-                  >
-                </a-flex>
+                <a-spin :spinning="showUploadSpinner">
+                  <a-flex justify="flex-start" horizontal>
+                    <a-upload-dragger
+                      style="width: 100%; min-width: 400px"
+                      name="file"
+                      :showUploadList="false"
+                      accept=".zip,.tar,.gz"
+                      :action="API.api + '/dataset'"
+                      :withCredentials="true"
+                      @change="uploadZip"
+                      >Select zip file (Click or Drag here)</a-upload-dragger
+                    >
+                  </a-flex>
+                </a-spin>
               </a-collapse-panel>
             </a-collapse>
             <a-divider />
@@ -1264,9 +1266,14 @@ const clearTask = async () => {
     })
 }
 
+const showUploadSpinner = ref(false)
 const uploadZip = async (e) => {
+  if (e.file.status == 'uploading') {
+    showUploadSpinner.value = true
+  }
   if (e.file.status !== 'uploading') {
     const res = await e.file.response
+    showUploadSpinner.value = false
     if (res.detail) {
       console.log(res)
       openNotificationWithIcon('error')

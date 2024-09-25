@@ -25,8 +25,7 @@ const info = useInfo();
     <template #heading><RouterLink  class="introItem"  to="/scan">Input</RouterLink></template>
     <p>
       <h3>1. Upload Biometric Samples (fingerprint, face, iris, and voice) for Quality Analysis</h3>
-      - Upload biometric samples to the server.<br>
-      - Alternatively, select a local folder if BQAT is running on your computer.<br>
+      - Upload biometric samples to the server OR select a local folder.<br>
       - Adjust the size, file type, and color space of biometric images as needed (Optional).<br>
       - Submit scan task.
     </p>
