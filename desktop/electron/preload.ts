@@ -2,12 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld('ipcRenderer', withPrototype(ipcRenderer))
-contextBridge.exposeInMainWorld('electron', {
-  navigateBack: () => ipcRenderer.send('navigate-back'),
-  navigateForward: () => ipcRenderer.send('navigate-forward'),
-  canGoBack: () => ipcRenderer.invoke('can-go-back'),
-  canGoForward: () => ipcRenderer.invoke('can-go-forward')
-});
+
 // `exposeInMainWorld` can't detect attributes and methods of `prototype`, manually patching it.
 function withPrototype(obj: Record<string, any>) {
   const protos = Object.getPrototypeOf(obj)
