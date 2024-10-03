@@ -71,7 +71,7 @@ export const useInfo = defineStore('info', () => {
         generating: [],
         selectedCsv: [],
         treeSelected: [],
-        generatedReport: { id: '', html: new Blob() }
+        generatedReport: { id: '', blob: new Blob() , html:''}
     })
 
     const outlier = ref({
@@ -175,7 +175,7 @@ export const useInfo = defineStore('info', () => {
             generating: [],
             selectedCsv: [],
             treeSelected: [],
-            generatedReport: { id: '', html: new Blob() }
+            generatedReport: { id: '', blob: new Blob(), html:'' }
         }
         result.value = newResult
     }

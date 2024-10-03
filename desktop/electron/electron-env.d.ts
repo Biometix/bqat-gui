@@ -19,6 +19,8 @@ declare namespace NodeJS {
     /** /dist/ or /public/ */
     VITE_PUBLIC: string
     VITE_API: 'http://localhost:8848'
+    VITE_PASSWORD: 'admin'
+    VITE_USERNAME: 'root'
   }
 }
 

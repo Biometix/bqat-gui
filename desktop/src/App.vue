@@ -361,8 +361,8 @@ onMounted(async () => {
         </a-tooltip>
         <div style="margin-bottom: 8px; margin-left: 20px">
           <RouterLink to="/">Home</RouterLink>
-          <RouterLink to="/scan">Scan</RouterLink>
-          <RouterLink to="/result">Report</RouterLink>
+          <RouterLink to="/scan">Input</RouterLink>
+          <RouterLink to="/result">Result</RouterLink>
         </div>
       </a-config-provider>
     </nav>
@@ -480,16 +480,17 @@ nav {
 
 nav a.router-link-exact-active {
   color: red;
+  font-weight: 500;
 }
 
 nav a.router-link-exact-active:hover {
-  background-color: transparent;
+  background-color: lightgrey;
 }
 
 nav a {
   display: inline-block;
   padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+  /* border-left: 1px solid var(--color-border); */
 }
 
 nav a:first-of-type {

@@ -3161,6 +3161,13 @@ vue-router@^4.3.0:
   dependencies:
     "@vue/devtools-api" "^6.5.1"
 
+vue-sound@^0.1.10:
+  version "0.1.10"
+  resolved "https://registry.npmjs.org/vue-sound/-/vue-sound-0.1.10.tgz"
+  integrity sha512-Ns03pfeh6KiVesSjjyBf+/M3BuE1mWjTCo0pHHf/APcJuxOUExKUeDEBmcLm8c4mJcxbYBjh5wkQDSXXo5YFYA==
+  dependencies:
+    vue "^3.2.16"
+
 vue-template-compiler@^2.7.14:
   version "2.7.16"
   resolved "https://registry.npmjs.org/vue-template-compiler/-/vue-template-compiler-2.7.16.tgz"
@@ -3185,7 +3192,7 @@ vue-types@^3.0.0:
   dependencies:
     is-plain-object "3.0.1"
 
-"vue@^2.6.14 || ^3.3.0", vue@^3.0.0, "vue@^3.0.0-0 || ^2.6.0", vue@^3.2.0, vue@^3.2.25, vue@^3.4.21, vue@>=3.0.3, vue@>=3.2.0, vue@3.4.21:
+"vue@^2.6.14 || ^3.3.0", vue@^3.0.0, "vue@^3.0.0-0 || ^2.6.0", vue@^3.2.0, vue@^3.2.16, vue@^3.2.25, vue@^3.4.21, vue@>=3.0.3, vue@>=3.2.0, vue@3.4.21:
   version "3.4.21"
   resolved "https://registry.npmjs.org/vue/-/vue-3.4.21.tgz"
   integrity sha512-5hjyV/jLEIKD/jYl4cavMcnzKwjMKohureP8ejn3hhEjwhWIhWeuzL2kJAjzl/WyVsgPY56Sy4Z40C3lVshxXA==
