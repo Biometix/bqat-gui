@@ -1,3 +1,15 @@
+<a name="v0.3.6"></a>
+# v0.3.6 (2024-10-03)
+
+## 🚀 Features
+
+- 🙌 Render audio player in preview
+
+## 🛠 Fixes
+
+- Improve UX
+
+
 <a name="v0.3.1"></a>
 # v0.3.1 (2024-09-19)
 
