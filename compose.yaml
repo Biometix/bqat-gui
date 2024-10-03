@@ -12,17 +12,20 @@ services:
       - 9949:9949
     depends_on:
       - api
+    profiles:
+      - default
 
-  # web-lite:
-  #   restart: on-failure
-  #   image: bqat-gui-lite:latest
-  #   # image: ghcr.io/biometix/bqat-gui-lite:latest
-  #   build:
-  #     context: lite/bqat_gui
-  #   ports:
-  #     - 7860:7860
-  #   depends_on:
-  #     - api
+  web-lite:
+    restart: on-failure
+    image: ghcr.io/biometix/bqat-gui-lite:latest
+    build:
+      context: lite/bqat_gui
+    ports:
+      - 7860:7860
+    depends_on:
+      - api-lite
+    profiles:
+      - lite
 
   api:
     restart: on-failure
@@ -43,12 +46,37 @@ services:
       - 8848:8848
     volumes:
       - ./data:/app/data
+    profiles:
+      - default
+
+  api-lite:
+    restart: on-failure
+    image: ghcr.io/biometix/bqat-api:v1.3.0-beta
+    shm_size: '8gb'
+    depends_on:
+      - mongo
+      - redis
+    environment:
+      MGO_URL: mongodb://root:admin@mongo:27017/
+      SCAN_DB: scan
+      LOG_DB: log
+      RDS_URL: redis://redis:6379/
+      QUEUE_DB: 10
+      DATA: data/
+      WEB: http://localhost:7860
+    ports:
+      - 8848:8848
+    profiles:
+      - lite
 
   redis:
     restart: on-failure
     image: redis:latest
     ports:
       - 6379:6379
+    profiles:
+      - default
+      - lite
 
   mongo:
     restart: on-failure
@@ -58,3 +86,6 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: admin
     volumes:
       - mongo:/data/db
+    profiles:
+      - default
+      - lite

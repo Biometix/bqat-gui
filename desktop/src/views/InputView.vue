@@ -423,12 +423,12 @@
               </h3>
 
               <a-collapse v-model:activeKey="scanInfo.scan.activeKeys" :bordered="false">
-                <a-collapse-panel :key="4" header="Preview" class="customStyle1">
+                <a-collapse-panel :key="4" header="Preview" class="customStyle1" @scroll="handleScroll">
                   <div class="emptyPreview" v-if="scanInfo.scan.validFileList.length == 0">
                     <a-empty />
                   </div>
 
-                  <div v-else class="image-card-container" @scroll="handleScroll">
+                  <div v-else class="image-card-container">
                     <a-card
                       v-if="scanInfo.scan.validFileList.length > 100"
                       hoverable
@@ -436,9 +436,10 @@
                       :style="previewStyle"
                       :key="index"
                       style="margin: 5px"
+                      class="hover-zoom"
                     >
                       <template #cover>
-                        <a-tooltip :title="item.name">
+                        <a-tooltip :title="item.name.toUpperCase()">
                           <div v-if="item.name.includes('.wsq') || item.name.includes('.jp2')">
                             <img
                               v-if="
@@ -454,17 +455,21 @@
                                 ).data
                               "
                               :alt="'🖼️' + item.name"
-                              class="hover-zoom"
+                            />
+                          </div>
+                          <div v-else-if="item.type.includes('audio')" class="smallCard">
+                            <vue-sound
+                              :show-download="false"
+                              :file="fileUrl(item.originFileObj)"
+                              :alt="'🔉' + item.name"
+                              :style="previewStyle"
                             />
                           </div>
                           <div v-else>
                             <img
                               :src="fileUrl(item.originFileObj)"
-                              :alt="
-                                item.type.includes('audio') ? '🔉' + item.name : '🖼️' + item.name
-                              "
+                              :alt="'🖼️' + item.name"
                               :style="previewStyle"
-                              class="hover-zoom"
                             />
                           </div>
                         </a-tooltip>
@@ -477,7 +482,8 @@
                       v-for="(item1, index1) in scanInfo.scan.validFileList"
                       :style="previewStyle"
                       :key="index1"
-                      style="margin: 5px"
+                      style="margin: 5px; "
+                      class="hover-zoom"
                     >
                       <template #cover>
                         <a-tooltip :title="item1.name">
@@ -495,17 +501,21 @@
                                   .data
                               "
                               :alt="'🖼️' + item1.name"
-                              class="hover-zoom"
+                            />
+                          </div>
+                          <div v-else-if="item1.type.includes('audio')" style="background-color: white;">
+                            <vue-sound
+                              :show-download="false"
+                              :file="fileUrl(item1.originFileObj)"
+                              :alt="'🔉' + item1.name"
+                              :style="previewStyle"
                             />
                           </div>
                           <div v-else>
                             <img
                               :src="fileUrl(item1.originFileObj)"
-                              :alt="
-                                item1.type.includes('audio') ? '🔉' + item1.name : '🖼️' + item1.name
-                              "
+                              :alt="'🖼️' + item1.name"
                               :style="previewStyle"
-                              class="hover-zoom"
                             />
                           </div>
                         </a-tooltip>
@@ -578,6 +588,7 @@ import { h } from 'vue'
 import { SyncOutlined, CheckCircleTwoTone, CloseCircleTwoTone } from '@ant-design/icons-vue'
 import mime from 'mime'
 import { notification } from 'ant-design-vue'
+import { VueSound } from 'vue-sound'
 
 const openNotificationWithIcon = (type: string) => {
   if (type === 'stop') {
@@ -1111,11 +1122,12 @@ const submitScan1 = async () => {
     const newTaskStatus = {
       tid: data.tid,
       collection: '',
-      name: data.tid.substring(data.tid.length - 4),
+      name: data.tid.substring(0,5),
       status: 0,
       percent: 0,
       eta: 0,
       num: 0,
+      total: scanInfo.value.scan.validFileList.length,
       mode: '',
       engine: '',
       input: input,
@@ -1185,11 +1197,12 @@ const submitScan2 = async () => {
     const newTaskStatus = {
       tid: data.tid,
       collection: '',
-      name: data.tid.substring(data.tid.length - 4),
+      name: data.tid.substring(0,5),
       status: 0,
       percent: 0,
       eta: 0,
       num: 0,
+      total: scanInfo.value.scan.length,
       mode: '',
       engine: '',
       input: input,
@@ -1421,7 +1434,7 @@ const getETA = async (tid) => {
 
 .hover-zoom:hover {
   transform: scale(2); /* Scales the image to 110% of its original size */
-  z-index: 3;
+  z-index: 10;
 }
 .emptyPreview {
   margin-top: 1rem;
@@ -1453,7 +1466,10 @@ const getETA = async (tid) => {
   margin: 30px;
   border: solid lightgrey 0.5px;
   height: auto;
+  max-height: 400px;
+  overflow-y: scroll;
 }
+
 
 .customStyle1:hover {
   border: solid gray 0.5px;
@@ -1462,8 +1478,9 @@ const getETA = async (tid) => {
 .image-card-container {
   display: flex;
   flex-wrap: wrap;
-  height: 350px;
-  overflow-y: scroll;
+  /* height: 350px; */
+  position: relative;
+  overflow: visible; 
 }
 .iconStyle {
   font-size: 30;
@@ -1499,6 +1516,32 @@ i {
   transform: translate(-50%, -50%);
 }
 
+.vue-sound{
+  display: flex;
+  justify-content: center; 
+  align-items: center; 
+  background-color: rgba(240, 240, 240, 1)
+}
+
+.vue-sound .player-back-15-icon, .player-ahead-15-icon, .player-volume {
+  display: none;
+}
+.vue-sound .player-controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.smallCard .vue-sound .play-icon, .pause-icon{
+  height: 25px;
+  width: 25px;
+}
+
+.smallCard .vue-sound .player-track{
+  display: none;
+}
+
 [data-theme='dark'] {
   .customStyle1:hover {
     border: solid orange 0.5px;
@@ -1506,10 +1549,31 @@ i {
   .fixed-center-spin {
     background-color: rgba(20, 20, 20, 0.2);
   }
+  .vue-sound .play-icon, .pause-icon {
+    fill: #f8f8f8;
+  }
+  .vue-sound{
+    background-color: rgba(20, 20, 20, 1)
+  }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(50, 50, 50, 0.3);
+  }
+
 }
 @media (min-width: 1024px) {
   .scanContainer {
-    margin-top: 2rem;
+    margin-top: 0rem;
   }
 }
 @media (max-width: 1024px) {

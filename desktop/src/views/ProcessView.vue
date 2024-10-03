@@ -20,25 +20,25 @@
               "
               style="text-align: center"
             >
-              <template #suffix>
+              <template #prefix>
                 <i class="bi bi-terminal"></i>
               </template>
             </a-statistic>
           </a-col>
           <a-col :span="6">
             <a-statistic
-              title="Current Task Time"
+              title="Elapsed Time"
               :value="formatSeconds"
               style="text-align: center"
             >
-              <template #suffix>
+              <template #prefix>
                 <i class="bi bi-stopwatch"></i>
               </template>
             </a-statistic>
           </a-col>
           <a-col :span="6">
             <a-statistic
-              title="Task Finish In"
+              title="ETC"
               :value="
                 processInfo.process.taskStatus.filter((item) => item.status != 2).length > 0
                   ? formatETA
@@ -46,7 +46,7 @@
               "
               style="text-align: center"
             >
-              <template #suffix>
+              <template #prefix>
                 <i class="bi bi-stopwatch"></i>
               </template>
             </a-statistic>
@@ -54,11 +54,10 @@
           <a-col :span="6">
             <a-statistic
               title="Processed"
-              :value="processInfo.process.taskStatus.filter((item) => item.status == 2).length"
+              :value="`${processInfo.process.taskStatus.filter((item) => item.status == 2).length} / ${processInfo.process.taskStatus.length}`"
               style="text-align: center"
             >
-              <template #suffix>
-                <span> / {{ processInfo.process.taskStatus.length }}</span>
+              <template #prefix>
                 <i class="bi bi-check2-circle"></i> </template
               >``
             </a-statistic>
@@ -66,17 +65,16 @@
         </a-row>
 
         <!-- Stop Task Section -->
-        <a-row justify="center" style="margin-block: 2rem">
+        <a-row justify="center" style="margin-block: 15px">
           <a-col :span="8">
             <a-button
               :disabled="processStatus.process != 1"
-              style="width: 100%; padding: 0; overflow: hidden"
-              size="large"
+              style="width: 100%; padding: 0px; overflow: hidden"
               danger
               @click="clearTask"
             >
-              <i class="bi bi-stop-circle" style="font-size: 18px; margin-inline: 5px"></i>
-              Stop Running Task
+              <i class="bi bi-stop-circle" style="font-size: 15px; margin-inline: 5px"></i>
+              Stop Current Task
             </a-button>
           </a-col>
         </a-row>
@@ -88,54 +86,56 @@
             :key="index"
             hoverable
             class="taskStyle"
-            bodyStyle="padding:0px; height: 78px"
-            :style="colorCustom(item.percent)"
+            bodyStyle="padding: 0px; height: 78px;"
+            :style="{
+              backgroundColor: processInfo.process.selectedItems[item.tid]
+                ? item.percent < 100
+                  ? 'rgba(162, 165, 166,0.5)'
+                  : 'rgba(200, 200, 200,0.7)'
+                : 'rgba(200, 200, 200,0.2)'
+            }"
           >
-            <a-spin style="margin-top: 0" :spinning="item.percent < 100">
-              <a-tooltip :title="new Date(item.modified).toLocaleString()">
-                <div style="padding-inline: 10px">
-                  <div
-                    style="
-                      display: flex;
-                      flex-direction: row;
-                      height: 35px;
-                      padding-top: 8px;
-                      margin-bottom: 5px;
-                    "
+            <a-spin style="margin-top: -15px" :spinning="item.percent < 100">
+              <a-tooltip :title="`${new Date(item.modified).toLocaleString()} | ${convertSecondsToHMS(Number(item.elapse))}`">
+                <div style="padding-inline: 10px; width: 100%">
+                  <a-checkbox
+                    class="checkbox-hidden"
+                    :disabled="item.status != 2"
+                    v-model:checked="processInfo.process.selectedItems[item.tid]"
+                    @change="(e) => selectTask(e, item)"
                   >
-                    <div class="checkboxStyle">
-                      <a-checkbox
-                        :disabled="item.status != 2"
-                        v-model:checked="processInfo.process.selectedItems[item.tid]"
-                        @change="(e) => selectTask(e, item)"
+                    <div
+                      style="display: flex; flex-direction: row; height: 35px; margin-top: -15px"
+                    >
+                      <p
+                        style="padding: 5px; text-align: end; font-size: medium; font-weight: normal"
                       >
-                        <h3
-                          style="
-                            padding-top: 5px;
-                            text-align: end;
-                            font-size: large;
-                            font-weight: bold;
-                          "
-                        >
-                          {{ item.name }}:
-                        </h3>
-                      </a-checkbox>
+                        {{ item.name.toUpperCase() }}:
+                      </p>
+                      <a-progress
+                        class="progressStyle"
+                        :size="[300, 20]"
+                        :stroke-color="{ '0%': '#ff1a2d', '100%': '#99000d' }"
+                        :percent="item.percent"
+                      />
                     </div>
-
-                    <a-progress
-                      class="progressStyle"
-                      :size="[300, 25]"
-                      :stroke-color="{ '0%': '#ff1a2d', '100%': '#99000d' }"
-                      :percent="item.percent"
-                    />
-                  </div>
-                  <div style="text-align: center; height: 40px; padding-top: 5px">
-                    <p style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
-                      Input: {{ item.input }} | Modality: {{ item.mode }} | Engine:
-                      {{ item.engine }} | Files:
-                      {{ item.num }}
-                    </p>
-                  </div>
+                    <div style="text-align: center; height: 40px; padding-top: 2px; width: 100%">
+                      <p
+                        style="
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                          white-space: nowrap;
+                          width: 100%;
+                          font-size: medium;
+                        "
+                      >
+                        Input: {{ truncateString(item.input) }} | Modality:
+                        {{ capitalizeFirstLetter(item.mode) }} | Engine:
+                        {{ item.engine ? item.engine.toUpperCase() : 'Default' }} | Data:
+                        {{ item.num }}/{{ item.total }}
+                      </p>
+                    </div>
+                  </a-checkbox>
                 </div>
               </a-tooltip>
             </a-spin>
@@ -144,45 +144,64 @@
           <a-card
             hoverable
             class="taskStyle"
-            style="background-color: rgba(162, 165, 166, 0.2); height: 70px"
-            bodyStyle="padding: 10px 10px; height: 85px"
+            bodyStyle="padding: 10px 10px; height: 70px"
+            :style="{
+              height: '70px',
+              backgroundColor: processInfo.process.selectedExternal
+                ? 'rgba(200, 200, 200,0.7)'
+                : 'rgba(200, 200, 200,0.2)'
+            }"
           >
-            <a-tooltip title="Use External CSV to Generate Report">
+            <a-tooltip title="Import CSV to Generate Report">
               <div style="display: flex; flex-direction: row">
-                <div class="checkboxStyle" style="width: 15%; min-width: 100px">
-                  <a-checkbox
-                    :disabled="!processInfo.result.selectedCsv[0]"
-                    v-model:checked="processInfo.process.selectedExternal"
-                  >
+                <a-checkbox
+                  :disabled="!processInfo.result.selectedCsv[0]"
+                  v-model:checked="processInfo.process.selectedExternal"
+                  class="checkbox-hidden"
+                >
+                  <div style="display: flex; flex-direction: row; height: 35px; margin-top: -15px">
                     <h3
-                      style="padding-top: 6px; text-align: end; font-size: large; font-weight: bold"
+                      style="
+                        padding-inline: 6px;
+                        padding-top: 4px;
+                        padding-right: 10px;
+                        text-align: end;
+                        font-size: medium;
+                        font-weight: normal;
+                      "
                     >
                       External:
                     </h3>
-                  </a-checkbox>
-                </div>
-                <input
-                  type="file"
-                  ref="uploadRef"
-                  accept=".csv"
-                  style="display: none"
-                  @change="selectCsv"
-                />
-                <a-button
-                  size="large"
-                  @click="uploadCsv"
-                  danger
-                  style="width: 80%; text-overflow: ellipsis; overflow: hidden"
-                  :disabled="
-                    tip !== false || processStatus.outlier == 1 || processStatus.preprocess == 1
-                  "
-                >
-                  {{
-                    processInfo.result.selectedCsv[0]
-                      ? processInfo.result.selectedCsv[0].name
-                      : 'Select external CSV'
-                  }}
-                </a-button>
+
+                    <input
+                      type="file"
+                      ref="uploadRef"
+                      accept=".csv"
+                      style="display: none"
+                      @change="selectCsv"
+                    />
+                    <a-button
+                      size="medium"
+                      @click="uploadCsv"
+                      danger
+                      style="width: 80%; text-overflow: ellipsis; overflow: hidden"
+                      :disabled="
+                        tip !== false || processStatus.outlier == 1 || processStatus.preprocess == 1
+                      "
+                    >
+                      {{
+                        processInfo.result.selectedCsv[0]
+                          ? processInfo.result.selectedCsv[0].name
+                          : 'Import CSV file'
+                      }}
+                    </a-button>
+                    <!-- <div style="text-align: center; height: 40px; padding-top: 6px">
+                      <p style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
+                        Select External CSV File
+                      </p>
+                    </div> -->
+                  </div>
+                </a-checkbox>
               </div>
             </a-tooltip>
           </a-card>
@@ -193,46 +212,63 @@
           <a-card
             hoverable
             class="taskStyle"
-            style="background-color: rgba(162, 165, 166, 0.2)"
             bodyStyle="padding: 10px 10px; height: 85px;"
+            :style="{
+              height: '70px',
+              backgroundColor: processInfo.process.selectedExternal
+                ? 'rgba(200, 200, 200,0.7)'
+                : 'rgba(200, 200, 200,0.2)'
+            }"
           >
             <a-tooltip title="Use External CSV to Generate Report">
               <div style="display: flex; flex-direction: row; height: 40px">
-                <div class="checkboxStyle" style="width: 15%; min-width: 100px">
-                  <a-checkbox
-                    :disabled="!processInfo.result.selectedCsv[0]"
-                    v-model:checked="processInfo.process.selectedExternal"
-                  >
-                    <h3 style="padding-top: 6px; text-align: end; font-size: large">External:</h3>
-                  </a-checkbox>
-                </div>
-                <input
-                  type="file"
-                  ref="uploadRef"
-                  accept=".csv"
-                  style="display: none"
-                  @change="selectCsv"
-                />
-                <a-button
-                  size="large"
-                  @click="uploadCsv"
-                  danger
-                  style="width: 80%; text-overflow: ellipsis; overflow: hidden"
-                  :disabled="
-                    tip !== false || processStatus.outlier == 1 || processStatus.preprocess == 1
-                  "
+                <a-checkbox
+                  class="checkbox-hidden"
+                  :disabled="!processInfo.result.selectedCsv[0]"
+                  v-model:checked="processInfo.process.selectedExternal"
                 >
-                  {{
-                    processInfo.result.selectedCsv[0]
-                      ? processInfo.result.selectedCsv[0].name
-                      : 'Select external CSV'
-                  }}
-                </a-button>
-              </div>
-              <div style="text-align: center; height: 40px; padding-top: 6px">
-                <p style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
-                  Select External CSV File
-                </p>
+                  <div style="display: flex; flex-direction: row; height: 35px; margin-top: -15px">
+                    <h3
+                      style="
+                        padding-inline: 6px;
+                        padding-top: 4px;
+                        text-align: end;
+                        font-size: large;
+                        font-weight: bold;
+                      "
+                    >
+                      External:
+                    </h3>
+
+                    <input
+                      type="file"
+                      ref="uploadRef"
+                      accept=".csv"
+                      style="display: none"
+                      @change="selectCsv"
+                    />
+                    <a-button
+                      size="large"
+                      @click="uploadCsv"
+                      danger
+                      style="width: 80%; text-overflow: ellipsis; overflow: hidden"
+                      :disabled="
+                        tip !== false || processStatus.outlier == 1 || processStatus.preprocess == 1
+                      "
+                    >
+                      {{
+                        processInfo.result.selectedCsv[0]
+                          ? processInfo.result.selectedCsv[0].name
+                          : 'Import CSV file'
+                      }}
+                    </a-button>
+                    <!-- <div style="text-align: center; height: 40px; padding-top: 6px">
+                    <p style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
+                      Select External CSV File
+                    </p>
+                  </div> -->
+                  </div>
+                </a-checkbox>
               </div>
             </a-tooltip>
           </a-card>
@@ -240,7 +276,7 @@
         </div>
 
         <!-- Operation Section -->
-        <a-row justify="center" style="margin-block: 3rem" :gutter="20">
+        <a-row justify="center" style="margin-top: 1rem" :gutter="20">
           <!-- Delete Item -->
           <a-col :span="2">
             <a-button
@@ -339,25 +375,79 @@
         <div id="bottom-anchor">
           <!-- Result Section -->
           <a-flex v-if="csvdata.length > 0" gap="middle" vertical>
+            <br>
             <a-card hoverable>
               <a-flex gap="middle" vertical style="width: 100%">
                 <h2><i class="bi bi-kanban"></i> Output Data:</h2>
+                <h3>Shape: {{ csvdata.length }} × {{ headers.length - 1 }}</h3>
                 <div class="table-container">
                   <table>
                     <thead>
                       <tr>
-                        <th v-for="(header, index) in headers" :key="index">{{ header }}</th>
+                        <th></th>
+                        <th
+                          v-for="(header, index) in headers.filter((item) => item !== 'log')"
+                          :key="index"
+                        >
+                          {{ header }}
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="(item, rowIndex) in csvdata" :key="rowIndex">
-                        <td v-for="(header, colIndex) in headers" :key="colIndex">
+                      <tr v-for="(item, rowIndex) in csvdata.slice(0, 50)" :key="rowIndex">
+                        <td>
+                          {{ rowIndex + 1 }}
+                        </td>
+                        <td
+                          v-for="(header, colIndex) in headers.filter((item) => item !== 'log')"
+                          :key="colIndex"
+                        >
                           {{ item[header] }}
                         </td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
+                <a-divider v-if="headers.filter((item) => item == 'log').length > 0" />
+                <a-collapse v-if="headers.filter((item) => item == 'log').length > 0">
+                  <a-collapse-panel header="log">
+                    <div class="table-container">
+                      <table>
+                        <thead>
+                          <tr>
+                            <!-- <th>Index</th> -->
+                            <th
+                              v-for="(header, index) in headers.filter(
+                                (item) => item == 'file' || item == 'log'
+                              )"
+                              :key="index"
+                            >
+                              {{ header }}
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr
+                            v-for="(item, rowIndex) in csvdata.filter((item) => item.log)"
+                            :key="rowIndex"
+                          >
+                            <!-- <td>
+                              {{ rowIndex + 1 }}
+                            </td> -->
+                            <td
+                              v-for="(header, colIndex) in headers.filter(
+                                (item) => item == 'file' || item == 'log'
+                              )"
+                              :key="colIndex"
+                            >
+                              {{ item[header] }}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </a-collapse-panel>
+                </a-collapse>
               </a-flex>
             </a-card>
           </a-flex>
@@ -390,6 +480,8 @@
                   </a-select>
                 </a-flex>
               </a-card>
+
+              <br>
 
               <!-- Advanced Configuration -->
               <a-card hoverable>
@@ -493,12 +585,10 @@
                         placeholder="100"
                         min="1"
                         max="100"
-                        :disabled="generateExternal"
                       />
                     </a-col>
                     <a-col :span="12">
                       <a-checkbox
-                        :disabled="generateExternal"
                         style="font-size: 17px"
                         size="large"
                         v-model:checked="processInfo.result.minimal"
@@ -585,17 +675,17 @@ const tip = computed(() => {
   }
 })
 
-const colorCustom = (percent) => {
-  if (percent >= 100) {
-    return 'background-color: rgba(162, 165, 166,0.2)'
-  } else if (percent == -1) {
-    return 'background-color: rgba(250, 33, 25, 0.3)'
-  } else if (percent == 0) {
-    return 'background-color: rgba(162, 165, 166,0.3)'
-  } else {
-    return 'background-color: rgba(162, 165, 166,0.2)'
-  }
-}
+// const colorCustom = (percent) => {
+//   if (percent >= 100) {
+//     return 'background-color: rgba(162, 165, 166,0.2)'
+//   } else if (percent == -1) {
+//     return 'background-color: rgba(250, 33, 25, 0.3)'
+//   } else if (percent == 0) {
+//     return 'background-color: rgba(162, 165, 166,0.3)'
+//   } else {
+//     return 'background-color: rgba(162, 165, 166,0.2)'
+//   }
+// }
 
 const detectorSelect = ref<SelectProps['options']>([
   {
@@ -1188,7 +1278,9 @@ const selectTask = (e, item) => {
     modality: item.mode,
     engine: item.engine,
     num: item.num,
-    input: item.input
+    total: item.total,
+    input: item.input,
+    elaspe: item.elapse
   }
   if (e.target.checked) {
     processInfo.value.process.selectedItems.push(selectedItem)
@@ -1340,7 +1432,6 @@ const checkModeTab = () => {
     } else {
       processInfo.value.result.activeKey = 3
     }
-    processInfo.value.process.selectedItems = []
   }
 
   router.push({ path: '/result' })
@@ -1358,12 +1449,18 @@ const getCsv = async (type) => {
     if (response.ok) {
       const data = await response.json()
       if (type == 'preview') {
-        console.log(data)
+        // console.log(data)
         csvdata.value = data
         showOutlier.value = false
         showReport.value = false
         if (data.length > 0) {
-          headers.value = Object.keys(data[0])
+          if (data.length > 0) {
+            const allHeaders = new Set() // Use a Set to avoid duplicates
+            data.forEach((row) => {
+              Object.keys(row).forEach((key) => allHeaders.add(key))
+            })
+            headers.value = Array.from(allHeaders) // Convert Set to Array for headers
+          }
           scrollToBottom()
         }
       } else {
@@ -1463,6 +1560,8 @@ const checkTaskStatus = setInterval(() => {
     getTaskETA(tasksToUpdateOnPage.value)
   } else {
     clearInterval(checkTaskStatus)
+    processInfo.value.process.timer = -1
+    processInfo.value.process.timeRecord = 0
   }
 }, intervalGap.value)
 //Update the progress as task going
@@ -1477,15 +1576,18 @@ const getTaskETA = async (tasksToUpdate) => {
       })
       if (!response.ok) {
         console.log('can not find task progress')
+        throw new Error('Error getting task status')
       }
       const data = await response.json()
       if (data.done != 0) {
         item.eta = data.eta
         item.percent = Math.floor((data.done * 100) / data.total)
+        item.num = data.done
 
         if (data.done == data.total) {
           item.percent = 100
           item.status = 2
+          
           const index = processInfo.value.process.taskList.findIndex(
             (x) => x.collection === item.collection
           )
@@ -1504,12 +1606,15 @@ const getTaskETA = async (tasksToUpdate) => {
       })
       if (!response.ok) {
         console.log('can not find task log')
+
       }
       const data = await response.json()
       if (data[0].status == 2) {
         item.eta = 0
         item.percent = 100
         item.status = 2
+        item.num = data[0].finished
+        item.elapse = data[0].elapse
 
         const index = processInfo.value.process.taskList.findIndex(
           (x) => x.collection === item.collection
@@ -1540,10 +1645,12 @@ const updateTaskStatus = async (tasksToUpdate) => {
         item.collection = data.collection
         item.mode = data.options.mode
         item.engine = data.options.engine
-        item.num = data.total
+        item.num = data.finished
+        item.total = data.total
         item.modified = data.modified
         item.input = data.input
         item.status = data.status
+        item.elapse = data.elapse
       }
       if (data.total > 500) {
         intervalGap.value = 5000
@@ -1588,14 +1695,16 @@ const initialiseTask = async () => {
         return {
           tid: item.tid,
           collection: item.collection,
-          name: item.collection.substring(item.collection.length - 4),
+          name: item.collection.substring(0, 5),
           status: item.status,
           percent: item.status == 2 ? 100 : Math.floor((item.finished * 100) / item.total),
-          num: item.total,
+          num: item.finished,
+          total: item.total,
           mode: item.options.mode,
           engine: item.options.engine,
           input: item.input,
-          modified: item.modified
+          modified: item.modified,
+          elapse: item.elapse
         }
       })
       if (data.filter((displayItem) => displayItem.status == 1).length > 0) {
@@ -1619,17 +1728,19 @@ const initialiseTask = async () => {
               const runningItemStatus = {
                 tid: runningItem.tid,
                 collection: runningItem.collection,
-                name: runningItem.collection.substring(runningItem.collection.length - 4),
+                name: runningItem.collection.substring(0, 5),
                 status: runningItem.status,
                 percent:
                   runningItem.status == 2
                     ? 100
                     : Math.floor((runningItem.finished * 100) / runningItem.total),
-                num: runningItem.total,
+                num: runningItem.finished,
+                total: runningItem.total,
                 mode: runningItem.options.mode,
                 engine: runningItem.options.engine,
                 input: runningItem.input,
-                modified: runningItem.modified
+                modified: runningItem.modified,
+                elapse: runningItem.elapse
               }
               processInfo.value.process.taskStatus.unshift(runningItemStatus)
             }
@@ -1965,14 +2076,17 @@ const csvGenerateReport = async () => {
     processInfo.value.result.selectedCsv[0],
     processInfo.value.result.selectedCsv[0].name
   )
-  const url = `${API.api}/scan/report/remote?trigger=true`
+  const downsample =
+    processInfo.value.result.downsample > 0 ? processInfo.value.result.downsample / 100 : 1
+
+  const url = `${API.api}/scan/report/remote?trigger=true&minimal=${processInfo.value.result.minimal}&downsample=${downsample}`
   await API.authFetch(url, {
     method: 'POST',
     body: formData
   })
     .then((response) => {
       if (!response.ok) {
-        processInfo.value.result.generatedReport = { id: '', html: new Blob() }
+        processInfo.value.result.generatedReport = { id: '', blob: new Blob(), html: '' }
         processStatus.updateStatus('result', 2)
         throw new Error('Failed to generate report')
       }
@@ -1982,12 +2096,14 @@ const csvGenerateReport = async () => {
       const tid = data['reporting in progress']
       let generated = {
         tid: tid,
-        html: new Blob(),
+        html: '',
+        blob: new Blob(),
         id: tid,
-        name: tid.substring(tid.length - 4),
-        modality: 'generated',
-        engine: 'generated',
+        name: tid.substring(0, 5),
+        modality: '',
+        engine: '',
         num: 0,
+        total: 0,
         minimal: false,
         downsample: 100,
         modified: ''
@@ -1995,7 +2111,7 @@ const csvGenerateReport = async () => {
       processInfo.value.result.generatedReport = generated
     })
     .catch((error) => {
-      processInfo.value.result.generatedReport = { id: '', html: new Blob() }
+      processInfo.value.result.generatedReport = { id: '', blob: new Blob(), html: '' }
       processStatus.updateStatus('result', 2)
       console.error('Error generating task report:', error)
     })
@@ -2026,6 +2142,7 @@ const submitGenerate = async () => {
       })
       .then((data) => {
         item.tid = data['reporting in progress']
+        // console.log('submit report',item.tid)
       })
       .catch((error) => {
         console.error('Error generating task report:', error)
@@ -2079,7 +2196,7 @@ const selectCsv = (event) => {
     }
     reader.readAsText(file)
   }
-  processInfo.value.result.generatedReport = { id: '', html: new Blob() }
+  processInfo.value.result.generatedReport = { id: '', blob: new Blob(), html: '' }
 }
 
 const generateReport = async () => {
@@ -2091,32 +2208,61 @@ const generateReport = async () => {
   } else {
     const items = processInfo.value.process.selectedItems
     processInfo.value.result.generating = items
-    console.log('generating', processInfo.value.result.generating.length, ' reports')
+    console.log('generating', processInfo.value.result.generating.length, 'reports')
     await submitGenerate()
   }
   checkModeTab()
 }
+
+function capitalizeFirstLetter(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
+function truncateString(str: string, maxLength = 20) {
+  if (str.length > maxLength) {
+    return '...' + str.slice(-maxLength)
+  }
+  return str
+}
+
+function convertSecondsToHMS(seconds: number) {
+    seconds = seconds | 0;
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${String(hours).padStart(2, '0')}h${String(minutes).padStart(2, '0')}m${String(secs).padStart(2, '0')}s`;
+}
 </script>
 
 <style>
+.scroller {
+  --scrollbar-color-thumb: hotpink;
+  --scrollbar-color-track: blue;
+  --scrollbar-width: thin;
+  --scrollbar-width-legacy: 10px;
+}
 .table-container {
   width: 100%;
   max-height: 500px;
+  height: auto;
   overflow-y: auto;
+  overflow-x: scroll;
   border: 1px solid #ccc;
+  position: relative;
 }
 
 table {
   width: 100%;
-  border-collapse: collapse;
+  overflow-x: scroll;
 }
 
 th,
 td {
-  border: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
   padding: 5px;
   text-align: left;
-  height: 40px;
+  /* height: 40px; */
   vertical-align: middle;
   white-space: nowrap;
 }
@@ -2125,8 +2271,11 @@ td {
 }
 
 th {
-  background-color: rgba(200, 200, 200, 0.5);
+  background-color: rgba(230, 230, 230, 1);
+  position: sticky;
+  top: -1px;
 }
+
 .processContainer {
   margin-top: 1rem;
   width: 80%;
@@ -2171,9 +2320,13 @@ th {
   margin-block: 6px;
   width: 85%;
 }
-.checkboxStyle {
-  width: 15%;
-  padding-inline: 2px;
+
+.checkbox-hidden {
+  display: block;
+  width: 100%;
+}
+.checkbox-hidden .ant-checkbox {
+  display: none;
 }
 
 i {
@@ -2186,7 +2339,7 @@ i {
 }
 @media (min-width: 1024px) {
   .processContainer {
-    margin-top: 2rem;
+    margin-top: 0rem;
   }
 
   .processItem {
@@ -2201,11 +2354,6 @@ i {
     margin-block: 6px;
     width: 98%;
   }
-  .checkboxStyle {
-    width: 10%;
-    padding-inline: 2px;
-    min-width: 80px;
-  }
 }
 
 [data-theme='dark'] {
@@ -2214,6 +2362,23 @@ i {
   }
   .task-card-container {
     background-color: rgba(245, 245, 245, 0.1);
+  }
+  th {
+    background-color: rgba(120, 120, 120, 1);
+  }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(50, 50, 50, 0.3);
   }
 }
 </style>

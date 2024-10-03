@@ -28,7 +28,7 @@
         <a-tab-pane :key="tabIndex" v-for="(tabItem, tabIndex) in modalityNames">
           <template #tab>
             <i :class="iconNames[tabIndex]"></i>
-            {{ tabIndex == 4 ? 'External CSV' : tabIndex == 3 ? 'Voice' : tabItem }}
+            {{ tabIndex == 4 ? 'Others' : tabIndex == 3 ? 'Voice' : tabItem }}
           </template>
           <!-- Reports Board -->
           <div
@@ -49,7 +49,7 @@
               )"
               :key="index1"
             >
-              <a-card size="small">
+              <a-card size="small" hoverable>
                 <template #cover>
                   <i
                     class="bi bi-x-square"
@@ -69,7 +69,7 @@
                   />
                 </template>
                 <template #actions>
-                  <BarChartOutlined
+                  <FundViewOutlined
                     key="open"
                     @click="
                       openHtml(
@@ -77,6 +77,12 @@
                           (item2) => item2.id == item1.id
                         )[0]
                       )
+                    "
+                  />
+                  <InfoCircleOutlined
+                    key="info"
+                    @click="
+                      openReportInfo(item1)
                     "
                   />
                   <DownloadOutlined
@@ -101,14 +107,14 @@
                   "
                 >
                   <template #title
-                    >{{ item1.name }}
-                    <i class="bi bi-info-circle" @click="openReportInfo(item1)"></i
-                  ></template>
+                    >{{ item1.name?.toUpperCase() }}
+                    <!-- <i class="bi bi-info-circle" @click="openReportInfo(item1)"></i> -->
+                  </template>
                   <template #description>
                     <p style="margin-left: 0px">
                       {{
                         item1.num > 0
-                          ? 'Engine:' + item1.engine + ', Num:' + item1.num
+                          ? `Engine: ${item1.engine ? item1.engine.toLowerCase() : 'Default'} | Data: ${item1.num}`
                           : item1.modified.substring(5, 19)
                       }}
                     </p>
@@ -124,67 +130,77 @@
               )"
               :key="index"
             >
-              <a-card size="small">
-                <template #cover>
-                  <i
-                    class="bi bi-x-square"
-                    style="
-                      display: flex;
-                      flex-direction: row-reverse;
-                      padding: 5px;
-                      font-size: 18px;
-                    "
-                    @click="deleteReport(item)"
-                  ></i>
-                  <a-qrcode
-                    style="margin: 5px auto"
-                    error-level="H"
-                    :value="`${API.api}/scan/${item.id}/report`"
-                    icon="./src/assets/favicon.png"
-                  />
-                </template>
-                <template #actions>
-                  <BarChartOutlined
-                    key="open"
-                    @click="
-                      openHtml(
-                        resultInfo.result.generatedReports.filter((item2) => item2.id == item.id)[0]
-                      )
-                    "
-                  />
-                  <DownloadOutlined
-                    key="download"
-                    @click="
-                      downloadHtml(
-                        resultInfo.result.generatedReports.filter((item2) => item2.id == item.id)[0]
-                      )
-                    "
-                  />
-                </template>
-                <a-card-meta
-                  style="
-                    height: 46px;
-                    margin-top: -10px;
-                    margin-bottom: -10px;
-                    margin-left: -10px;
-                    text-align: center;
-                    line-height: 18px;
-                  "
-                >
-                  <template #title
-                    >{{ item.name }} <i class="bi bi-info-circle" @click="openReportInfo(item)"></i
-                  ></template>
-                  <template #description>
-                    <p style="margin-left: 0px">
-                      {{
-                        item.num > 0
-                          ? 'Engine:' + item.engine + ', Num:' + item.num
-                          : item.modified.substring(5, 19)
-                      }}
-                    </p>
+            <a-tooltip>
+              <template #title>{{ new Date(resultInfo.result.generatedReports.filter((item2) => item2.id == item.id)[0].modified).toLocaleString() }}</template>
+                <a-card size="small">
+                  <template #cover>
+                    <i
+                      class="bi bi-x-square"
+                      style="
+                        display: flex;
+                        flex-direction: row-reverse;
+                        padding: 5px;
+                        font-size: 18px;
+                      "
+                      @click="deleteReport(item)"
+                    ></i>
+                    <a-qrcode
+                      style="margin: 5px auto"
+                      error-level="H"
+                      :value="`${API.api}/scan/${item.id}/report`"
+                      icon="./src/assets/favicon.png"
+                    />
                   </template>
-                </a-card-meta>
-              </a-card>
+                  <template #actions>
+                    <FundViewOutlined
+                      key="open"
+                      @click="
+                        openHtml(
+                          resultInfo.result.generatedReports.filter((item2) => item2.id == item.id)[0]
+                        )
+                      "
+                    />
+                    <InfoCircleOutlined
+                      key="info"
+                      @click="
+                        openReportInfo(resultInfo.result.generatedReports.filter((item2) => item2.id == item.id)[0])
+                      "
+                    />
+                    <DownloadOutlined
+                      key="download"
+                      @click="
+                        downloadHtml(
+                          resultInfo.result.generatedReports.filter((item2) => item2.id == item.id)[0]
+                        )
+                      "
+                    />
+                  </template>
+                  <a-card-meta
+                    style="
+                      height: 25px;
+                      margin-top: -10px;
+                      margin-bottom: -10px;
+                      margin-left: -10px;
+                      text-align: center;
+                      line-height: 18px;
+                    "
+                  >
+                    <template #title
+                      >ID: {{ item.name?.toUpperCase() }}
+                      <!-- <i class="bi bi-info-circle" @click="openReportInfo(item)"></i> -->
+                    </template>
+                    <template #description>
+                      <p style="margin-left: 0px">
+                        {{
+                          item.num > 0
+                            ? `Engine: ${item.engine ? item.engine.toUpperCase() : 'Default'} | Data: ${item.num}`
+                            : item.modified.substring(5, 19)
+                        }}
+                      </p>
+                    </template>
+                  </a-card-meta>
+                </a-card>
+              </a-tooltip>
             </div>
             <div
               v-if="resultInfo.result.generating.length > 0"
@@ -198,14 +214,14 @@
                 <a-card size="small">
                   <template #cover>
                     <i
-                    class="bi bi-x-square"
-                    style="
-                      display: flex;
-                      flex-direction: row-reverse;
-                      padding: 5px;
-                      font-size: 18px;
-                    "
-                  ></i>
+                      class="bi bi-x-square"
+                      style="
+                        display: flex;
+                        flex-direction: row-reverse;
+                        padding: 5px;
+                        font-size: 18px;
+                      "
+                    ></i>
                     <a-qrcode
                       style="margin: 5px auto"
                       error-level="H"
@@ -218,17 +234,18 @@
                   </template>
                   <a-card-meta
                     style="
-                      height: 46px;
+                      height: 28px;
                       margin-top: -10px;
                       margin-bottom: -10px;
                       text-align: center;
                       line-height: 18px;
                     "
                   >
-                    <template #title>{{ item.name }} <i class="bi bi-info-circle"></i></template>
                     <template #description>
                       {{
-                        item.num > 0 ? 'Engine:' + item.engine + '| Num:' + item.num : item.modality
+                        item.num > 0
+                          ? `${item.engine ? item.engine : item.modality.substring(0, 6)}  | Num:${item.num}`
+                          : item.modality
                       }}</template
                     >
                   </a-card-meta>
@@ -239,7 +256,7 @@
               class="cardContainerStyle"
               v-if="
                 resultInfo.result.generatedReport.id.length > 0 &&
-                resultInfo.result.generatedReport.html.size == 0 &&
+                resultInfo.result.generatedReport.html.length == 0 &&
                 resultStatus.result == 1 &&
                 tabItem.toLowerCase() == 'generated'
               "
@@ -248,14 +265,14 @@
                 <a-card size="small">
                   <template #cover>
                     <i
-                    class="bi bi-x-square"
-                    style="
-                      display: flex;
-                      flex-direction: row-reverse;
-                      padding: 5px;
-                      font-size: 18px;
-                    "
-                  ></i>
+                      class="bi bi-x-square"
+                      style="
+                        display: flex;
+                        flex-direction: row-reverse;
+                        padding: 5px;
+                        font-size: 18px;
+                      "
+                    ></i>
                     <a-qrcode
                       style="margin: 5px auto"
                       error-level="H"
@@ -268,7 +285,7 @@
                   </template>
                   <a-card-meta
                     style="
-                      height: 46px;
+                      height: 28px;
                       margin-top: -10px;
                       margin-bottom: -10px;
                       text-align: center;
@@ -276,14 +293,9 @@
                     "
                   >
                     <template #title
-                      >{{
-                        resultInfo.result.generatedReport.id.substring(
-                          resultInfo.result.generatedReport.id.length - 4
-                        )
-                      }}
-                      <i class="bi bi-info-circle"></i
-                    ></template>
-                    <template #description> generated</template>
+                      >{{ resultInfo.result.generatedReport.id.substring(0, 5).toUpperCase() }}
+                      <i class="bi bi-info-circle"></i>
+                    </template>
                   </a-card-meta>
                 </a-card>
               </a-spin>
@@ -319,7 +331,7 @@
 <script setup lang="ts">
 import { useStatus, useInfo, useApi } from '../stores/dataStore.js'
 import { ref, computed, onMounted } from 'vue'
-import { DownloadOutlined, BarChartOutlined } from '@ant-design/icons-vue'
+import { DownloadOutlined, FundViewOutlined, InfoCircleOutlined } from '@ant-design/icons-vue'
 import { Modal, message } from 'ant-design-vue'
 import { h } from 'vue'
 import { notification } from 'ant-design-vue'
@@ -359,7 +371,7 @@ const iconNames = [
   'bi bi-soundwave',
   'bi bi-filetype-csv'
 ]
-const modalityNames = ['Face', 'Fingerprint', 'Iris', 'Speech', 'Generated']
+const modalityNames = ['Face', 'Fingerprint', 'Iris', 'Speech', '']
 //No need to handle pending Tasks, because the task will be added to datasetIds when it is done in Process interval
 
 const searchItem = ref(null)
@@ -416,7 +428,7 @@ const stopReportTask = async () => {
         })
         .then((data) => {
           openNotificationWithIcon('stop')
-          resultInfo.value.result.generatedReport = { id: '', html: new Blob() }
+          resultInfo.value.result.generatedReport = { id: '', blob: new Blob(), html: '' }
         })
         .catch((error) => {
           console.error('Error cancel task:', error)
@@ -447,11 +459,15 @@ const stopReportTask = async () => {
 
 const openReportInfo = (item) => {
   Modal.info({
-    title: h('div', { style: 'font-size:20px' }, [h('h3', 'Report Config for ' + item.name)]),
+    title: 'Report Info',
     content: h('div', {}, [
-      h('h3', 'Modified:' + item.modified.toString()),
-      h('h3', 'Downsample:' + item.downsample.toString() + '%'),
-      h('h3', 'Minimal:' + item.minimal.toString())
+      h('br'),
+      h('p', 'Generated: ' + new Date(item.modified).toLocaleString()),
+      h('p', 'Modality: ' + `${item.modality ? capitalizeFirstLetter(item.modality) : 'NA'}`),
+      h('p', 'Engine: ' + `${item.engine ? item.engine.toUpperCase() : 'NA'}`),
+      h('p', 'Data: ' + `${item.num > 0 ? item.num : 'NA'}`),
+      h('p', 'Downsample: ' + item.downsample.toString() + '%'),
+      h('p', 'Minimal: ' + item.minimal.toString())
     ]),
     closable: true,
     centered: true
@@ -499,8 +515,9 @@ const checkGeneratedReport = async () => {
     }
     const data = await response.text()
     if (!data.includes('not found')) {
-      const blob = new Blob([data], { type: 'text/html' })
-      resultInfo.value.result.generatedReport.html = blob
+      // const blob = new Blob([data], { type: 'text/html' })
+      // resultInfo.value.result.generatedReport.blob = blob
+      resultInfo.value.result.generatedReport.html = url
       await checkReportDetails(resultInfo.value.result.generatedReport)
       const index = resultInfo.value.result.generatedReports.findIndex(
         (report) => report.id === resultInfo.value.result.generatedReport.id
@@ -511,10 +528,8 @@ const checkGeneratedReport = async () => {
       } else {
         resultInfo.value.result.generatedReports[index] = resultInfo.value.result.generatedReport
       }
-      resultStatus.updateStatus('result', 2)
     }
   } catch (error) {
-    resultStatus.updateStatus('result', 1)
     console.error('Error getting task report:', error)
   }
 }
@@ -566,14 +581,13 @@ const checkReport = async (item) => {
     }
     const temp = await response.text()
     if (!temp.includes('not found')) {
-      const blob = new Blob([temp], { type: 'text/html' })
       const generated = {
         ...item,
-        name: item.id.substring(item.id.length - 4),
-        html: blob,
+        name: item.id.substring(0, 5),
+        html: url,
         minimal: false,
         downsample: 100,
-        modified: ''
+        modified: '',
       }
       await checkReportDetails(generated)
       resultInfo.value.result.generating.splice(item, 1)
@@ -593,31 +607,32 @@ const checkReport = async (item) => {
 }
 
 const checkInternalStatus = setInterval(async () => {
-  if (resultInfo.value.result.generating.length > 0) {
-    resultStatus.updateStatus('result', 1)
+  if (resultInfo.value.result.generating.length == 0) {
+    resultStatus.updateStatus('result', 2)
+    resultInfo.value.process.selectedItems = []
+    clearInterval(checkInternalStatus)
+  } else {
     for (const item of resultInfo.value.result.generating) {
+      resultStatus.updateStatus('result', 1)
       await checkReport(item)
     }
-  } else {
-    clearInterval(checkInternalStatus)
-    resultStatus.updateStatus('result', 2)
   }
-}, 5000)
+}, 3000)
 
 const checkExternalStatus = setInterval(async () => {
   if (
-    resultInfo.value.result.generatedReport.html.size == 0 &&
+    resultInfo.value.result.generatedReport.html.length == 0 &&
     resultInfo.value.result.generatedReport.id
   ) {
     resultStatus.updateStatus('result', 1)
     await checkGeneratedReport()
   } else {
     clearInterval(checkExternalStatus)
+    resultStatus.updateStatus('result', 2)
   }
-}, 5000)
+}, 3000)
 
 const fetchReport = async (item) => {
-  console.log(item.id)
   const url = `${API.api}/scan/${item.id}/report`
   const response = await API.authFetch(url, {
     method: 'GET',
@@ -628,8 +643,9 @@ const fetchReport = async (item) => {
   }
   const data = await response.text()
   if (!data.includes('{"detail":"Report of')) {
-    const blob = new Blob([data], { type: 'text/html' })
-    item.html = blob
+    // const blob = new Blob([data], { type: 'text/html' })
+    item.html = url
+    // item.blob=blob
     const index = resultInfo.value.result.generatedReports.findIndex(
       (report) => report.id === item.id
     )
@@ -642,8 +658,7 @@ const fetchReport = async (item) => {
   }
 }
 
-const initResultLoad = async (otherInfos) => {
-  // console.log(otherInfos)
+const initResultLoad = async () => {
   const url = `${API.api}/task/logs/report`
   await API.authFetch(url, {
     method: 'GET',
@@ -658,22 +673,21 @@ const initResultLoad = async (otherInfos) => {
     .then((data) => {
       data.forEach(async (item) => {
         if (item.status != 0) {
-          const otherInfo = otherInfos.filter((info) => info.collection === item.collection)[0]
           const newItem = {
             tid: item.tid,
             id: item.collection,
-            name: item.collection.substring(item.collection.length - 4),
-            modality: otherInfo ? otherInfo.options.mode : 'generated',
-            engine: otherInfo ? otherInfo.options.engine : '',
-            num: otherInfo ? otherInfo.total : 0,
-            html: '',
+            name: item.collection.substring(0, 5),
             minimal: item.options.minimal,
             downsample:
               item.options.downsample != null && item.options.downsample > 0
                 ? item.options.downsample * 100
                 : 100,
             modified: item.modified,
-            status: item.status
+            status: item.status,
+            modality: item.metadata ? item.metadata.mode : '',
+            engine: item.metadata ? item.metadata.engine : '',
+            num: item.metadata ? item.metadata.length : 0,
+            html: '',
           }
           if (item.status == 2) {
             await fetchReport(newItem)
@@ -691,82 +705,6 @@ const initResultLoad = async (otherInfos) => {
   console.log('2. get all generated reports:', resultInfo.value.result.generatedReports)
 }
 
-const initialiseTask = async () => {
-  const url = `${API.api}/task/logs/scan`
-  try {
-    const response = await API.authFetch(url, {
-      method: 'GET',
-      headers: { accept: 'application/json' }
-    })
-
-    if (!response.ok) {
-      throw new Error('Failed to get task status')
-    }
-    const data = await response.json()
-    if (data) {
-      const finishedTasks = data.filter((displayItem) => displayItem.status == 2).reverse()
-      resultInfo.value.process.taskList = finishedTasks
-      resultInfo.value.process.taskStatus = finishedTasks.map((item) => {
-        return {
-          tid: item.tid,
-          collection: item.collection,
-          name: item.collection.substring(item.collection.length - 4),
-          status: item.status,
-          percent: item.status == 2 ? 100 : Math.floor((item.finished * 100) / item.total),
-          num: item.total,
-          mode: item.options.mode,
-          engine: item.options.engine,
-          input: item.input,
-          modified: item.modified
-        }
-      })
-      if (data.filter((displayItem) => displayItem.status == 1).length > 0) {
-        const url = `${API.api}/task/metadata`
-        await API.authFetch(url, {
-          method: 'GET',
-          headers: { accept: 'application/json' }
-        })
-          .then((response) => {
-            resultStatus.updateStatus('process', 2)
-            if (!response.ok) {
-              console.log('No running task')
-            }
-            return response.json()
-          })
-          .then((data) => {
-            //Only one running item
-            if (data.type == 'scan') {
-              resultStatus.updateStatus('process', 1)
-              const runningItem = data
-              const runningItemStatus = {
-                tid: runningItem.tid,
-                collection: runningItem.collection,
-                name: runningItem.collection.substring(runningItem.collection.length - 4),
-                status: runningItem.status,
-                percent:
-                  runningItem.status == 2
-                    ? 100
-                    : Math.floor((runningItem.finished * 100) / runningItem.total),
-                num: runningItem.total,
-                mode: runningItem.options.mode,
-                engine: runningItem.options.engine,
-                input: runningItem.input,
-                modified: runningItem.modified
-              }
-              resultInfo.value.process.taskStatus.unshift(runningItemStatus)
-            }
-          })
-          .catch((error) => {
-            console.error('Error get running task:', error)
-          })
-      }
-      resultStatus.updateStatus('app', 2)
-    }
-  } catch (error) {
-    console.error('Error getting task status:', error)
-  }
-}
-
 const checkRunning = async (newItem) => {
   const url = `${API.api}/task/metadata`
   await API.authFetch(url, {
@@ -774,7 +712,7 @@ const checkRunning = async (newItem) => {
     headers: { accept: 'application/json' }
   })
     .then((response) => {
-      resultStatus.updateStatus('result', 2)
+      // console.log('=-----',response)
       if (!response.ok) {
         console.log('No running task')
       }
@@ -795,43 +733,36 @@ const checkRunning = async (newItem) => {
 //Get more need display reports on current page in every navigation
 onMounted(async () => {
   if (
-    resultInfo.value.process.taskStatus.length == 0 &&
-    resultInfo.value.process.taskList.length == 0
-  ) {
-    resultStatus.updateStatus('app', 1)
-    await initialiseTask()
-    initResultLoad(resultInfo.value.process.taskList.filter((item) => item.status == 2))
-  } else if (
     resultInfo.value.result.generatedReports.length == 0 &&
     resultInfo.value.result.generating.length == 0
   ) {
     resultStatus.updateStatus('app', 1)
-    initResultLoad(resultInfo.value.process.taskList.filter((item) => item.status == 2))
+    initResultLoad()
   }
 })
 
 //Tool to open the html file in new tab
 const openHtml = (item) => {
   // Create a URL for the blob
-  const url = URL.createObjectURL(item.html)
+  const url = item.html
 
   // Open the URL in a new window
   window.open(url, '_blank')
-
-  // Clean up the URL object after use
-  URL.revokeObjectURL(url)
 }
 
 //Tool to download the html file
-const downloadHtml = (item) => {
-  const url = URL.createObjectURL(item.html)
+const downloadHtml = async (item) => {
+  console.log('downloadHtml', item.html)
+  item.blob = await generateReportBlob(item.id)
+  const url = URL.createObjectURL(item.blob)
 
   // Create a link element
   const downloadLink = document.createElement('a')
 
   // Set the download link attributes
   downloadLink.href = url
-  downloadLink.download = item.id + '_' + item.modality + '.html'
+  // downloadLink.download = item.id + '_' + item.modality + '.html'
+  downloadLink.download = 'report.html'
 
   // Append the link to the document body (or any other element)
   document.body.appendChild(downloadLink)
@@ -844,6 +775,26 @@ const downloadHtml = (item) => {
 
   // Remove the link from the document
   downloadLink.remove()
+}
+
+const generateReportBlob = async (id) => {
+  const url = `${API.api}/scan/${id}/report`
+  const response = await API.authFetch(url, {
+    method: 'GET',
+    headers: { accept: 'text/html' }
+  })
+  if (!response.ok) {
+    console.error('Error get report')
+  }
+  const data = await response.text()
+  if (!data.includes('{"detail":"Report of')) {
+    const blob = new Blob([data], { type: 'text/html' })
+    return blob
+  }
+}
+
+function capitalizeFirstLetter(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1)
 }
 </script>
 
@@ -887,7 +838,7 @@ const downloadHtml = (item) => {
   margin: 10px;
   border-radius: 10px;
   border: solid lightgrey 0.5px;
-  height: 300px;
+  height: 280px;
   width: 20%;
   min-width: 165px;
   overflow: hidden;
@@ -905,7 +856,7 @@ i {
 
 @media (min-width: 1024px) {
   .resItem {
-    min-height: 600px;
+    min-height: 400px;
   }
 
   .res-card-container {
@@ -922,6 +873,20 @@ i {
   }
   .resItem {
     background-color: rgba(245, 245, 245, 0.1);
+  }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(50, 50, 50, 0.3);
   }
 }
 </style>
