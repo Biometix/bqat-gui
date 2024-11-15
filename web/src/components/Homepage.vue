@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import HomeItem from './HomeItem.vue'
-import { LoadingOutlined, PieChartTwoTone, HourglassTwoTone } from '@ant-design/icons-vue';
+import { LoadingOutlined, PieChartTwoTone, HourglassTwoTone, FolderOpenOutlined } from '@ant-design/icons-vue';
 import { useStatus, useInfo } from '../stores/dataStore';
 const status = useStatus();
 const info = useInfo();
@@ -8,7 +8,7 @@ const info = useInfo();
 
 <template>
 
-  <div style="margin-top: 0rem;">
+  <div class="homeContainer" >
 
   <HomeItem>
     <template #icon>
@@ -22,7 +22,7 @@ const info = useInfo();
       <span class="bi bi-upc-scan" v-else-if="status.scan == -1" style=" color: #9b2015"></span >
 
     </template>
-    <template #heading><RouterLink  class="introItem"  to="/scan">Input</RouterLink></template>
+    <template #heading><RouterLink  class="introItem"  to="/input">Input</RouterLink></template>
     <p>
       <h3>1. Import biometric samples (fingerprint, face, iris, and voice) for quality assessment</h3>
       - Import biometric samples OR select from a local folder.<br>
@@ -31,7 +31,7 @@ const info = useInfo();
 
   </HomeItem>
 
-  <HomeItem>
+  <HomeItem class="taskItem">
     <template #icon>
       <!-- normal status -->
       <HourglassTwoTone twoToneColor="#9b9b9b" v-if="status.process == 0" />
@@ -42,7 +42,7 @@ const info = useInfo();
       <!-- error status -->
       <HourglassTwoTone twoToneColor="#9b2015" v-else-if="status.process == -1" />
     </template>
-    <template #heading><RouterLink  class="introItem"  to="/task">Task</RouterLink></template>
+    <template #heading><RouterLink  class="introItem"  to="/tasks">Tasks</RouterLink></template>
     <p>
       <h3>2. Keep eyes on the task status</h3>
         - Check the status of ongoing tasks in the "Task List".<br>
@@ -71,10 +71,22 @@ const info = useInfo();
       <!-- error status -->
       <PieChartTwoTone twoToneColor="#9b2015" v-else-if="status.result == -1" />
     </template>
-    <template #heading><RouterLink  class="introItem"  to="/result">Result</RouterLink></template>
+    <template #heading><RouterLink  class="introItem"  to="/results">Results</RouterLink></template>
     <p>
       <h3>5. Generate EDA quality report</h3>
       - Produce an Exploratory Data Analysis (EDA) report using the output quality metrics.
+    </p>
+  </HomeItem>
+
+  <HomeItem>
+    <template #icon>
+      <!-- normal status -->
+      <FolderOpenOutlined twoToneColor= "#9b9b9b" />
+    </template>
+    <template #heading><RouterLink  class="introItem"  to="/files">Files</RouterLink></template>
+    <p>
+      <h3>6. View your dataset</h3>
+      - You can upload / view / delete your dataset.
     </p>
   </HomeItem>
 </div>
@@ -89,6 +101,10 @@ const info = useInfo();
   }
 
 }
+.taskItem{
+  /* height:35vh */
+  height: fit-content
+}
 .introItem {
   text-decoration: none;
   font-weight: 500;
@@ -101,4 +117,9 @@ const info = useInfo();
     border-radius: 5px;
     padding: 5px 10px;
   }
+.homeContainer{
+  margin-top: 2rem;
+  /* min-height: calc(100vh-200px); */
+
+}
 </style>

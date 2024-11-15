@@ -84,7 +84,7 @@ def check_upload(files):
 
 
 def check_version():
-    r = requests.get(f"http://{BQAT_API}/scan/info")
+    r = requests.get(f"http://{BQAT_API}/info")
     if r.status_code == 200:
         return r.json()["version"]
     else:

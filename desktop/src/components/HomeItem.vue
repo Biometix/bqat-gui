@@ -14,15 +14,17 @@
 
 <style scoped>
 .item {
-  margin-top: 3rem;
-  /* margin-left: 3rem; */
   display: flex;
   position: relative;
+  padding-bottom: 2vh;
+  /* height:15vh; */
 }
 
 .details {
   flex: 1;
   margin-left: 2rem;
+  align-content: top;
+  /* height:fit-content */
 }
 
 i {
@@ -44,14 +46,15 @@ h2 {
 
 @media (min-width: 1024px) {
   .item {
-    margin-top: 0rem;
-    /* background-color: red; */
-    padding: 0.5rem 0 1.5rem calc(var(--section-gap) / 2);
+    padding: 0.5rem 0 0.5rem calc(var(--section-gap) / 2);
+    /* height:30vh */
+    padding-bottom: 2vh;
   }
   .details {
     flex: 1;
     margin-left: 3rem;
     padding-inline: calc(var(--section-gap) / 2);
+    align-content: center
   }
 
   i {
