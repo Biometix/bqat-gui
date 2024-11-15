@@ -122,7 +122,10 @@
               size="large"
               type="primary"
               :loading="outlierInfo.outlier.iconLoading"
-              :disabled="outlierInfo.process.selectedItems.length !== 1 || outlierInfo.outlier.columns.length == 0"
+              :disabled="
+                outlierInfo.process.selectedItems.length !== 1 ||
+                outlierInfo.outlier.columns.length == 0
+              "
               @click="getOutlier"
             >
               <i v-if="eta > 0">ETA: {{ eta }} s</i>
@@ -381,116 +384,116 @@ const columnSelect = ref<CascaderProps['options']>([
       },
 
       {
-        label: 'unified_quality_score.scalar',
-        value: 'unified_quality_score.scalar'
+        label: 'unified_quality_score_scalar',
+        value: 'unified_quality_score_scalar'
       },
       {
-        label: 'background_uniformity.scalar',
-        value: 'background_uniformity.scalar'
+        label: 'background_uniformity_scalar',
+        value: 'background_uniformity_scalar'
       },
       {
-        label: 'illumination_uniformity.scalar',
-        value: 'illumination_uniformity.scalar'
+        label: 'illumination_uniformity_scalar',
+        value: 'illumination_uniformity_scalar'
       },
       {
-        label: 'luminance_mean.scalar',
-        value: 'luminance_mean.scalar'
+        label: 'luminance_mean_scalar',
+        value: 'luminance_mean_scalar'
       },
       {
-        label: 'luminance_variance.scalar',
-        value: 'luminance_variance.scalar'
+        label: 'luminance_variance_scalar',
+        value: 'luminance_variance_scalar'
       },
       {
-        label: 'under_exposure_prevention.scalar',
-        value: 'under_exposure_prevention.scalar'
+        label: 'under_exposure_prevention_scalar',
+        value: 'under_exposure_prevention_scalar'
       },
       {
-        label: 'over_exposure_prevention.scalar',
-        value: 'over_exposure_prevention.scalar'
+        label: 'over_exposure_prevention_scalar',
+        value: 'over_exposure_prevention_scalar'
       },
       {
-        label: 'dynamic_range.scalar',
-        value: 'dynamic_range.scalar'
+        label: 'dynamic_range_scalar',
+        value: 'dynamic_range_scalar'
       },
       {
-        label: 'sharpness.scalar',
-        value: 'sharpness.scalar'
+        label: 'sharpness_scalar',
+        value: 'sharpness_scalar'
       },
       {
-        label: 'compression_artifacts.scalar',
-        value: 'compression_artifacts.scalar'
+        label: 'compression_artifacts_scalar',
+        value: 'compression_artifacts_scalar'
       },
       {
-        label: 'natural_colour.scalar',
-        value: 'natural_colour.scalar'
+        label: 'natural_colour_scalar',
+        value: 'natural_colour_scalar'
       },
       {
-        label: 'single_face_present.scalar',
-        value: 'single_face_present.scalar'
+        label: 'single_face_present_scalar',
+        value: 'single_face_present_scalar'
       },
       {
-        label: 'eyes_open.scalar',
-        value: 'eyes_open.scalar'
+        label: 'eyes_open_scalar',
+        value: 'eyes_open_scalar'
       },
       {
-        label: 'mouth_closed.scalar',
-        value: 'mouth_closed.scalar'
+        label: 'mouth_closed_scalar',
+        value: 'mouth_closed_scalar'
       },
       {
-        label: 'eyes_visible.scalar',
-        value: 'eyes_visible.scalar'
+        label: 'eyes_visible_scalar',
+        value: 'eyes_visible_scalar'
       },
       {
-        label: 'mouth_occlusion_prevention.scalar',
-        value: 'mouth_occlusion_prevention.scalar'
+        label: 'mouth_occlusion_prevention_scalar',
+        value: 'mouth_occlusion_prevention_scalar'
       },
       {
-        label: 'face_occlusion_prevention.scalar',
-        value: 'face_occlusion_prevention.scalar'
+        label: 'face_occlusion_prevention_scalar',
+        value: 'face_occlusion_prevention_scalar'
       },
       {
-        label: 'inter_eye_distance.scalar',
-        value: 'inter_eye_distance.scalar'
+        label: 'inter_eye_distance_scalar',
+        value: 'inter_eye_distance_scalar'
       },
       {
-        label: 'head_size.scalar',
-        value: 'head_size.scalar'
+        label: 'head_size_scalar',
+        value: 'head_size_scalar'
       },
       {
-        label: 'leftward_crop_of_the_face_image.scalar',
-        value: 'leftward_crop_of_the_face_image.scalar'
+        label: 'leftward_crop_of_the_face_image_scalar',
+        value: 'leftward_crop_of_the_face_image_scalar'
       },
       {
-        label: 'rightward_crop_of_the_face_image.scalar',
-        value: 'rightward_crop_of_the_face_image.scalar'
+        label: 'rightward_crop_of_the_face_image_scalar',
+        value: 'rightward_crop_of_the_face_image_scalar'
       },
       {
-        label: 'downward_crop_of_the_face_image.scalar',
-        value: 'downward_crop_of_the_face_image.scalar'
+        label: 'downward_crop_of_the_face_image_scalar',
+        value: 'downward_crop_of_the_face_image_scalar'
       },
       {
-        label: 'upward_crop_of_the_face_image.scalar',
-        value: 'upward_crop_of_the_face_image.scalar'
+        label: 'upward_crop_of_the_face_image_scalar',
+        value: 'upward_crop_of_the_face_image_scalar'
       },
       {
-        label: 'head_pose_yaw.scalar',
-        value: 'head_pose_yaw.scalar'
+        label: 'head_pose_yaw_scalar',
+        value: 'head_pose_yaw_scalar'
       },
       {
-        label: 'head_pose_pitch.scalar',
-        value: 'head_pose_pitch.scalar'
+        label: 'head_pose_pitch_scalar',
+        value: 'head_pose_pitch_scalar'
       },
       {
-        label: 'head_pose_roll.scalar',
-        value: 'head_pose_roll.scalar'
+        label: 'head_pose_roll_scalar',
+        value: 'head_pose_roll_scalar'
       },
       {
-        label: 'expression_neutrality.scalar',
-        value: 'expression_neutrality.scalar'
+        label: 'expression_neutrality_scalar',
+        value: 'expression_neutrality_scalar'
       },
       {
-        label: 'no_head_coverings.scalar',
-        value: 'no_head_coverings.scalar'
+        label: 'no_head_coverings_scalar',
+        value: 'no_head_coverings_scalar'
       }
     ]
   },
@@ -785,7 +788,7 @@ const clearTask = async () => {
     })
 }
 // const clearTask = async () => {
-//   const url = `${API.api}/task/metadata`
+//   const url = `${API.api}/task/pending`
 //   try {
 //     const response = await fetch(url, {
 //       method: 'GET',
@@ -828,6 +831,7 @@ const clearTask = async () => {
 
 // const iconLoading = ref<boolean>(false);
 const getOutlier = async () => {
+  outlierLength.value = 0
   let optionColumns =
     outlierInfo.value.outlier.columns.length > 0
       ? outlierInfo.value.outlier.columns.map((item) => {
@@ -875,34 +879,34 @@ const getOutlier = async () => {
           'expression_neutrality',
           'no_head_coverings',
           'unified_quality_score',
-          'unified_quality_score.scalar',
-          'background_uniformity.scalar',
-          'illumination_uniformity.scalar',
-          'luminance_mean.scalar',
-          'luminance_variance.scalar',
-          'under_exposure_prevention.scalar',
-          'over_exposure_prevention.scalar',
-          'dynamic_range.scalar',
-          'sharpness.scalar',
-          'compression_artifacts.scalar',
-          'natural_colour.scalar',
-          'single_face_present.scalar',
-          'eyes_open.scalar',
-          'mouth_closed.scalar',
-          'eyes_visible.scalar',
-          'mouth_occlusion_prevention.scalar',
-          'face_occlusion_prevention.scalar',
-          'inter_eye_distance.scalar',
-          'head_size.scalar',
-          'leftward_crop_of_the_face_image.scalar',
-          'rightward_crop_of_the_face_image.scalar',
-          'downward_crop_of_the_face_image.scalar',
-          'upward_crop_of_the_face_image.scalar',
-          'head_pose_yaw.scalar',
-          'head_pose_pitch.scalar',
-          'head_pose_roll.scalar',
-          'expression_neutrality.scalar',
-          'no_head_coverings.scalar'
+          'unified_quality_score_scalar',
+          'background_uniformity_scalar',
+          'illumination_uniformity_scalar',
+          'luminance_mean_scalar',
+          'luminance_variance_scalar',
+          'under_exposure_prevention_scalar',
+          'over_exposure_prevention_scalar',
+          'dynamic_range_scalar',
+          'sharpness_scalar',
+          'compression_artifacts_scalar',
+          'natural_colour_scalar',
+          'single_face_present_scalar',
+          'eyes_open_scalar',
+          'mouth_closed_scalar',
+          'eyes_visible_scalar',
+          'mouth_occlusion_prevention_scalar',
+          'face_occlusion_prevention_scalar',
+          'inter_eye_distance_scalar',
+          'head_size_scalar',
+          'leftward_crop_of_the_face_image_scalar',
+          'rightward_crop_of_the_face_image_scalar',
+          'downward_crop_of_the_face_image_scalar',
+          'upward_crop_of_the_face_image_scalar',
+          'head_pose_yaw_scalar',
+          'head_pose_pitch_scalar',
+          'head_pose_roll_scalar',
+          'expression_neutrality_scalar',
+          'no_head_coverings_scalar'
         ]
       }
       if (options.includes('BIQT')) {
@@ -1162,7 +1166,7 @@ const clearOutlier = () => {
 }
 
 @media (min-width: 1024px) {
-  .outlierContainer{
+  .outlierContainer {
     margin-top: 2rem;
   }
 }

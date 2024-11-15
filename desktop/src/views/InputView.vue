@@ -32,6 +32,7 @@
                       :action="API.api + '/dataset'"
                       :withCredentials="true"
                       @change="uploadZip"
+                      @drop="dropZip"
                       >Select zip file (Click or Drag here)</a-upload-dragger
                     >
                   </a-flex>
@@ -65,11 +66,11 @@
               <a-button size="large" @click="handleGoToFolder(scanInfo.scan.folderPath)"
                 ><i class="bi bi-aspect-ratio" style="margin-right: 5px"></i> View</a-button
               >
-              <a-tooltip title="Refresh Input Directory">
+              <a-tooltip title="Larger dataset may take longer time to refresh)">
                 <a-button shape="circle" style="margin-inline: 10px">
                   <span
                     class="bi bi-arrow-clockwise"
-                    style="font-size: 15px"
+                    style="font-size: 16px; margin-top: -2px"
                     @click="refreshDirectory"
                   ></span>
                 </a-button>
@@ -134,105 +135,133 @@
           </a-card>
 
           <a-card hoverable>
+            <h3>
+              Input file count: <span style="font-weight: bold">{{ scanInfo.scan.length }}</span>
+              <a-button
+                v-if="scanInfo.scan.tabKey == 1"
+                shape="circle"
+                style="margin-inline: 10px"
+                @click="refreshMetadata"
+              >
+                <div v-if="requestFolderMeta">
+                  <SyncOutlined style="font-size: 15px" spin />
+                </div>
+                <div v-else>
+                  <ReloadOutlined style="font-size: 14px" />
+                </div>
+              </a-button>
+            </h3>
+          </a-card>
+
+          <a-card hoverable>
             <!-- Preprocess Image Section -->
             <a-collapse :bordered="false" style="padding: 5px">
               <!-- upload section -->
               <a-collapse-panel header="Preprocess" class="customStyle1">
                 <!-- Resize Section -->
-                <a-card hoverable style="margin-bottom: 20px">
-                  <a-flex vertical gap="middle">
-                    <h2 style="margin-bottom: 10px">
-                      <span class="bi bi-aspect-ratio"></span> Resize Images:
-                    </h2>
-                    <a-flex align="left" gap="large" class="resizeStyle">
-                      <a-row>
-                        <a-radio
-                          size="large"
-                          @click="updateSelect('ratio')"
-                          :checked="preprocessInfo.preprocess.selectedRadio == 'ratio'"
-                          style="font-size: 18px; align-self: center"
-                          >Rescale:</a-radio
-                        >
-                        <a-input-number
-                          style="width: 65%"
-                          size="large"
-                          v-model:value="preprocessInfo.preprocess.ratio"
-                          addon-before="Ratio:"
-                          addon-after="%"
-                        ></a-input-number>
-                      </a-row>
-                      <a-row>
-                        <a-radio
-                          size="large"
-                          style="font-size: 18px; margin-left: 5px; align-self: center"
-                          @click="updateSelect('size')"
-                          :checked="preprocessInfo.preprocess.selectedRadio == 'size'"
-                          >Resize:
-                        </a-radio>
-                        <a-input-number
-                          style="width: 73%"
-                          size="large"
-                          v-model:value="preprocessInfo.preprocess.size"
-                          addon-before="Width (maintain aspect ratio):"
-                          addon-after="px"
-                        ></a-input-number>
-                      </a-row>
+                <a-spin
+                  size="large"
+                  :indicator="indicator"
+                  :spinning="scanStatus.preprocess == 1"
+                  tip="Task is running..."
+                >
+                  <a-card hoverable style="margin-bottom: 20px">
+                    <a-flex vertical gap="middle">
+                      <h2 style="margin-bottom: 10px">
+                        <span class="bi bi-aspect-ratio"></span> Resize Images:
+                      </h2>
+                      <a-flex align="left" gap="large" class="resizeStyle">
+                        <a-row>
+                          <a-radio
+                            size="large"
+                            @click="updateSelect('ratio')"
+                            :checked="preprocessInfo.preprocess.selectedRadio == 'ratio'"
+                            style="font-size: 18px; align-self: center"
+                            >Rescale:</a-radio
+                          >
+                          <a-input-number
+                            style="width: 65%"
+                            size="large"
+                            v-model:value="preprocessInfo.preprocess.ratio"
+                            addon-before="Ratio:"
+                            addon-after="%"
+                          ></a-input-number>
+                        </a-row>
+                        <a-row>
+                          <a-radio
+                            size="large"
+                            style="font-size: 18px; margin-left: 5px; align-self: center"
+                            @click="updateSelect('size')"
+                            :checked="preprocessInfo.preprocess.selectedRadio == 'size'"
+                            >Resize:
+                          </a-radio>
+                          <a-input-number
+                            style="width: 73%"
+                            size="large"
+                            v-model:value="preprocessInfo.preprocess.size"
+                            addon-before="Width (maintain aspect ratio):"
+                            addon-after="px"
+                          ></a-input-number>
+                        </a-row>
+                      </a-flex>
                     </a-flex>
-                  </a-flex>
-                </a-card>
+                  </a-card>
 
-                <!-- Output Format Section -->
-                <a-card hoverable>
-                  <a-flex vertical gap="middle">
-                    <h2 style="margin-block: 10px">
-                      <span class="bi bi-transparency"></span> Configure Output:
-                    </h2>
-                    <h3>Colour space:</h3>
-                    <a-flex align="center" gap="large">
-                      <a-radio-group
-                        v-model:value="preprocessInfo.preprocess.color"
-                        style="
-                          width: 100%;
-                          display: flex;
-                          flex-direction: row;
-                          flex-wrap: wrap;
-                          justify-content: space-around;
-                        "
-                      >
-                        <a-radio value="Grayscale" size="large" style="font-size: 18px"
-                          >Grayscale</a-radio
+                  <!-- Output Format Section -->
+                  <a-card hoverable>
+                    <a-flex vertical gap="middle">
+                      <h2 style="margin-block: 10px">
+                        <span class="bi bi-transparency"></span> Configure Output:
+                      </h2>
+                      <h3>Colour space:</h3>
+                      <a-flex align="center" gap="large">
+                        <a-radio-group
+                          v-model:value="preprocessInfo.preprocess.color"
+                          style="
+                            width: 100%;
+                            display: flex;
+                            flex-direction: row;
+                            flex-wrap: wrap;
+                            justify-content: space-around;
+                          "
                         >
-                        <a-radio value="RGB" size="large" style="font-size: 18px">RGB</a-radio>
-                        <a-radio value="BW" size="large" style="font-size: 18px">BW</a-radio>
-                        <a-radio value="HSV" size="large" style="font-size: 18px">HSV</a-radio>
-                        <a-radio value="RGBA" size="large" style="font-size: 18px">RGBA</a-radio>
-                        <a-radio value="CMYK" size="large" style="font-size: 18px">CMYK</a-radio>
-                        <a-radio value="YCbCr" size="large" style="font-size: 18px">YCbCr</a-radio>
-                      </a-radio-group>
+                          <a-radio value="Grayscale" size="large" style="font-size: 18px"
+                            >Grayscale</a-radio
+                          >
+                          <a-radio value="RGB" size="large" style="font-size: 18px">RGB</a-radio>
+                          <a-radio value="BW" size="large" style="font-size: 18px">BW</a-radio>
+                          <a-radio value="HSV" size="large" style="font-size: 18px">HSV</a-radio>
+                          <a-radio value="RGBA" size="large" style="font-size: 18px">RGBA</a-radio>
+                          <a-radio value="CMYK" size="large" style="font-size: 18px">CMYK</a-radio>
+                          <a-radio value="YCbCr" size="large" style="font-size: 18px"
+                            >YCbCr</a-radio
+                          >
+                        </a-radio-group>
+                      </a-flex>
+                      <br />
+                      <h3>File format:</h3>
+                      <a-flex align="center" gap="large">
+                        <a-select
+                          style="width: 100%"
+                          size="large"
+                          v-model:value="preprocessInfo.preprocess.type"
+                          :options="
+                            typeOptions.filter((item) => {
+                              return item.label != 'WAV'
+                            })
+                          "
+                        >
+                        </a-select>
+                      </a-flex>
                     </a-flex>
-                    <br />
-                    <h3>File format:</h3>
-                    <a-flex align="center" gap="large">
-                      <a-select
-                        style="width: 100%"
-                        size="large"
-                        v-model:value="preprocessInfo.preprocess.type"
-                        :options="
-                          typeOptions.filter((item) => {
-                            return item.label != 'WAV'
-                          })
-                        "
-                      >
-                      </a-select>
-                    </a-flex>
-                  </a-flex>
-                </a-card>
-
+                  </a-card>
+                </a-spin>
                 <!-- Submit Section -->
-                <a-row justify="center" gutter="40" style="margin-block: 2rem">
+                <a-row justify="center" gutter="40" style="margin-block: 0rem; margin-top: 1rem">
                   <a-col :span="12">
                     <a-button
-                      :disabled="!preprocessInfo.preprocess.loading"
+                      :loading="submittedStop"
+                      :disabled="!preprocessInfo.preprocess.progress"
                       style="width: 100%; padding: 0"
                       size="large"
                       type="primary"
@@ -240,10 +269,11 @@
                       @click="clearTask"
                     >
                       <span
+                        v-if="!submittedStop"
                         class="bi bi-stop-circle"
                         style="font-size: 18px; margin-inline: 5px"
                       ></span>
-                      Stop
+                      Cancel
                     </a-button>
                   </a-col>
                   <a-col :span="12">
@@ -252,19 +282,23 @@
                       size="large"
                       type="primary"
                       @click="submitPreprocess"
-                      :loading="preprocessInfo.preprocess.loading"
-                      :disabled="preprocessInfo.preprocess.length == 0"
+                      :loading="preprocessInfo.preprocess.progress"
+                      :disabled="!preprocessInfo.scan.folderPath"
                     >
                       <span v-if="eta > 0">ETA: {{ eta }} s</span>
-                      <span
-                        v-else
-                        class="bi bi-play"
-                        style="font-style: normal; margin-inline: 5px"
-                      ></span>
-                      Start
+
+                      <span v-else>
+                        <span
+                          v-if="!preprocessInfo.preprocess.progress"
+                          class="bi bi-play"
+                          style="font-style: normal; margin-inline: 5px"
+                        ></span
+                        >Convert</span
+                      >
                     </a-button></a-col
                   >
                 </a-row>
+
                 <!-- Result section -->
                 <a-alert
                   v-if="outputPath"
@@ -284,12 +318,6 @@
             </a-collapse>
           </a-card>
 
-          <a-card hoverable>
-            <h3>
-              Input file count: <span style="font-weight: bold">{{ scanInfo.scan.length }}</span>
-            </h3>
-          </a-card>
-
           <!-- Modality section  -->
           <a-card hoverable>
             <a-flex gap="middle" vertical>
@@ -297,12 +325,11 @@
                 <span class="bi bi-check2-square"></span> Select Biometircs Modality / Engine:
               </h2>
 
-              <a-cascader
-                popupClassName="popupClass"
+              <a-select
                 style="width: 100%; margin-block: 10px"
                 v-model:value="scanInfo.scan.modality"
-                change-on-select
-                :allowClear="false"
+                mode="multiple"
+                :allowClear="true"
                 placeholder="Please select"
                 size="large"
                 :options="cascadeModalityOptions"
@@ -312,16 +339,26 @@
           </a-card>
 
           <!-- Submit section  -->
-          <a-row justify="center" style="margin-block: 2rem">
+          <a-row justify="center" style="margin-block: 0rem; margin-bottom: 2rem">
             <a-button
               style="width: 100%"
               type="primary"
               size="large"
               @click="submitScan2"
-              :loading="scanInfo.process.taskStatus.filter((item) => item.status != 2).length > 0"
-              :disabled="scanStatus.process == 1 || scanInfo.scan.length == 0"
+              :loading="scanStatus.process == 1 || submittedScan"
+              :disabled="
+                scanStatus.process == 1 ||
+                scanStatus.preprocess == 1 ||
+                scanInfo.scan.length == 0 ||
+                submittedScan ||
+                scanInfo.scan.modality.length == 0
+              "
             >
-              <span class="bi bi-play" style="font-style: normal; margin-inline: 5px"></span>
+              <span
+                v-if="scanStatus.process != 1 && !submittedScan"
+                class="bi bi-play"
+                style="font-style: normal; margin-inline: 5px"
+              ></span>
               Start Task</a-button
             >
           </a-row>
@@ -350,6 +387,7 @@
                     style="margin-top: 20px"
                     directory
                     @change="handleChange"
+                    @drop="handleDrop"
                     :before-upload="beforeUpload"
                     :disabled="scanInfo.scan.disableUploader || scanInfo.scan.inputType.length == 0"
                     :showUploadList="false"
@@ -404,6 +442,13 @@
             </a-flex>
           </a-card>
 
+          <a-card hoverable>
+            <h3>
+              Input file count:
+              <span style="font-weight: bold">{{ scanInfo.scan.validFileList.length }}</span>
+            </h3>
+          </a-card>
+
           <!-- Preview Section -->
           <a-card hoverable>
             <a-flex vertical gap="middle">
@@ -423,7 +468,12 @@
               </h3>
 
               <a-collapse v-model:activeKey="scanInfo.scan.activeKeys" :bordered="false">
-                <a-collapse-panel :key="4" header="Preview" class="customStyle1" @scroll="handleScroll">
+                <a-collapse-panel
+                  :key="4"
+                  header="Preview"
+                  class="customStyle1"
+                  @scroll="handleScroll"
+                >
                   <div class="emptyPreview" v-if="scanInfo.scan.validFileList.length == 0">
                     <a-empty />
                   </div>
@@ -482,7 +532,7 @@
                       v-for="(item1, index1) in scanInfo.scan.validFileList"
                       :style="previewStyle"
                       :key="index1"
-                      style="margin: 5px; "
+                      style="margin: 5px"
                       class="hover-zoom"
                     >
                       <template #cover>
@@ -503,7 +553,10 @@
                               :alt="'🖼️' + item1.name"
                             />
                           </div>
-                          <div v-else-if="item1.type.includes('audio')" style="background-color: white;">
+                          <div
+                            v-else-if="item1.type.includes('audio')"
+                            style="background-color: white"
+                          >
                             <vue-sound
                               :show-download="false"
                               :file="fileUrl(item1.originFileObj)"
@@ -529,25 +582,17 @@
             </a-flex>
           </a-card>
 
-          <a-card hoverable>
-            <h3>
-              Input file count:
-              <span style="font-weight: bold">{{ scanInfo.scan.validFileList.length }}</span>
-            </h3>
-          </a-card>
-
           <!-- Modality Section  -->
           <a-card hoverable>
             <a-flex vertical gap="middle">
               <h2 style="margin-bottom: 10px">
                 <span class="bi bi-check2-square"></span> Select Biometrics Modality / Engine:
               </h2>
-              <a-cascader
-                popupClassName="popupClass"
-                style="width: 100%; margin-block: 0px"
+              <a-select
+                style="width: 100%; margin-block: 10px"
                 v-model:value="scanInfo.scan.modality"
-                change-on-select
-                :allowClear="false"
+                mode="multiple"
+                :allowClear="true"
                 placeholder="Please select"
                 size="large"
                 :options="cascadeModalityOptions"
@@ -563,8 +608,13 @@
               type="primary"
               size="large"
               @click="submitScan1"
-              :loading="scanInfo.process.taskStatus.filter((item) => item.status != 2).length > 0"
-              :disabled="scanStatus.process == 1 || scanInfo.scan.validFileList.length == 0"
+              :loading="scanStatus.process == 1 || submittedScan"
+              :disabled="
+                scanStatus.process == 1 ||
+                scanInfo.scan.validFileList.length == 0 ||
+                submittedScan ||
+                scanInfo.scan.modality.length == 0
+              "
             >
               <span class="bi bi-play" style="font-style: normal; margin-inline: 5px"></span>
               Start Task</a-button
@@ -580,15 +630,21 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useStatus, useInfo, useApi } from '../stores/dataStore.js'
 import { InboxOutlined } from '@ant-design/icons-vue'
-import { message } from 'ant-design-vue'
+import { message, Cascader } from 'ant-design-vue'
 import type { UploadChangeParam, UploadProps } from 'ant-design-vue'
 import { onBeforeRouteLeave, useRouter } from 'vue-router'
 import type { CascaderProps } from 'ant-design-vue'
 import { h } from 'vue'
-import { SyncOutlined, CheckCircleTwoTone, CloseCircleTwoTone } from '@ant-design/icons-vue'
+import {
+  SyncOutlined,
+  CheckCircleTwoTone,
+  CloseCircleTwoTone,
+  ReloadOutlined
+} from '@ant-design/icons-vue'
 import mime from 'mime'
 import { notification } from 'ant-design-vue'
 import { VueSound } from 'vue-sound'
+import { getFusionCode, parseFusionCode } from '../components/utils.ts'
 
 const openNotificationWithIcon = (type: string) => {
   if (type === 'stop') {
@@ -621,6 +677,12 @@ const openNotificationWithIcon = (type: string) => {
       description: 'Reload input directory successful.',
       placement: 'top'
     })
+  } else if (type === 'notZip') {
+    notification['error']({
+      message: 'Dropped File Is Not Zip Folder',
+      description: 'Please select Zip folder.',
+      placement: 'top'
+    })
   }
 }
 let checkInternalStatus = null
@@ -642,6 +704,7 @@ const scanInfo = ref(useInfo())
 const router = useRouter()
 const showError = ref(false)
 const errorMessage = ref('')
+const submittedScan = ref(false)
 
 const indicator = h(SyncOutlined, {
   style: {
@@ -689,18 +752,17 @@ const mimeTypeToFormat = {
   'image/jpeg': 'JPEG',
   'image/jpg': 'JPG',
   jp2: 'JP2',
+  'image/jp2': 'JP2',
   wsq: 'WSQ',
+  'image/wsq': 'JP2',
   'image/bmp': 'BMP',
   'audio/x-wav': 'WAV',
   'audio/wav': 'WAV'
 }
+
+const typeInvalid = ref(false)
 const tip = computed(() => {
-  if (
-    scanStatus.result == 1 ||
-    scanStatus.process == 1 ||
-    scanStatus.preprocess == 1 ||
-    scanStatus.outlier == 1
-  ) {
+  if (scanStatus.result == 1 || scanStatus.process == 1 || scanStatus.outlier == 1) {
     return 'Task is running...'
   } else {
     return false
@@ -717,50 +779,76 @@ const displayedFiles = ref(
 )
 const loadedFiles = ref(100)
 
+const multiple = ref(false)
 const cascadeModalityOptions = ref<CascaderProps['options']>([
   {
-    value: 'Face',
-    label: 'Face',
-    children: [
-      {
-        value: 'BQAT',
-        label: 'BQAT'
-      },
-      {
-        value: 'OFIQ-file',
-        label: 'OFIQ'
-      },
-      // {
-      //   value: 'OFIQ',
-      //   label: 'OFIQ  (folder)'
-      // },
-      {
-        value: 'BIQT',
-        label: 'BIQT'
-      }
-    ]
+    disabled: false,
+    value: 'face-bqat',
+    label: 'Face (BQAT)'
   },
   {
-    value: 'Fingerprint',
+    disabled: false,
+    value: 'face-ofiq',
+    label: 'Face (OFIQ)'
+  },
+  {
+    disabled: false,
+    value: 'face-biqt',
+    label: 'Face (BIQT)'
+  },
+  {
+    disabled: true,
+    value: 'fingerprint',
     label: 'Fingerprint'
   },
   {
-    value: 'Iris',
+    disabled: true,
+    value: 'iris',
     label: 'Iris'
   },
   {
-    value: 'Speech',
+    disabled: true,
+    value: 'speech',
     label: 'Voice'
   }
 ])
 
-const updateModality = () => {
-  scanInfo.value.outlier.columns = [scanInfo.value.scan.modality[0]]
-  scanInfo.value.scan.type = []
+const updateModality = (selectedValues) => {
+  const faceType =
+    selectedValues.filter((item) => item.includes('face')).length > 0 ? true : false
+  // console.log(selectedValues, faceType)
+  if (faceType) {
+    console.log('select face engines')
+    cascadeModalityOptions.value.filter((item) =>
+      item.value.toString().includes('face') ? (item.disabled = false) : (item.disabled = true)
+    )
+  } else {
+    console.log('select other engines')
+    cascadeModalityOptions.value.filter((item) => (item.disabled = false))
+    if (selectedValues.length > 0) {
+      console.log(cascadeModalityOptions.value)
+      cascadeModalityOptions.value.map((item) =>
+        item.value !== selectedValues[0] ? (item.disabled = true) : (item.disabled = false)
+      )
+    }
+  }
+  scanInfo.value.scan.modality = selectedValues
 }
-const handleGoToFolder = (item) => {
+const handleGoToFolder = async (item) => {
   const linkToFolder = API.api + '/warehouse/' + item + '/'
   window.open(linkToFolder, '_blank')
+  // const linkToFolder = `${API.api}/warehouse/${item}/`
+  // const response = await API.authFetch(linkToFolder, {
+  //   method: 'GET',
+  // })
+
+  // const resultHTML = await response.text()
+  //     // Create a new Blob with the HTML content
+  //     const blob = new Blob([resultHTML], { type: 'text/html' });
+  //   const blobUrl = URL.createObjectURL(blob); // Create a URL for the Blob
+
+  //   // Open the Blob URL in a new tab
+  //   window.open(blobUrl, '_blank');
 }
 
 //Note: do not claim two value in one const
@@ -780,46 +868,63 @@ const handleFiles = (event) => {
 
 const loadInputFolder = ref(true)
 const requestFolder = ref(false)
+const requestFolderMeta = ref(false)
+
+const checkInputFolderMetaData = async () => {
+  requestFolderMeta.value = true
+  const exts = scanInfo.value.scan.inputType.map((ext) => `exts=${ext.toLowerCase()}`).join('&')
+  const pattern = scanInfo.value.scan.name ? `&pattern=${scanInfo.value.scan.name}` : ''
+  const path = scanInfo.value.scan.folderPath ? `&path=${scanInfo.value.scan.folderPath}` : ''
+  const url = `${API.api}/task/inputs/metadata?${exts}${pattern}${path}`
+
+  try {
+    const data = await API.authFetch(url, {
+      method: 'GET'
+    })
+    if (data) {
+      console.log('total num of folder', data)
+      scanInfo.value.scan.length = data.count
+    }
+    requestFolderMeta.value = false
+  } catch (error) {
+    console.error('the API can not be reach', error)
+    requestFolderMeta.value = false
+  }
+}
 
 const checkInputFolder = async () => {
   requestFolder.value = true
-  const exts = scanInfo.value.scan.inputType.map((ext) => `exts=${ext.toLowerCase()}`).join('&')
-  const pattern = scanInfo.value.scan.name ? `&pattern=${scanInfo.value.scan.name}` : ''
-  const myRequest = new Request(`${API.api}/task/inputs?${exts}${pattern}`, {
-    method: 'GET'
-  })
-  await API.authFetch(myRequest)
-    .then((response) => {
-      if (!response.ok) {
-        loadInputFolder.value = false
-        requestFolder.value = false
-        throw new Error('Mounted folder is not exist')
-      }
-      return response.json()
+  // const exts = scanInfo.value.scan.inputType.map((ext) => `exts=${ext.toLowerCase()}`).join('&')
+  // const pattern = scanInfo.value.scan.name ? `&pattern=${scanInfo.value.scan.name}` : ''
+  try {
+    const data = await API.authFetch(`${API.api}/task/inputs/folders`, {
+      method: 'GET'
     })
-    .then((data) => {
-      if (data) {
-        loadInputFolder.value = true
-        requestFolder.value = false
-        API.updateInputFolder(data)
-        API.updateInputTree(data)
-      }
-    })
-    .catch((error) => {
-      loadInputFolder.value = false
+
+    if (data) {
+      // console.log(data)
+      loadInputFolder.value = true
       requestFolder.value = false
-      console.error('the API can not be reach', error)
-    })
+      API.updateInputFolder(data)
+      API.updateInputTree(data)
+    }
+  } catch (error) {
+    loadInputFolder.value = false
+    requestFolder.value = false
+    console.error('the API can not be reach', error)
+  }
 }
 
-const debounceDelay = 300 // Delay in milliseconds
+const debounceDelay = 1000 // Delay in milliseconds
 let debounceTimer
 const debouncedSearch = (event) => {
   clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(() => {
+  debounceTimer = setTimeout(async () => {
     //prevent reload the local direcotry when the inputType is changed on remote uploading
     if (scanInfo.value.scan.tabKey == 1) {
-      checkInputFolder()
+      // checkInputFolder()
+      await refreshMetadata()
+      console.log('no update on file num for local scan')
     } else {
       scanInfo.value.scan.validFileList = scanInfo.value.scan.fileList.filter((item) =>
         validateFile(item)
@@ -829,10 +934,11 @@ const debouncedSearch = (event) => {
 }
 watch(
   () => scanInfo.value.scan.inputType,
-  () => {
+  async () => {
     //prevent reload the local direcotry when the inputType is changed on remote uploading
     if (scanInfo.value.scan.tabKey == 1) {
-      checkInputFolder()
+      // checkInputFolder()
+      await refreshMetadata()
     } else {
       scanInfo.value.scan.validFileList = scanInfo.value.scan.fileList.filter((item) =>
         validateFile(item)
@@ -841,36 +947,27 @@ watch(
   }
 )
 
-watch(
-  () => API.inputFolder,
-  (newVal) => {
-    if (newVal.length > 0 && scanInfo.value.scan.folderPath) {
-      const item = newVal.filter((item) => item.dir == scanInfo.value.scan.folderPath)[0]
-      const count = item ? item.count : 0
-      console.log(count)
-      scanInfo.value.scan.length = count
-      preprocessInfo.value.preprocess.length = count
-    }
-  }
-)
+// watch(
+//   () => API.inputFolder,
+//   (newVal) => {
+//     if (newVal.length > 0 && scanInfo.value.scan.folderPath) {
+//       const item = newVal.filter((item) => item.dir == scanInfo.value.scan.folderPath)[0]
+//       const count = item ? item.count : 0
+//       // console.log(count)
+//       scanInfo.value.scan.length = count
+//       preprocessInfo.value.preprocess.length = count
+//     }
+//   }
+// )
 
 watch(
   () => scanInfo.value.scan.folderPath,
-  (newVal, oldVal) => {
+  async (newVal, oldVal) => {
     if (!newVal) {
       scanInfo.value.scan.length = 0
       preprocessInfo.value.preprocess.length = 0
     } else {
-      const selectedItem = API.inputFolder.filter(
-        (item) => item.dir == scanInfo.value.scan.folderPath
-      )[0]
-      if (selectedItem && scanInfo.value.scan.inputType.length > 0) {
-        scanInfo.value.scan.length = selectedItem.count
-        preprocessInfo.value.preprocess.length = selectedItem.count
-      } else {
-        scanInfo.value.scan.length = 0
-        preprocessInfo.value.preprocess.length = 0
-      }
+      await refreshMetadata()
     }
   }
 )
@@ -893,15 +990,48 @@ const refreshDirectory = async () => {
   scanInfo.value.scan.folderPath = null
 }
 
-const count = ref(0)
-const handleChange = async (info: UploadChangeParam) => {
-  if (scanInfo.value.scan.validFileList.length <= 0) {
-    if (scanInfo.value.scan.percent < 90) {
-      scanInfo.value.scan.percent += 1
-    }
+const refreshMetadata = async () => {
+  console.log('refresh metadata')
+  if (scanInfo.value.scan.folderPath) {
+    await checkInputFolderMetaData()
   } else {
-    scanInfo.value.scan.percent == 100
+    console.log('No selected folder')
   }
+}
+
+watch(
+  () => scanStatus.scan,
+  (val) => {
+    if (val == 2 && uploadRemote.value) {
+      message.success(`All scan files uploaded successfully.`)
+      scanInfo.value.scan.percent = 100
+    }
+  }
+)
+const count = ref(0)
+const drop = ref(false)
+const handleChange = async (info: UploadChangeParam) => {
+  if (
+    !drop.value &&
+    info.file.name == info.fileList[info.fileList.length - 1].name &&
+    info.fileList.length == scanInfo.value.scan.validFileList.length
+  ) {
+    scanInfo.value.scan.percent == 100
+    console.log('Select finished')
+    scanStatus.updateStatus('scan', 2)
+  }
+}
+const handleDrop = (e) => {
+  console.log(e)
+  drop.value = true
+  setTimeout(() => {
+    if (scanInfo.value.scan.fileList.length == scanInfo.value.scan.validFileList.length) {
+      scanInfo.value.scan.percent == 100
+      console.log('Drop finished')
+      scanStatus.updateStatus('scan', 2)
+    }
+    drop.value = false
+  }, 10000)
 }
 
 const validatePatterns = (name, pattern) => {
@@ -935,31 +1065,30 @@ const validateFile = (file) => {
 
 //get type & convertImageBackend
 const beforeUpload: UploadProps['beforeUpload'] = async (file) => {
+  uploadRemote.value = true
   if (count.value == 0) {
     // console.log('scanning on going-------')
     scanStatus.updateStatus('scan', 1)
   }
   count.value = count.value + 1
+  if (scanInfo.value.scan.percent < 95 && !typeInvalid.value) {
+    scanInfo.value.scan.percent += 1
+  }
 
   let type = file.type
-
-  if (file.name.includes('.wsq') || file.name.includes('.jp2')) {
-    type = file.name.includes('.wsq') ? 'wsq' : 'jp2'
-  } else {
-    if (type == '') {
-      type = mime.getType(file.name)
-    }
-  }
-
-  let newfile = {
-    name: file.name,
-    type: type,
-    originFileObj: file
-  }
+    ? file.type
+    : mime.getType(file.name)
+      ? mime.getType(file.name)
+      : file.name.split('.')[1]
 
   const format = mimeTypeToFormat[type]
 
   if (format) {
+    let newfile = {
+      name: file.name,
+      type: type,
+      originFileObj: file
+    }
     const index = scanInfo.value.scan.fileList.findIndex((item) => item.name === file.name)
 
     // Check if the file name already exists in the list
@@ -972,28 +1101,20 @@ const beforeUpload: UploadProps['beforeUpload'] = async (file) => {
       scanInfo.value.scan.fileList = [...(scanInfo.value.scan.fileList || []), newfile]
     }
     if (format == 'WSQ' || format == 'JP2') {
-      if (count.value == 1) {
-        setTimeout(() => {
-          scanInfo.value.scan.percent = 100
-          message.success(`All scan files uploaded successfully.`)
-          scanStatus.updateStatus('scan', 2)
-          scanInfo.value.scan.validFileList = scanInfo.value.scan.fileList
-        }, 5000)
-      }
+      setTimeout(() => {
+        scanInfo.value.scan.percent = 100
+        scanStatus.updateStatus('scan', 2)
+        scanInfo.value.scan.validFileList = scanInfo.value.scan.fileList
+      }, 5000)
       const res = await convertToBase64(file)
       convertImageBackend(res, file.name)
     } else {
-      if (count.value == 1) {
-        setTimeout(() => {
-          scanInfo.value.scan.percent = 100
-          message.success(`All scan files uploaded successfully.`)
-          scanStatus.updateStatus('scan', 2)
-          scanInfo.value.scan.validFileList = scanInfo.value.scan.fileList
-        }, 1000)
-      }
+      scanInfo.value.scan.validFileList = scanInfo.value.scan.fileList
     }
+  } else {
+    typeInvalid.value = true
+    message.error(`${file.name} is not a valid file type`)
   }
-
   return false
 }
 
@@ -1027,25 +1148,19 @@ const convertImageBackend = async (file, name) => {
     format: 'webp'
   }
   const url = API.api + '/convert'
-  await API.authFetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(requestBody)
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('Failed to convert Image')
-      }
-      return response.json()
+  try {
+    const data = await API.authFetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
     })
-    .then((data) => {
-      scanInfo.value.scan.converted.push({ name: name, data: data })
-    })
-    .catch((error) => {
-      console.error('Failed to convert Image')
-    })
+
+    scanInfo.value.scan.converted.push({ name: name, data: data })
+  } catch (error) {
+    console.error('Failed to convert Image')
+  }
 }
 
 //Get whether it is scolling to the bottom of the file list
@@ -1076,6 +1191,8 @@ const clearScan = () => {
   scanInfo.value.scan.modality = model
   scanStatus.updateStatus('scan', 0)
   loadedFiles.value = 100
+  submittedScan.value = false
+  drop.value = false
   console.log('Clear Scan')
 }
 
@@ -1098,40 +1215,57 @@ const transferPatterns = (pattern) => {
 
 //Notes: reason for bloacking resend the task, it's some engine can not be responsed when running task(for default engine, the engine would respond with delay)
 //submit the scan task, update status & taskIDs, start a new process timer, redirect to process page
+const uploadRemote = ref(false)
 const submitScan1 = async () => {
+  uploadRemote.value = false
+  submittedScan.value = true
   const formData = new FormData()
   scanInfo.value.scan.validFileList.forEach((file) => {
     formData.append(`files`, file.originFileObj, file.name)
   })
-  const modality = scanInfo.value.scan.modality[0]
-  const engine = scanInfo.value.scan.modality[1]
-    ? '&engine=' + scanInfo.value.scan.modality[1].split('-')[0].toLowerCase()
-    : ''
-  const url = `${API.api}/scan/remote?modality=${modality.toLowerCase()}${engine}`
+  let modality = scanInfo.value.scan.modality[0]?.includes('face')
+    ? 'face'
+    : scanInfo.value.scan.modality[0]
+  let fusionEngines = scanInfo.value.scan.modality.map((item) => item.split('-')[1])
+
+  let fusionCode = fusionEngines.length > 1 ? getFusionCode(fusionEngines) : 0
+  let engine = fusionCode != 0 ? 'fusion' : modality == 'face' ? fusionEngines[0] : null
+
+  const url = `${API.api}/scan/remote?modality=${modality}&engine=${engine}&fusion=${fusionCode}`
+
   try {
-    const response = await API.authFetch(url, {
+    const data = await API.authFetch(url, {
       method: 'POST',
       body: formData
     })
-    if (!response.ok) {
-      throw new Error('Failed to submit task')
-    }
 
-    const data = await response.json()
     const input = `temp/+${data.tid}`
     const newTaskStatus = {
       tid: data.tid,
       collection: '',
-      name: data.tid.substring(0,5),
-      status: 0,
+      name: data.tid.substring(0, 5),
+      status: 1,
       percent: 0,
       eta: 0,
       num: 0,
       total: scanInfo.value.scan.validFileList.length,
-      mode: '',
-      engine: '',
+      mode: modality,
+      engine: engine,
       input: input,
-      modified: ''
+      modified: '',
+      elapse: 0,
+      logs: [],
+      options: {
+        mode: modality,
+        engine: engine,
+        source: [],
+        target: null,
+        confidence: null,
+        pattern: null,
+        type: null,
+        batch: null,
+        fusion: fusionCode
+      }
     }
 
     const timeStamp = Date.now()
@@ -1142,19 +1276,26 @@ const submitScan1 = async () => {
     scanStatus.updateStatus('process', 1)
     clearScan()
     scanStatus.updateStatus('scan', 2)
-
-    router.push({ path: '/task', query: { timeStamp } })
+    router.push({ path: '/tasks', query: { timeStamp } })
   } catch (error) {
     console.error('Error submitting task:', error)
+    submittedScan.value = false
   }
 }
 
 //submit the scan task, update status & taskIDs, start a new process timer, redirect to process page
 const submitScan2 = async () => {
-  const modality = scanInfo.value.scan.modality[0]
+  submittedScan.value = true
+  let modality = scanInfo.value.scan.modality[0]?.includes('face')
+    ? 'face'
+    : scanInfo.value.scan.modality[0]
+  let fusionEngines = scanInfo.value.scan.modality.map((item) => item.split('-')[1])
+  let fusionCode = fusionEngines.length > 1 ? getFusionCode(fusionEngines) : 0
+  let engine = fusionCode != 0 ? 'fusion' : modality == 'face' ? fusionEngines[0] : null
+  // console.log(modality, fusionEngines, fusionCode, engine,parseFusionCode(fusionCode))
   const input = scanInfo.value.scan.folderPath
   let requestBody = {}
-  if (!scanInfo.value.scan.modality[1]) {
+  if (modality != 'face') {
     requestBody = {
       options: {
         source: scanInfo.value.scan.inputType.map((item) => item.toLowerCase()),
@@ -1163,50 +1304,57 @@ const submitScan2 = async () => {
       input: input
     }
   } else {
-    let type = null
-    if (scanInfo.value.scan.modality[1].includes('file')) {
-      type = scanInfo.value.scan.modality[1].split('-')[1]
-    }
     requestBody = {
       options: {
         source: scanInfo.value.scan.inputType.map((item) => item.toLowerCase()),
-        engine: scanInfo.value.scan.modality[1].split('-')[0].toLowerCase(),
+        engine: engine,
         pattern: scanInfo.value.scan.name ? transferPatterns(scanInfo.value.scan.name) : null,
-        type: type ? type : null
+        fusion: fusionCode
       },
       input: input
     }
   }
-  const url = `${API.api}/scan/local?modality=${modality.toLowerCase()}`
+  const url = `${API.api}/scan/local?modality=${modality}`
+  const timeoutId = setTimeout(() => {
+    message.error('Request time out, refresh later to get updated taskList!')
+    submittedScan.value = false
+  }, 60000)
   try {
-    const response = await API.authFetch(url, {
+    const data = await API.authFetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody)
     })
-    console.log(response)
-
-    if (!response.ok) {
-      const res = await response.json()
-      errorMessage.value = res.detail[0].msg
-      showError.value = true
-      throw new Error('Failed to submit task')
+    if (data) {
+      clearTimeout(timeoutId) // Clear timeout when request completes
+      //do status check
     }
-
-    const data = await response.json()
     const newTaskStatus = {
       tid: data.tid,
       collection: '',
-      name: data.tid.substring(0,5),
-      status: 0,
+      name: data.tid.substring(0, 5),
+      status: 1,
       percent: 0,
       eta: 0,
       num: 0,
       total: scanInfo.value.scan.length,
-      mode: '',
-      engine: '',
+      mode: modality,
+      engine: engine,
       input: input,
-      modified: ''
+      modified: '',
+      elapse: 0,
+      logs: [],
+      options: {
+        mode: modality,
+        engine: engine,
+        source: [],
+        target: null,
+        confidence: null,
+        pattern: null,
+        type: null,
+        batch: null,
+        fusion: fusionCode
+      }
     }
     //push item to the top of array
     scanInfo.value.process.taskStatus.unshift(newTaskStatus)
@@ -1219,8 +1367,12 @@ const submitScan2 = async () => {
     scanStatus.updateStatus('process', 1)
     clearScan()
     scanStatus.updateStatus('scan', 2)
-    router.push({ path: '/task', query: { timeStamp } })
+    router.push({ path: '/tasks', query: { timeStamp } })
   } catch (error) {
+    console.log(error)
+    errorMessage.value = error?.detail[0]?.msg
+    showError.value = true
+    submittedScan.value = false
     console.error('Error submitting task:', error)
   }
 }
@@ -1236,15 +1388,7 @@ onBeforeRouteLeave((to, from, next) => {
 })
 
 onMounted(async () => {
-  if (API.inputFolder && scanInfo.value.scan.folderPath) {
-    const selectedItem = API.inputFolder.filter(
-      (item) => item.dir == scanInfo.value.scan.folderPath
-    )
-    if (selectedItem) {
-      console.log(selectedItem)
-      scanInfo.value.scan.length = selectedItem[0].count
-    }
-  } else {
+  if (API.inputFolder.length == 0) {
     checkInputFolder()
   }
 })
@@ -1253,34 +1397,39 @@ onMounted(async () => {
 const updateSelect = (item) => {
   preprocessInfo.value.preprocess.selectedRadio = item
 }
+
+const submittedStop = ref(false)
 const clearTask = async () => {
-  preprocessInfo.value.preprocess.loading = false
-  const url = `${API.api}/task/${preprocessInfo.value.preprocess.id}/cancel?type=preprocessing`
-  await API.authFetch(url, {
-    method: 'POST',
-    headers: { accept: 'application/json' }
-  })
-    .then((response) => {
-      if (!response.ok) {
-        openNotificationWithIcon('error')
-        throw new Error('Failed to cancel task')
-      }
-      return response.json()
+  submittedStop.value = true
+  // const url = `${API.api}/task/cancel/${preprocessInfo.value.preprocess.id}?type=preprocessing`
+  const url = `${API.api}/task/cancel`
+  try {
+    const data = await API.authFetch(url, {
+      method: 'POST',
+      headers: { accept: 'application/json' }
     })
-    .then((data) => {
-      clearInterval(checkInternalStatus)
-      preprocessStatus.updateStatus('preprocess', 2)
-      preprocessInfo.value.preprocess.id = ''
-      eta.value = -1
-      openNotificationWithIcon('stop')
-    })
-    .catch((error) => {
-      console.error('Error cancel task:', error)
-    })
+    clearInterval(checkInternalStatus)
+    preprocessInfo.value.preprocess.progress = false
+    preprocessStatus.updateStatus('preprocess', 2)
+    preprocessInfo.value.preprocess.id = ''
+    eta.value = -1
+    submittedStop.value = false
+    openNotificationWithIcon('stop')
+  } catch (error) {
+    openNotificationWithIcon('error')
+    console.error('Error cancel task:', error)
+  }
+}
+const dropZip = (e) => {
+  // console.log(e.dataTransfer.files[0])
+  if (e.dataTransfer.files[0].type !== 'application/zip') {
+    openNotificationWithIcon('notZip')
+  }
 }
 
 const showUploadSpinner = ref(false)
 const uploadZip = async (e) => {
+  uploadRemote.value = false
   if (e.file.status == 'uploading') {
     showUploadSpinner.value = true
   }
@@ -1327,21 +1476,21 @@ const submitPreprocess = async () => {
   }
   const url = `${API.api}/scan/preprocessing`
   try {
-    const response = await API.authFetch(url, {
+    const data = await API.authFetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody)
     })
-    if (!response.ok) {
-      const res = await response.json()
-      errorMessage.value = res.detail[0].msg
-      showError.value = true
-      throw new Error('Failed to submit preprocessing task')
-    }
-    const data = await response.json()
+    // if (!response.ok) {
+    //   const res = await response.json()
+    //   errorMessage.value = res.detail[0].msg
+    //   showError.value = true
+    //   throw new Error('Failed to submit preprocessing task')
+    // }
+    // const data = await response.json()
     console.log(data)
     preprocessStatus.updateStatus('preprocess', 1)
-    preprocessInfo.value.preprocess.loading = true
+    preprocessInfo.value.preprocess.progress = true
     preprocessInfo.value.preprocess.id = data['Preprocessing task in progress']
     eta.value = -1
     checkInternalStatus = setInterval(async () => {
@@ -1356,6 +1505,8 @@ const submitPreprocess = async () => {
       }
     }, 1000)
   } catch (error) {
+    errorMessage.value = error.detail[0].msg
+    showError.value = true
     console.error('Error submitting preprocessing task:', error)
   }
 }
@@ -1363,54 +1514,79 @@ const submitPreprocess = async () => {
 const checkPreprocess = async () => {
   if (preprocessInfo.value.preprocess.id != '') {
     const url2 = `${API.api}/scan/preprocessing/${preprocessInfo.value.preprocess.id}`
-    await API.authFetch(url2, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
-    })
-      .then((response) => {
-        if (!response.ok) {
-          console.log('preprocessing task can not found')
+    try {
+      const data = await API.authFetch(url2, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      console.log(data)
+      outputPath.value = data.target
+      if (data.status == 2 || data.status == -1) {
+        if (data.status == -1) {
+          preprocessStatus.updateStatus('preprocess', -1)
+          console.error('preprocessing task failed')
         }
-        const data = response.json()
-        return data
-      })
-      .then((data) => {
-        console.log(data)
-        outputPath.value = data.target
-        if (data.status == 2 || data.status == -1) {
-          if (data.status == -1) {
-            preprocessStatus.updateStatus('preprocess', -1)
-            console.error('preprocessing task failed')
-          }
-          preprocessStatus.updateStatus('preprocess', 2)
-          preprocessInfo.value.preprocess.id = ''
-          preprocessInfo.value.preprocess.loading = false
-          const index = scanInfo.value.scan.inputType.indexOf(preprocessInfo.value.preprocess.type)
-          if (index === -1) {
-            scanInfo.value.scan.inputType.push(preprocessInfo.value.preprocess.type)
-          }
-          checkInputFolder()
-          preprocessInfo.value.scan.folderPath = outputPath.value
+        preprocessStatus.updateStatus('preprocess', 2)
+        preprocessInfo.value.preprocess.id = ''
+        preprocessInfo.value.preprocess.progress = false
+        const index = scanInfo.value.scan.inputType.indexOf(preprocessInfo.value.preprocess.type)
+        if (index === -1) {
+          scanInfo.value.scan.inputType.push(preprocessInfo.value.preprocess.type)
         }
-      })
-      .catch((error) => {
-        console.error('Error check preprocessing task status:', error)
-      })
+        checkInputFolder()
+        preprocessInfo.value.scan.folderPath = outputPath.value
+      }
+    } catch (error) {
+      console.error('Error check preprocessing task status:', error)
+    }
   }
 }
+
+// let debounceTimeout
+// const getETA = async (tid) => {
+//   clearTimeout(debounceTimeout)
+//   const url = `${API.api}/task/${tid}/status`
+//   debounceTimeout = setTimeout(() => {
+//     API.authFetch(url, {
+//       method: 'GET',
+//       headers: { accept: 'application/json' }
+//     })
+//       .then((response) => {
+//         if (!response.ok) {
+//           console.log('can not find task progress')
+//           console.log(eta.value)
+//         }
+//         return response.json()
+//       })
+//       .then((data) => {
+//         if (data.done != 0) {
+//           eta.value = data.eta
+//           if (data.eta == 0) {
+//             eta.value = -1
+//             checkPreprocess()
+//             clearInterval(checkInternalStatus)
+//           }
+//         }
+//       })
+//       .catch((e) => {
+//         console.error('Error getting task status:', e)
+//       })
+//   }, 2000)
+// }
 
 const getETA = async (tid) => {
   const url = `${API.api}/task/${tid}/status`
   try {
-    const response = await API.authFetch(url, {
+    const data = await API.authFetch(url, {
       method: 'GET',
       headers: { accept: 'application/json' }
     })
-    if (!response.ok) {
-      console.log('can not find task progress')
-      console.log(eta.value)
-    }
-    const data = await response.json()
+    // if (!response.ok) {
+    //   console.log('can not find task progress')
+    //   console.log(eta.value)
+    // }
+    // const data = await response.json()
     if (data.done != 0) {
       eta.value = data.eta
       if (data.eta == 0) {
@@ -1449,12 +1625,6 @@ const getETA = async (tid) => {
   background-color: rgba(245, 245, 245, 0.4);
 }
 
-.popupClass {
-  width: 65%;
-  max-width: 1000px;
-  min-width: 600px;
-}
-
 .scanContainer {
   width: 80%;
   max-width: 1200px;
@@ -1468,8 +1638,8 @@ const getETA = async (tid) => {
   height: auto;
   max-height: 400px;
   overflow-y: scroll;
+  overflow-x: hidden;
 }
-
 
 .customStyle1:hover {
   border: solid gray 0.5px;
@@ -1480,7 +1650,7 @@ const getETA = async (tid) => {
   flex-wrap: wrap;
   /* height: 350px; */
   position: relative;
-  overflow: visible; 
+  overflow: visible;
 }
 .iconStyle {
   font-size: 30;
@@ -1505,7 +1675,7 @@ i {
   height: 100%;
   background-color: rgba(242, 242, 242, 0.3);
   border-radius: 15px;
-  cursor: not-allowed; /* Shows stop cursor */
+  cursor: not-allowed;
   pointer-events: auto;
 }
 
@@ -1516,14 +1686,16 @@ i {
   transform: translate(-50%, -50%);
 }
 
-.vue-sound{
+.vue-sound {
   display: flex;
-  justify-content: center; 
-  align-items: center; 
-  background-color: rgba(240, 240, 240, 1)
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(240, 240, 240, 1);
 }
 
-.vue-sound .player-back-15-icon, .player-ahead-15-icon, .player-volume {
+.vue-sound .player-back-15-icon,
+.player-ahead-15-icon,
+.player-volume {
   display: none;
 }
 .vue-sound .player-controls {
@@ -1533,12 +1705,13 @@ i {
   align-items: center;
 }
 
-.smallCard .vue-sound .play-icon, .pause-icon{
+.smallCard .vue-sound .play-icon,
+.pause-icon {
   height: 25px;
   width: 25px;
 }
 
-.smallCard .vue-sound .player-track{
+.smallCard .vue-sound .player-track {
   display: none;
 }
 
@@ -1549,11 +1722,12 @@ i {
   .fixed-center-spin {
     background-color: rgba(20, 20, 20, 0.2);
   }
-  .vue-sound .play-icon, .pause-icon {
+  .vue-sound .play-icon,
+  .pause-icon {
     fill: #f8f8f8;
   }
-  .vue-sound{
-    background-color: rgba(20, 20, 20, 1)
+  .vue-sound {
+    background-color: rgba(20, 20, 20, 1);
   }
   ::-webkit-scrollbar {
     width: 6px;
@@ -1569,7 +1743,6 @@ i {
   ::-webkit-scrollbar-track {
     background: rgba(50, 50, 50, 0.3);
   }
-
 }
 @media (min-width: 1024px) {
   .scanContainer {

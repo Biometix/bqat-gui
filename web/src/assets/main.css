@@ -5,6 +5,7 @@
   min-width: 800px;
   margin: 0 1rem;
   padding: 2rem;
+  height: calc(100vh - 200px);
   font-weight: normal;
 }
 
@@ -17,11 +18,12 @@ a:not(.introItem) {
 
 .body {
   display: flex;
-  place-items: top;
+  /* place-items: center; */
   justify-content: center;
   width: 100%;
+  height:100%;
+  /* background-color: gray; */
   padding: 1rem 1rem;
-  min-height: 800px;
 }
 
 html {
@@ -39,18 +41,6 @@ html {
 }
 
 @media (min-width: 1024px) {
-  header{
-    display: flex;
-    place-items: top;
-    margin-top: 1rem;
-    height: 120px;
-    justify-content: center;
-    align-items: center;
-    margin: 0 6rem;
-    padding: 0rem 1rem;
-    width: 100%;
-  }
-
   #app {
     margin: 0 6rem;
     padding: 0 1rem;
