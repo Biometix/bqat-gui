@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { theme } from 'ant-design-vue'
+import { message, theme } from 'ant-design-vue'
 import {
   SettingOutlined,
   CheckCircleTwoTone,
@@ -11,6 +11,10 @@ import { useInfo, useStatus, useApi } from './stores/dataStore.js'
 import { ref, watchEffect, watch, computed, onMounted } from 'vue'
 import { notification } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
+import { initialiseTask, checkRunning } from './components/utils.ts'
+import { Modal, Input } from 'ant-design-vue'
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
+import { h } from 'vue'
 
 const openSetting = ref(false)
 const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)')
@@ -36,7 +40,6 @@ const defaultSetting = {
 }
 
 const colorTheme = ref(prefersDarkScheme.matches ? darkSetting : defaultSetting)
-document.documentElement.setAttribute('data-theme', prefersDarkScheme.matches ? 'dark' : 'light')
 const currrentTheme = ref('light')
 
 const info = ref(useInfo())
@@ -48,13 +51,6 @@ const validApi = ref(false)
 const requestApi = ref(false)
 const options = ref<{ value: string }[]>(API.apiList.slice(1))
 const version = import.meta.env.VITE_VERSION
-
-let timer = setInterval(() => {
-  if (info.value.process.timer != -1) {
-    info.value.process.timeRecord = info.value.process.timeRecord + 1
-  }
-  // Increment elapsed time by 1 second
-}, 1000)
 
 const openNotificationWithIcon = (type: string) => {
   if (type === 'purgeError') {
@@ -120,84 +116,33 @@ const openNotificationWithIcon = (type: string) => {
   }
 }
 
-//start timer and stop timer
+let timer = null
+
 watchEffect(() => {
   if (info.value.process.taskStatus.length > 0) {
-    if (
-      timer == null &&
-      info.value.process.taskStatus.filter((item) => item.status != 2).length > 0
-    ) {
+    const runningTasks = info.value.process.taskStatus.filter((item) => item.status == 1).length
+    if (timer == null && runningTasks > 0) {
+      info.value.process.timer = 0
       timer = setInterval(() => {
         info.value.process.timeRecord = info.value.process.timeRecord + 1
+        // API.testTimer += 1
       }, 1000)
     }
-    if (
-      info.value.process.taskStatus.filter((item) => item.status != 2).length == 0 ||
-      info.value.process.taskStatus.filter((item) => item.status != 2).length ==
-        info.value.process.taskStatus.filter((item) => item.status == -1).length
-    ) {
+    if (runningTasks == 0 || info.value.process.timer == -1) {
       // console.log('clear')
       clearInterval(timer)
       info.value.process.timer = -1
+      info.value.process.timeRecord = 0
+      // API.testTimer = 0
       timer = null
     }
   }
 })
 
-watch(API.apiList, () => {
+watch(API.apiList, async () => {
   console.log('api changed')
-  checkInputFolder()
+  await checkRunning(API, info, status)
 })
-
-const checkRunning = async () => {
-  const url = `${API.api}/task/metadata`
-  await API.authFetch(url, {
-    method: 'GET',
-    headers: { accept: 'application/json' }
-  })
-    .then((response) => {
-      status.updateStatus('app', 2)
-      if (!response.ok) {
-        console.log('No running task')
-      }
-      return response.json()
-    })
-    .then((data) => {
-      // console.log(data)
-      if (data.type == 'report') {
-        console.log('3. get running report')
-        status.updateStatus('result', 1)
-        status.updateStatus('app', 1)
-      }
-      if (data.type == 'scan') {
-        console.log('3. get running scan')
-        status.updateStatus('app', 1)
-        status.updateStatus('process', 1)
-      }
-      if (data.type == 'preprocessing') {
-        console.log('3. get running preprocessing')
-        status.updateStatus('app', 1)
-        status.updateStatus('preprocess', 1)
-      }
-      if (data.type == 'outlier') {
-        console.log('3. get running outlier')
-        status.updateStatus('app', 1)
-        status.updateStatus('outlier', 1)
-      }
-    })
-    .catch((error) => {
-      status.updateStatus('app', 2)
-      console.error('Error get running task:', error)
-    })
-}
-
-const intervalId = setInterval(() => {
-  if (status.app == 2) {
-    clearInterval(intervalId)
-  } else {
-    checkRunning()
-  }
-}, 5000)
 
 const updateApiUrl = () => {
   API.updateApi(tempApi.value)
@@ -218,7 +163,6 @@ const validateUrl = async () => {
     currentController.abort()
     currentController = null
   }
-
   // Create a new AbortController for the new request
   currentController = new AbortController()
   const signal = currentController.signal
@@ -227,28 +171,24 @@ const validateUrl = async () => {
 
 const requestUrl = async (signal) => {
   requestApi.value = true
-  const myRequest = new Request(`${tempApi.value}/scan/info`, {
-    method: 'GET',
-    signal: signal
-  })
-
+  const url = `${tempApi.value}/info`
   try {
     // Await the fetch response
-    const response = await API.authFetch(myRequest)
+    const data = await API.authFetch(url, {
+      method: 'GET',
+      signal: signal
+    })
     // Check if the response is OK
-    if (!response.ok) {
-      console.log('There was a problem with the new API address')
-      validApi.value = false
-      requestApi.value = false
-      return false
-    }
-
-    const data = await response.json()
-
+    // if (!response.ok) {
+    //   console.log('There was a problem with the new API address')
+    //   validApi.value = false
+    //   requestApi.value = false
+    //   return false
+    // }
+    // const data = await response.json()
     // Set the API status as valid
     validApi.value = true
     requestApi.value = false
-
     return true
   } catch (error) {
     // Catch any errors (e.g., network errors, aborted requests)
@@ -259,49 +199,60 @@ const requestUrl = async (signal) => {
   }
 }
 
-const checkInputFolder = async () => {
-  const myRequest = new Request(`${API.api}/task/inputs`, {
-    method: 'GET'
-  })
+function showPurgeConfirm() {
+  const userInput = ref('')
+  Modal.confirm({
+    title: 'Purge Database',
+    icon: h(ExclamationCircleOutlined),
+    content: h('div', [
+      h('p', 'Be careful! You are about to delete whole database.'),
+      h(Input, {
+        placeholder: 'Type "purge" to confirm',
+        onChange: (e) => (userInput.value = e.target.value)
+      })
+    ]),
+    okType: 'danger',
+    centered: true,
+    okText: 'Delete',
+    async onOk() {
+      if (userInput.value.toLowerCase() !== 'purge') {
+        message.error('You must type "purge" to confirm.')
+        return Promise.reject(new Error('You must type "purge" to confirm.'))
+      }
 
-  await API.authFetch(myRequest)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('Mounted folder is not exist')
+      console.log('OK')
+
+      try {
+        await purgeDatabase()
+        // console.log('mockl purge')
+        return Promise.resolve()
+      } catch (error) {
+        console.log('Oops, errors!', error)
+        return Promise.reject(error)
       }
-      return response.json()
-    })
-    .then((data) => {
-      if (data) {
-        API.updateInputFolder(data)
-        API.updateInputTree(data)
-      }
-    })
-    .catch((error) => {
-      console.error('the API can not be reach', error)
-    })
+    },
+    onCancel() {
+      console.log('Cancel')
+    }
+  })
 }
 
 const purgeDatabase = async () => {
   const url = `${API.api}/purge`
-  await API.authFetch(url, {
-    method: 'POST',
-    headers: { accept: 'application/json' }
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('the Database can not be purge')
-      }
-      return response.json()
+  try {
+    const data = await API.authFetch(url, {
+      method: 'POST',
+      headers: { accept: 'application/json' }
     })
-    .then((data) => {
-      openNotificationWithIcon('purgeSuccess')
-      window.location.reload()
-    })
-    .catch((error) => {
-      openNotificationWithIcon('purgeError')
-      console.error(error)
-    })
+
+    // Process the successful response data
+    openNotificationWithIcon('purgeSuccess')
+    window.location.reload()
+  } catch (error) {
+    // Handle errors here
+    openNotificationWithIcon('purgeError')
+    console.error(error)
+  }
 }
 
 const switchTheme = () => {
@@ -319,7 +270,7 @@ const switchTheme = () => {
 }
 
 const goToTaskBoard = () => {
-  router.push({ path: '/task' })
+  router.push({ path: '/tasks' })
 }
 
 const showBadge = ref(
@@ -332,19 +283,35 @@ const showBadge = ref(
   })
 )
 
+watch(
+  () => API.landing,
+  () => {
+    console.log('landing changed')
+    validateUrl()
+    API.accessKey = ''
+  }
+)
 onMounted(async () => {
-  try {
-    currentController = new AbortController()
-    const res = await requestUrl(currentController.signal)
+  document.documentElement.setAttribute('data-theme', prefersDarkScheme.matches ? 'dark' : 'light')
+  if (!API.getCookie('accessToken')) {
+    API.landing = true
+    router.push({ path: '/landing' })
+  } else {
+    try {
+      currentController = new AbortController()
+      const res = await requestUrl(currentController.signal)
 
-    if (res) {
-    } else {
-      openNotificationWithIcon('hostError')
+      if (res) {
+        status.updateStatus('app', 1)
+        await initialiseTask(API, info, status)
+        await checkRunning(API, info, status)
+      } else {
+        status.updateStatus('app', -1)
+        openNotificationWithIcon('hostError')
+      }
+    } catch (error) {
+      console.error('Error in onMounted:', error)
     }
-
-    checkInputFolder()
-  } catch (error) {
-    console.error('Error in onMounted:', error)
   }
 })
 </script>
@@ -357,27 +324,30 @@ onMounted(async () => {
           <template #title>
             <span>{{ version }}</span>
           </template>
-          <img alt="BQAT logo" class="logo" src="./assets/logo-bqat.png" height="50" />
+          <img v-if="!API.landing" alt="BQAT logo" class="logo" src="./assets/logo-bqat.png" />
         </a-tooltip>
-        <div style="margin-bottom: 8px; margin-left: 20px">
+        <div v-if="!API.landing" style="margin-bottom: 8px; margin-left: 20px">
           <RouterLink to="/">Home</RouterLink>
-          <RouterLink to="/scan">Input</RouterLink>
-          <RouterLink to="/result">Result</RouterLink>
+          <RouterLink to="/input">Input</RouterLink>
+          <RouterLink to="/results">Results</RouterLink>
+          <RouterLink to="/files">Files</RouterLink>
         </div>
       </a-config-provider>
     </nav>
   </header>
 
   <body class="body">
+    <RouterView />
     <a-float-button
-      :badge="{ count: info.process.taskStatus.filter((item) => item.status != 2).length }"
+      v-if="!API.landing"
+      :badge="{ count: info.process.taskStatus.filter((item) => item.status == 1).length }"
       shape="square"
       @click="goToTaskBoard"
       :style="{
         right: '70px',
-        bottom: '1400px',
         top: '70px',
-        width: '140px'
+        width: '140px',
+        height: '40px'
       }"
       type="primary"
     >
@@ -396,7 +366,7 @@ onMounted(async () => {
       </template>
     </a-float-button>
 
-    <a-float-button-group trigger="hover" type="primary" class="floatButtons">
+    <a-float-button-group v-if="!API.landing" trigger="hover" type="primary" class="floatButtons">
       <template #icon>
         <a-badge v-if="!validApi" color="red" style="position: absolute; top: 0px; left: 20px" />
         <SettingOutlined
@@ -412,7 +382,7 @@ onMounted(async () => {
           ></span>
         </template>
       </a-float-button>
-      <a-float-button tooltip="Purge Database" @click="purgeDatabase">
+      <a-float-button tooltip="Purge Database" @click="showPurgeConfirm">
         <template #icon>
           <span class="bi bi-arrow-counterclockwise"></span>
         </template>
@@ -452,16 +422,13 @@ onMounted(async () => {
         </div>
       </a-flex>
     </a-modal>
-    <RouterView />
   </body>
 </template>
 
 <style scoped>
 header {
   line-height: 1.5;
-  max-height: 100vh;
 }
-
 .logo {
   display: block;
   margin: 0 auto 2rem;
@@ -507,13 +474,23 @@ nav a:first-of-type {
 
   nav {
     justify-content: left;
-    margin-right: 15rem;
+    margin-left: -10rem;
     align-items: end;
     display: flex;
     font-size: 1.5rem;
     height: 100px;
     max-width: 1200px;
     width: 80%;
+  }
+  header {
+    display: flex;
+    place-items: top;
+    margin-top: 1rem;
+    justify-content: center;
+    align-items: center;
+    margin: 0 6rem;
+    padding: 0rem 1rem;
+    width: 100%;
   }
 }
 </style>

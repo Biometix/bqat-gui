@@ -1,3 +1,19 @@
+<a name="v0.3.7"></a>
+# v0.3.7 (2024-10-29)
+
+## 🚀 Features
+
+- 💡 Introduce file management tab (beta)
+
+- 💡 Introduce landing page (beta)
+
+- 🙌 Add fail safe logic that work with backend health check feature
+
+## 🛠 Fixes
+
+- Improve outlier detection UX
+
+
 <a name="v0.3.6"></a>
 # v0.3.6 (2024-10-03)
 

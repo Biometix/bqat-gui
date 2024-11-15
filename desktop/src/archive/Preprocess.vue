@@ -23,7 +23,7 @@
                     style="width: 85%"
                     placeholder="Select file type"
                     :options="typeOptions"
-                    :disabled="preprocessInfo.preprocess.loading"
+                    :disabled="preprocessInfo.preprocess.progress"
                   />
                   <br />
                   <h3>Input directory:</h3>
@@ -32,7 +32,7 @@
                       size="large"
                       v-model:value="preprocessInfo.preprocess.folderPath"
                       @select="updateFileCount"
-                      :disabled="preprocessInfo.preprocess.loading"
+                      :disabled="preprocessInfo.preprocess.progress"
                       show-search
                       style="width: 85%; margin-right: 30px"
                       :height="233"
@@ -88,7 +88,7 @@
                       style="width: 430px"
                       placeholder="Select file type"
                       :options="typeOptions"
-                      :disabled="preprocessInfo.preprocess.loading"
+                      :disabled="preprocessInfo.preprocess.progress"
                     />
                   </h3>
 
@@ -387,7 +387,7 @@
         <a-row justify="center" gutter="40" style="margin-block: 2rem">
           <a-col :span="12">
             <a-button
-              :disabled="!preprocessInfo.preprocess.loading"
+              :disabled="!preprocessInfo.preprocess.progress"
               style="width: 100%; padding: 0"
               size="large"
               type="primary"
@@ -404,7 +404,7 @@
               size="large"
               type="primary"
               @click="submitPreprocess"
-              :loading="preprocessInfo.preprocess.loading"
+              :loading="preprocessInfo.preprocess.progress"
               :disabled="preprocessInfo.preprocess.length == 0"
             >
               <span v-if="eta > 0">ETA: {{ eta }} s</span>
@@ -620,7 +620,7 @@ const deletePreprocess = async (item) => {
 
 const GoToScan = (item) => {
   preprocessInfo.value.scan.folderPath = item.target
-  router.push({ path: '/scan' })
+  router.push({ path: '/input' })
 }
 
 const handleGoToFolder = (item) => {
@@ -647,10 +647,9 @@ const checkInputFolder = async () => {
   const exts = preprocessInfo.value.preprocess.inputType
     .map((ext) => `exts=${ext.toLowerCase()}`)
     .join('&')
-  const myRequest = new Request(`${API.api}/task/inputs?${exts}`, {
+  await fetch(`${API.api}/task/inputs?${exts}`, {
     method: 'GET'
   })
-  await fetch(myRequest)
     .then((response) => {
       if (!response.ok) {
         throw new Error('Mounted folder is not exist')
@@ -721,7 +720,7 @@ watch(
 // }
 
 const clearTask = async () => {
-  preprocessInfo.value.preprocess.loading = false
+  preprocessInfo.value.preprocess.progress = false
   const url = `${API.api}/task/${preprocessInfo.value.preprocess.id}/cancel?type=preprocessing`
   await fetch(url, {
     method: 'POST',
@@ -788,7 +787,7 @@ const submitPreprocess = async () => {
     const data = await response.json()
     console.log(data)
     preprocessStatus.updateStatus('preprocess', 1)
-    preprocessInfo.value.preprocess.loading = true
+    preprocessInfo.value.preprocess.progress = true
     preprocessInfo.value.preprocess.id = data['Preprocessing task in progress']
     eta.value = -1
     checkInternalStatus = setInterval(async () => {
@@ -832,7 +831,7 @@ const checkPreprocess = async () => {
           }
           preprocessStatus.updateStatus('preprocess', 2)
           preprocessInfo.value.preprocess.id = ''
-          preprocessInfo.value.preprocess.loading = false
+          preprocessInfo.value.preprocess.progress = false
           checkInputFolder()
           preprocessInfo.value.scan.folderPath = outputPath.value
           checkPreprocessLog()

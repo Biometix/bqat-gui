@@ -1,6 +1,6 @@
 {
   "name": "bqat_gui",
-  "version": "v0.3.1",
+  "version": "v0.3.7",
   "private": true,
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 9949",
@@ -16,7 +16,7 @@
     "build-linux": "vite build && electron-builder -l"
   },
   "dependencies": {
-    "ant-design-vue": "^4.1.2", 
+    "ant-design-vue": "^4.1.2",
     "axios": "^1.6.8",
     "bootstrap-icons": "^1.11.3",
     "json-2-csv": "^5.5.1",
