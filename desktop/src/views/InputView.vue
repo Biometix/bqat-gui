@@ -324,7 +324,7 @@
               <h2 style="margin-block: 10px">
                 <span class="bi bi-check2-square"></span> Select Biometircs Modality / Engine:
               </h2>
-              <a-radio-group size="large" v-model:value="scanInfo.scan.modality" @change="scanInfo.scan.engine=[]">
+              <a-radio-group size="large" v-model:value="scanInfo.scan.modality" @change="scanInfo.scan.modality=='face'?scanInfo.scan.engine=['bqat']:scanInfo.scan.engine=['default']">
                 <a-radio-button value="face">Face</a-radio-button>
                 <a-radio-button value="fingerprint">Fingerprint</a-radio-button>
                 <a-radio-button value="iris">Iris</a-radio-button>
@@ -603,7 +603,7 @@
               <h2 style="margin-bottom: 10px">
                 <span class="bi bi-check2-square"></span> Select Biometrics Modality / Engine:
               </h2>
-              <a-radio-group size="large" v-model:value="scanInfo.scan.modality" @change="scanInfo.scan.engine=[]">
+              <a-radio-group size="large" v-model:value="scanInfo.scan.modality" @change="scanInfo.scan.modality=='face'?scanInfo.scan.engine=['bqat']:scanInfo.scan.engine=['default']">
                 <a-radio-button value="face">Face</a-radio-button>
                 <a-radio-button value="fingerprint">Fingerprint</a-radio-button>
                 <a-radio-button value="iris">Iris</a-radio-button>
@@ -826,28 +826,15 @@ const modalityOptions = computed(() => {
         label: 'BIQT'
       }
     ]
-  } else if (scanInfo.value.scan.modality == 'iris') {
+  } else if (scanInfo.value.scan.modality == 'iris'|| scanInfo.value.scan.modality == 'fingerprint' || scanInfo.value.scan.modality == 'speech') {
     return [
       {
-        value: 'iris',
-        label: 'Iris'
-      }
-    ]
-  } else if (scanInfo.value.scan.modality == 'fingerprint') {
-    return [
-      {
-        value: 'fingerprint',
-        label: 'Fingerprint'
-      }
-    ]
-  } else if (scanInfo.value.scan.modality == 'speech') {
-    return [
-      {
-        value: 'speech',
-        label: 'Voice'
+        value: 'default',
+        label: 'Default'
       }
     ]
   }
+
 })
 // const cascadeModalityOptions = ref<CascaderProps['options']>([
 //   {
