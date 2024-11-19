@@ -324,8 +324,22 @@
               <h2 style="margin-block: 10px">
                 <span class="bi bi-check2-square"></span> Select Biometircs Modality / Engine:
               </h2>
-
+              <a-radio-group size="large" v-model:value="scanInfo.scan.modality" @change="scanInfo.scan.modality=='face'?scanInfo.scan.engine=['bqat']:scanInfo.scan.engine=['default']">
+                <a-radio-button value="face">Face</a-radio-button>
+                <a-radio-button value="fingerprint">Fingerprint</a-radio-button>
+                <a-radio-button value="iris">Iris</a-radio-button>
+                <a-radio-button value="speech">Voice</a-radio-button>
+              </a-radio-group>
               <a-select
+                style="width: 100%; margin-block: 10px"
+                v-model:value="scanInfo.scan.engine"
+                mode="multiple"
+                :allowClear="true"
+                placeholder="Please select"
+                size="large"
+                :options="modalityOptions"
+              />
+              <!-- <a-select
                 style="width: 100%; margin-block: 10px"
                 v-model:value="scanInfo.scan.modality"
                 mode="multiple"
@@ -334,7 +348,7 @@
                 size="large"
                 :options="cascadeModalityOptions"
                 @change="updateModality"
-              />
+              /> -->
             </a-flex>
           </a-card>
 
@@ -351,7 +365,8 @@
                 scanStatus.preprocess == 1 ||
                 scanInfo.scan.length == 0 ||
                 submittedScan ||
-                scanInfo.scan.modality.length == 0
+                !scanInfo.scan.modality ||
+                scanInfo.scan.engine.length == 0
               "
             >
               <span
@@ -588,7 +603,22 @@
               <h2 style="margin-bottom: 10px">
                 <span class="bi bi-check2-square"></span> Select Biometrics Modality / Engine:
               </h2>
+              <a-radio-group size="large" v-model:value="scanInfo.scan.modality" @change="scanInfo.scan.modality=='face'?scanInfo.scan.engine=['bqat']:scanInfo.scan.engine=['default']">
+                <a-radio-button value="face">Face</a-radio-button>
+                <a-radio-button value="fingerprint">Fingerprint</a-radio-button>
+                <a-radio-button value="iris">Iris</a-radio-button>
+                <a-radio-button value="speech">Voice</a-radio-button>
+              </a-radio-group>
               <a-select
+                style="width: 100%; margin-block: 10px"
+                v-model:value="scanInfo.scan.engine"
+                mode="multiple"
+                :allowClear="true"
+                placeholder="Please select"
+                size="large"
+                :options="modalityOptions"
+              />
+              <!-- <a-select
                 style="width: 100%; margin-block: 10px"
                 v-model:value="scanInfo.scan.modality"
                 mode="multiple"
@@ -597,7 +627,7 @@
                 size="large"
                 :options="cascadeModalityOptions"
                 @change="updateModality"
-              />
+              /> -->
             </a-flex>
           </a-card>
 
@@ -613,7 +643,8 @@
                 scanStatus.process == 1 ||
                 scanInfo.scan.validFileList.length == 0 ||
                 submittedScan ||
-                scanInfo.scan.modality.length == 0
+                !scanInfo.scan.modality ||
+                scanInfo.scan.engine.length == 0
               "
             >
               <span class="bi bi-play" style="font-style: normal; margin-inline: 5px"></span>
@@ -779,61 +810,86 @@ const displayedFiles = ref(
 )
 const loadedFiles = ref(100)
 
-const multiple = ref(false)
-const cascadeModalityOptions = ref<CascaderProps['options']>([
-  {
-    disabled: false,
-    value: 'face-bqat',
-    label: 'Face (BQAT)'
-  },
-  {
-    disabled: false,
-    value: 'face-ofiq',
-    label: 'Face (OFIQ)'
-  },
-  {
-    disabled: false,
-    value: 'face-biqt',
-    label: 'Face (BIQT)'
-  },
-  {
-    disabled: true,
-    value: 'fingerprint',
-    label: 'Fingerprint'
-  },
-  {
-    disabled: true,
-    value: 'iris',
-    label: 'Iris'
-  },
-  {
-    disabled: true,
-    value: 'speech',
-    label: 'Voice'
+const modalityOptions = computed(() => {
+  if (scanInfo.value.scan.modality == 'face') {
+    return [
+      {
+        value: 'bqat',
+        label: 'BQAT'
+      },
+      {
+        value: 'ofiq',
+        label: 'OFIQ'
+      },
+      {
+        value: 'biqt',
+        label: 'BIQT'
+      }
+    ]
+  } else if (scanInfo.value.scan.modality == 'iris'|| scanInfo.value.scan.modality == 'fingerprint' || scanInfo.value.scan.modality == 'speech') {
+    return [
+      {
+        value: 'default',
+        label: 'Default'
+      }
+    ]
   }
-])
 
-const updateModality = (selectedValues) => {
-  const faceType =
-    selectedValues.filter((item) => item.includes('face')).length > 0 ? true : false
-  // console.log(selectedValues, faceType)
-  if (faceType) {
-    console.log('select face engines')
-    cascadeModalityOptions.value.filter((item) =>
-      item.value.toString().includes('face') ? (item.disabled = false) : (item.disabled = true)
-    )
-  } else {
-    console.log('select other engines')
-    cascadeModalityOptions.value.filter((item) => (item.disabled = false))
-    if (selectedValues.length > 0) {
-      console.log(cascadeModalityOptions.value)
-      cascadeModalityOptions.value.map((item) =>
-        item.value !== selectedValues[0] ? (item.disabled = true) : (item.disabled = false)
-      )
-    }
-  }
-  scanInfo.value.scan.modality = selectedValues
-}
+})
+// const cascadeModalityOptions = ref<CascaderProps['options']>([
+//   {
+//     disabled: false,
+//     value: 'face-bqat',
+//     label: 'Face (BQAT)'
+//   },
+//   {
+//     disabled: false,
+//     value: 'face-ofiq',
+//     label: 'Face (OFIQ)'
+//   },
+//   {
+//     disabled: false,
+//     value: 'face-biqt',
+//     label: 'Face (BIQT)'
+//   },
+//   {
+//     disabled: true,
+//     value: 'fingerprint',
+//     label: 'Fingerprint'
+//   },
+//   {
+//     disabled: true,
+//     value: 'iris',
+//     label: 'Iris'
+//   },
+//   {
+//     disabled: true,
+//     value: 'speech',
+//     label: 'Voice'
+//   }
+// ])
+
+// const updateModality = (selectedValues) => {
+//   const faceType = selectedValues.filter((item) => item.includes('face')).length > 0 ? true : false
+//   // console.log(selectedValues, faceType)
+//   if (faceType) {
+//     console.log('select face engines')
+//     cascadeModalityOptions.value.filter((item) =>
+//       item.value.toString().includes('face') ? (item.disabled = false) : (item.disabled = true)
+//     )
+//   } else {
+//     console.log('select other engines')
+//     cascadeModalityOptions.value.filter((item) => (item.disabled = false))
+//     if (selectedValues.length > 0) {
+//       console.log(cascadeModalityOptions.value)
+//       cascadeModalityOptions.value.map((item) =>
+//         item.value !== selectedValues[0] ? (item.disabled = true) : (item.disabled = false)
+//       )
+//     }
+//   }
+//   scanInfo.value.scan.modality = selectedValues
+// }
+
 const handleGoToFolder = async (item) => {
   const linkToFolder = API.api + '/warehouse/' + item + '/'
   window.open(linkToFolder, '_blank')
@@ -1186,9 +1242,11 @@ const loadMoreFiles = () => {
 const clearScan = () => {
   const temp = scanInfo.value.scan.tabKey
   const model = scanInfo.value.scan.modality
+  const engine = scanInfo.value.scan.engine
   scanInfo.value.initialiseScan()
   scanInfo.value.scan.tabKey = temp
   scanInfo.value.scan.modality = model
+  scanInfo.value.scan.engine = engine
   scanStatus.updateStatus('scan', 0)
   loadedFiles.value = 100
   submittedScan.value = false
@@ -1223,15 +1281,12 @@ const submitScan1 = async () => {
   scanInfo.value.scan.validFileList.forEach((file) => {
     formData.append(`files`, file.originFileObj, file.name)
   })
-  let modality = scanInfo.value.scan.modality[0]?.includes('face')
-    ? 'face'
-    : scanInfo.value.scan.modality[0]
-  let fusionEngines = scanInfo.value.scan.modality.map((item) => item.split('-')[1])
-
+  let modality = scanInfo.value.scan.modality
+  let engine = modality=='face'&&scanInfo.value.scan.engine.length>1?'fusion':modality=='face'?scanInfo.value.scan.engine[0]:''
+  let fusionEngines = modality=='face'? scanInfo.value.scan.engine:[]
   let fusionCode = fusionEngines.length > 1 ? getFusionCode(fusionEngines) : 0
-  let engine = fusionCode != 0 ? 'fusion' : modality == 'face' ? fusionEngines[0] : null
-
-  const url = `${API.api}/scan/remote?modality=${modality}&engine=${engine}&fusion=${fusionCode}`
+  console.log(modality,engine,fusionEngines,fusionCode)
+  const url = `${API.api}/scan/remote?modality=${modality}${engine?'&engine='+engine:''}${fusionCode!=0?'&fusion='+fusionCode:''}`
 
   try {
     const data = await API.authFetch(url, {
@@ -1285,14 +1340,13 @@ const submitScan1 = async () => {
 
 //submit the scan task, update status & taskIDs, start a new process timer, redirect to process page
 const submitScan2 = async () => {
-  submittedScan.value = true
-  let modality = scanInfo.value.scan.modality[0]?.includes('face')
-    ? 'face'
-    : scanInfo.value.scan.modality[0]
-  let fusionEngines = scanInfo.value.scan.modality.map((item) => item.split('-')[1])
+  let modality = scanInfo.value.scan.modality
+  let engine = modality=='face'&&scanInfo.value.scan.engine.length>1?'fusion':modality=='face'?scanInfo.value.scan.engine[0]:''
+  let fusionEngines = modality=='face'? scanInfo.value.scan.engine:[]
   let fusionCode = fusionEngines.length > 1 ? getFusionCode(fusionEngines) : 0
-  let engine = fusionCode != 0 ? 'fusion' : modality == 'face' ? fusionEngines[0] : null
-  // console.log(modality, fusionEngines, fusionCode, engine,parseFusionCode(fusionCode))
+
+  console.log(modality,engine,fusionEngines,fusionCode)
+  submittedScan.value = true
   const input = scanInfo.value.scan.folderPath
   let requestBody = {}
   if (modality != 'face') {
