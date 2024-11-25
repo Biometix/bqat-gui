@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import router from '../router/index.ts';
-
+import { inject } from 'vue';
 
 export const useStatus = defineStore('status', () => {
     const scan = ref(0)
@@ -237,13 +237,21 @@ export const useInfo = defineStore('info', () => {
 })
 
 export const useApi = defineStore('api', () => {
-    const api = ref(import.meta.env.VITE_API.toString())
-    const apiList = ref([import.meta.env.VITE_API.toString()])
-    const username = ref(import.meta.env.VITE_USERNAME.toString())
-    const password = ref(import.meta.env.VITE_PASSWORD.toString())
-    const accessKey = ref('')
-    const landing = ref(false)
+    type Config = {
+        apiUrl?: string;
+        cookieExpire?: string;
+        login?: string;
+      };
+      
+    const config:Config= inject('config');
+    const api = ref(config.apiUrl?config.apiUrl:import.meta.env.VITE_API.toString())
+    const apiList = ref([config.apiUrl?config.apiUrl:import.meta.env.VITE_API.toString()])
+    // const username = ref(env.VITE_USERNAME?env.VITE_USERNAME:import.meta.env.VITE_USERNAME.toString())
+    // const password = ref(env.VITE_PASSWORD?env.VITE_PASSWORD:import.meta.env.VITE_PASSWORD.toString())
+    const landing = ref(config.login?config.login?false:true:import.meta.env.VITE_LOGIN? import.meta.env.VITE_LOGIN.toString()=='true'?false:true:false)
+    const accessKey = ref(landing.value?btoa('bqat'):'')
     const testTimer = ref(0)
+    const cookieExpire = ref(config.cookieExpire?config.cookieExpire:import.meta.env.VITE_COOKIE_EXPIRE.toString())
 
     const folderPath = ref('')
     const inputFolder = ref([])
@@ -255,10 +263,10 @@ export const useApi = defineStore('api', () => {
     };
 
     // Helper to set cookie
-    const setCookie = (name: string, value: string, hours: number) => {
-        const expires = new Date(Date.now() + hours * 60 * 60 * 1000).toUTCString();
+    const setCookie = (name: string, value: string, sec: number) => {
+        const expires = new Date(Date.now() + sec * 1000).toUTCString();
         let encodedValue = btoa(value);
-        document.cookie = `${name}=${encodedValue}; expires=${expires}; path=/; Secure`;
+        document.cookie = `${name}=${encodedValue}; expires=${expires}; path=/;`;
     };
 
     // Helper to get unexpired cookie
@@ -275,21 +283,18 @@ export const useApi = defineStore('api', () => {
     // Create a wrapper around fetch to automatically add the Authorization header
     const authFetch = async (url, options: RequestInit = {}) => {
         let token = getCookie('accessToken');
-
         if (!token && accessKey.value) {
-            setCookie('accessToken', accessKey.value, 1); // Store new token for 6 hours
+            setCookie('accessToken', accessKey.value, cookieExpire.value); // Store new token for 10 min
             token = accessKey.value;
         }
 
         options.headers = options.headers || {};
         options.headers['Authorization'] = `Bearer ${token}`;
         options.credentials = 'include';
-
         // const timeoutId = setTimeout(() => Promise.reject(new Error('Request timed out')), 600000);
 
         const fetchPromise = fetch(url, options).then(async response => {
             // clearTimeout(timeoutId);  // Clear timeout when request completes
-
             if (response.status === 403) {
                 clearCookie('accessToken');
                 console.log('back to landing page!');
@@ -297,7 +302,7 @@ export const useApi = defineStore('api', () => {
                     router.push({ path: '/landing' });
                 }
             } else if (token) {
-                setCookie('accessToken', atob(token), 1); // Store new token
+                setCookie('accessToken', atob(token), cookieExpire.value); // Store new token
             }
 
             if (!response.ok) {
@@ -411,6 +416,6 @@ export const useApi = defineStore('api', () => {
         inputTree.value = nestedStructure ? nestedStructure[0] ?.children : []
     }
 
-    return { testTimer, accessKey, landing, setCookie, getCookie, api, apiList, updateApi, folderPath, updateFolderPath, updateInputFolder, inputFolder, inputTree, updateInputTree, password, username, authFetch }
+    return { testTimer, accessKey, landing, cookieExpire, setCookie, getCookie, api, apiList, updateApi, folderPath, updateFolderPath, updateInputFolder, inputFolder, inputTree, updateInputTree, authFetch }
 })
 

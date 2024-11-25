@@ -140,10 +140,10 @@
           :style="{
             height:
               showPreview || showOutlier || showReport
-                ? '500px'
+                ? '450px'
                 : isWideWindow
-                  ? 'calc(100vh - 425px)'
-                  : 'calc(100vh - 525px)'
+                  ? 'calc(100vh - 300px)'
+                  : 'calc(100vh - 450px)'
           }"
         >
           <div
@@ -151,10 +151,10 @@
             :style="{
               height:
                 showPreview || showOutlier || showReport
-                  ? '450px'
+                  ? '400px'
                   : isWideWindow
-                    ? 'calc(100vh - 500px)'
-                    : 'calc(100vh - 625px)'
+                    ? 'calc(100vh - 525px)'
+                    : 'calc(100vh - 620px)'
             }"
           >
             <!-- Task Board Section -->
@@ -392,7 +392,7 @@
             </div>
           </div>
           <!-- Operation Section -->
-          <a-row justify="center" style="margin-block: 1rem" :gutter="20">
+          <a-row justify="center" style="margin-block: 2rem" :gutter="20">
             <!-- Delete Item -->
             <a-col :span="2">
               <a-button
@@ -558,10 +558,13 @@
                 <a-collapse v-if="csvlog.length > 0">
                   <a-collapse-panel>
                     <template #header>
-                      <a-tooltip placement="left" title="Only the first 50 entries displayed if there are more.">
+                      <a-tooltip
+                        placement="left"
+                        title="Only the first 50 entries displayed if there are more."
+                      >
                         <div>Task log</div>
                       </a-tooltip>
-                      </template>
+                    </template>
                     <div class="table-container">
                       <table>
                         <thead>
@@ -2698,8 +2701,8 @@ th {
 
 .processCard {
   width: 100%;
-  min-height: 750px;
-  height: calc(100vh - 200px);
+  min-height: 700px;
+  /* height: calc(100vh - 200px); */
 }
 
 .processBoard {
@@ -2707,15 +2710,13 @@ th {
   margin-block: 1rem;
   display: flex;
   width: 100%;
-  /* height: calc(100vh - 500px); */
-  min-height: 500px;
+  min-height: 400px;
 }
 
 .processTask {
   display: flex;
   width: 100%;
-  min-height: 450px;
-  /* height: calc(100vh - 650px); */
+  min-height: 400px;
 }
 
 .task-card-container {
@@ -2803,11 +2804,7 @@ i {
     width: 98%;
   }
   .processCard {
-    min-height: 800px;
-  }
-  .processBoard {
-    /* height: calc(100vh - 450px); */
-    /* min-height: 475px; */
+    min-height: 825px;
   }
   .processTask {
     /* height: calc(100vh - 500px); */

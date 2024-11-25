@@ -167,8 +167,9 @@
                 <a-spin
                   v-if="
                     resultStatus.result == 1 &&
-                    tabItem.toLowerCase() == '' &&                     
-                    item?.id&& item.id.length > 0 &&
+                    tabItem.toLowerCase() == '' &&
+                    item?.id &&
+                    item.id.length > 0 &&
                     !item?.html
                   "
                   size="middle"
@@ -319,9 +320,10 @@
                         "
                     /></a-tooltip>
                     <a-tooltip title="Download Report">
+                      <SyncOutlined v-if="getHtml==item.id" spin />
                       <DownloadOutlined
+                        v-else
                         key="download"
-                        v-if="!getHtml"
                         @click="
                           downloadHtml(
                             resultInfo.result.generatedReports.filter(
@@ -329,8 +331,8 @@
                             )[0]
                           )
                         "
-                    /></a-tooltip>
-                    <SyncOutlined v-if="getHtml" spin />
+                      />
+                    </a-tooltip>
                   </template>
                   <a-card-meta
                     style="
@@ -422,8 +424,9 @@
             </div>
           </a-tab-pane>
         </a-tabs>
+        <a-divider />
         <!-- Stop Task Section -->
-        <a-row justify="center" style="margin-block: 1rem">
+        <a-row justify="center" style="margin-block: 2rem">
           <a-col :span="8">
             <a-button
               style="width: 100%; height: 100%; min-width: 200px"
@@ -621,7 +624,17 @@ const openReportInfo = (item) => {
       h(
         'p',
         'Engine: ' +
-          `${item.engine ? (item.engine == 'fusion' ? 'Fusion (' + parseFusionCode(item.fusion).map(item=>item.toUpperCase()).join(', ') + ')': item.engine.toUpperCase()) : 'NA'}`
+          `${
+            item.engine
+              ? item.engine == 'fusion'
+                ? 'Fusion (' +
+                  parseFusionCode(item.fusion)
+                    .map((item) => item.toUpperCase())
+                    .join(', ') +
+                  ')'
+                : item.engine.toUpperCase()
+              : 'NA'
+          }`
       ),
       h('p', 'Data: ' + `${item.num > 0 ? item.num : 'NA'}`),
       h('p', 'Downsample: ' + item.downsample.toString() + '%'),
@@ -1011,15 +1024,15 @@ const openHtml = (item) => {
   window.open(url, '_blank')
 }
 
-const getHtml = ref(false)
+const getHtml = ref('')
 //Tool to download the html file
 const downloadHtml = async (item) => {
-  getHtml.value = true
+  getHtml.value = item.id
   // console.log('downloadHtml', item.html)
   item.blob = await generateReportBlob(item.id)
   const url = URL.createObjectURL(item.blob)
 
-  getHtml.value = false
+  getHtml.value = ''
   // Create a link element
   const downloadLink = document.createElement('a')
 
@@ -1080,14 +1093,14 @@ function formatDate(date) {
   width: 100%;
   overflow: hidden;
   min-height: 750px;
-  height: calc(100vh - 200px);
+  height: calc(100vh - 250px);
 }
 .outputTab {
   margin-block: 1rem;
   display: flex;
   width: 100%;
-  height: calc(100vh - 625px);
-  min-height: 450px;
+  height: calc(100vh - 600px);
+  min-height: 425px;
 }
 .res-card-container {
   display: flex;
@@ -1095,7 +1108,7 @@ function formatDate(date) {
   height: 100%;
   width: 100%;
   margin-block: 1rem;
-  padding-inline: 30px;
+  padding-inline: 35px;
   padding-block: 1rem;
   border: 1px dotted grey;
   border-radius: 10px;
@@ -1136,7 +1149,7 @@ i {
 
 @media (min-width: 1024px) {
   .resItem {
-    min-height: 400px;
+    min-height: 500px;
   }
 
   .res-card-container {
@@ -1147,11 +1160,11 @@ i {
     margin-top: 10px;
   }
   .outputCard {
-    min-height: 780px;
+    min-height: 800px;
   }
   .outputTab {
-    height: calc(100vh - 550px);
-    min-height: 500px;
+    height: calc(100vh - 600px);
+    min-height: 450px;
   }
 }
 

@@ -13,20 +13,25 @@ const version = ref('NA')
 
 const validateKey = async () => {
   loading.value = 1
-  loading.value = -1
   try {
-    const data = await API.authFetch(`${API.api}/info`, {
-      method: 'GET'
+    const res = await fetch(`${API.api}/validate`, {
+      method: 'POST',
+      body:API.accessKey
     })
-    console.log(data)
-    loading.value = 2
-    await finishLanding()
+    const data=await res.json()
+    if (data) {
+      loading.value = 2
+      await finishLanding()
+    } else {
+      loading.value = -1
+    }
   } catch (error) {
+    loading.value = -1
     console.log(error)
   }
 }
 const finishLanding = async () => {
-  API.setCookie('accessToken', API.accessKey, 1) // Store new token for 6 hours
+  API.setCookie('accessToken', API.accessKey, API.cookieExpire) // Store new token for 10 min
   status.updateStatus('app', 1)
   await initialiseTask(API, info, status)
   await checkRunning(API, info, status)
@@ -35,6 +40,9 @@ const finishLanding = async () => {
 }
 onMounted(async () => {
   //Public info endpoint
+  if(API.landing){
+    router.push('/')
+  }
   API.landing = true
   fetch(
     new Request(`${API.api}/info`, {
