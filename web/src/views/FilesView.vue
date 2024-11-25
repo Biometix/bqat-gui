@@ -240,7 +240,7 @@
         <!-- </a-spin> -->
         <a-divider />
         <a-spin :spinning="showUploadSpinner">
-          <a-flex justify="center" style="margin-block: 0rem">
+          <a-flex justify="center" style="margin-block: 2rem">
             <a-upload-dragger
               style="width: 95%; margin: 0 auto"
               name="file"
@@ -555,14 +555,14 @@ function capitalizeFirstLetter(str: string) {
   width: 100%;
   overflow: hidden;
   min-height: 750px;
-  height: calc(100vh - 200px);
+  height: calc(100vh - 250px);
 }
 .filesTab {
   margin-block: 1rem;
   display: flex;
   width: 100%;
-  height: calc(100vh - 650px);
-  min-height: 400px;
+  height: calc(100vh - 600px);
+  min-height: 425px;
 }
 
 .file-container {
@@ -637,7 +637,7 @@ i {
 
 @media (min-width: 1024px) {
   .resItem {
-    min-height: 400px;
+    min-height: 500px;
   }
 
   .file-container {
@@ -649,7 +649,7 @@ i {
     margin-top: 10px;
   }
   .filesCard {
-    min-height: 780px;
+    min-height: 800px;
   }
   .filesTab {
     height: calc(100vh - 600px);

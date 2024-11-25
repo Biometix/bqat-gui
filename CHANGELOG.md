@@ -1,3 +1,11 @@
+<a name="v0.3.8"></a>
+# v0.3.8 (2024-11-21)
+
+## 🚀 Features
+
+- 💡 Support runtime environment variables
+
+
 <a name="v0.3.7"></a>
 # v0.3.7 (2024-10-29)
 

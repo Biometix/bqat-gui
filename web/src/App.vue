@@ -15,7 +15,10 @@ import { initialiseTask, checkRunning } from './components/utils.ts'
 import { Modal, Input } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
+import { inject } from 'vue';
 
+
+const env = inject('env');
 const openSetting = ref(false)
 const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)')
 const darkSetting = {
@@ -293,14 +296,13 @@ watch(
 )
 onMounted(async () => {
   document.documentElement.setAttribute('data-theme', prefersDarkScheme.matches ? 'dark' : 'light')
-  if (!API.getCookie('accessToken')) {
-    API.landing = true
+  if ((!API.getCookie('accessToken')||API.getCookie('accessToken')==null)&&!API.landing) {
+    console.log(API.getCookie('accessToken'),API.landing)
     router.push({ path: '/landing' })
   } else {
     try {
       currentController = new AbortController()
       const res = await requestUrl(currentController.signal)
-
       if (res) {
         status.updateStatus('app', 1)
         await initialiseTask(API, info, status)
@@ -309,6 +311,7 @@ onMounted(async () => {
         status.updateStatus('app', -1)
         openNotificationWithIcon('hostError')
       }
+      API.landing = false
     } catch (error) {
       console.error('Error in onMounted:', error)
     }

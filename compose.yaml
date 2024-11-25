@@ -10,6 +10,8 @@ services:
       context: web
     ports:
       - 9949:9949
+    volumes:
+      - ./config.json:/usr/share/nginx/html/config.json
     depends_on:
       - api
     profiles:
@@ -34,6 +36,7 @@ services:
     depends_on:
       - mongo
       - redis
+    env_file: .env
     environment:
       MGO_URL: mongodb://root:admin@mongo:27017/
       SCAN_DB: scan
@@ -41,7 +44,6 @@ services:
       RDS_URL: redis://redis:6379/
       QUEUE_DB: 0
       DATA: data/
-      WEB: http://localhost:9949
     ports:
       - 8848:8848
     volumes:
