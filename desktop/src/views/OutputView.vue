@@ -320,7 +320,7 @@
                         "
                     /></a-tooltip>
                     <a-tooltip title="Download Report">
-                      <SyncOutlined v-if="getHtml==item.id" spin />
+                      <SyncOutlined v-if="getHtml == item.id" spin />
                       <DownloadOutlined
                         v-else
                         key="download"
@@ -426,7 +426,7 @@
         </a-tabs>
         <a-divider />
         <!-- Stop Task Section -->
-        <a-row justify="center" style="margin-block: 2rem">
+        <a-row justify="center" class="stopClass">
           <a-col :span="8">
             <a-button
               style="width: 100%; height: 100%; min-width: 200px"
@@ -1087,7 +1087,7 @@ function formatDate(date) {
 .outputContainer {
   width: 80%;
   max-width: 1200px;
-  margin-top: 1rem;
+  margin-top: 15px;
 }
 .outputCard {
   width: 100%;
@@ -1107,8 +1107,8 @@ function formatDate(date) {
   flex-wrap: wrap;
   height: 100%;
   width: 100%;
-  margin-block: 1rem;
-  padding-inline: 35px;
+  margin-block: 5px;
+  padding-inline: 26px;
   padding-block: 1rem;
   border: 1px dotted grey;
   border-radius: 10px;
@@ -1116,7 +1116,7 @@ function formatDate(date) {
   background-color: rgba(245, 245, 245, 0.4);
 }
 .resItem {
-  margin-block: 1rem;
+  margin-block: 5px;
   height: 100%;
   width: 100%;
   display: flex;
@@ -1141,6 +1141,10 @@ function formatDate(date) {
 i {
   transition: opacity 0.3s ease;
 }
+
+.stopClass {
+  margin-block: 35px;
+}
 @media (max-width: 1024px) {
   i {
     display: none;
@@ -1149,9 +1153,11 @@ i {
 
 @media (min-width: 1024px) {
   .resItem {
-    min-height: 500px;
+    min-height: 400px;
   }
-
+  .stopClass {
+    margin-block: 40px;
+  }
   .res-card-container {
     min-height: 400px;
     padding-inline: 20px;

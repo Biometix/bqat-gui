@@ -248,6 +248,7 @@ export const useApi = defineStore('api', () => {
     const apiList = ref([config.apiUrl?config.apiUrl:import.meta.env.VITE_API.toString()])
     // const username = ref(env.VITE_USERNAME?env.VITE_USERNAME:import.meta.env.VITE_USERNAME.toString())
     // const password = ref(env.VITE_PASSWORD?env.VITE_PASSWORD:import.meta.env.VITE_PASSWORD.toString())
+    const login = config.login?config.login:import.meta.env.VITE_LOGIN.toString()
     const landing = ref(config.login?config.login?false:true:import.meta.env.VITE_LOGIN? import.meta.env.VITE_LOGIN.toString()=='true'?false:true:false)
     const accessKey = ref(landing.value?btoa('bqat'):'')
     const testTimer = ref(0)
@@ -416,6 +417,6 @@ export const useApi = defineStore('api', () => {
         inputTree.value = nestedStructure ? nestedStructure[0] ?.children : []
     }
 
-    return { testTimer, accessKey, landing, cookieExpire, setCookie, getCookie, api, apiList, updateApi, folderPath, updateFolderPath, updateInputFolder, inputFolder, inputTree, updateInputTree, authFetch }
+    return { testTimer, accessKey, landing, login, cookieExpire, setCookie, getCookie, api, apiList, updateApi, folderPath, updateFolderPath, updateInputFolder, inputFolder, inputTree, updateInputTree, authFetch }
 })
 

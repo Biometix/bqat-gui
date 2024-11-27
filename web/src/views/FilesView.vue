@@ -68,7 +68,7 @@
                         justify-content: center;
                       "
                       @click="
-                      showDeleteConfirm(
+                        showDeleteConfirm(
                           tabIndex,
                           API.inputTree.findIndex((item) => item.title == tabItem),
                           item1.value
@@ -240,10 +240,11 @@
         <!-- </a-spin> -->
         <a-divider />
         <a-spin :spinning="showUploadSpinner">
-          <a-flex justify="center" style="margin-block: 2rem">
+          <a-flex justify="center" class="uploader">
             <a-upload-dragger
               style="width: 95%; margin: 0 auto"
               name="file"
+              :disabled="currentKey == 1"
               :showUploadList="false"
               accept=".zip,.tar,.gz"
               :action="API.api + '/dataset'"
@@ -269,6 +270,8 @@ import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
 
 const iconNames = ['bi bi-cloud-arrow-up', 'bi bi-hdd']
+const windowWidth = ref(window.innerWidth)
+const isWideWindow = computed(() => windowWidth.value >= 1024)
 
 const API = useApi()
 const status = useStatus()
@@ -372,18 +375,22 @@ const openNotificationWithIcon = (type: string) => {
       placement: 'top',
       duration: 3
     })
-  }else if (type === 'notZip') {
+  } else if (type === 'notZip') {
     notification['error']({
-      message: 'Dropped File Is Not Zip Folder',
-      description: 'Please select Zip folder.',
+      message: 'Dropped File Is Not Zip File',
+      description: 'Please select Zip file.',
       placement: 'top'
     })
   }
 }
 
 const dropZip = (e) => {
-  // console.log(e.dataTransfer.files[0])
-  if(e.dataTransfer.files[0].type!=='application/zip'){
+  e.preventDefault() // Prevent default behavior (e.g., opening the file)
+  // Access the dragged files
+  const file = e.dataTransfer.files[0]
+
+  if (file.name.includes('.zip') || file.type == 'application/zip') {
+  } else {
     openNotificationWithIcon('notZip')
   }
 }
@@ -548,7 +555,7 @@ function capitalizeFirstLetter(str: string) {
 .filesContainer {
   width: 80%;
   max-width: 1200px;
-  margin-top: 1rem;
+  margin-top: 15px;
 }
 
 .filesCard {
@@ -568,8 +575,8 @@ function capitalizeFirstLetter(str: string) {
 .file-container {
   display: flex;
   flex-wrap: wrap;
-  margin-block: 1rem;
-  padding-inline: 35px;
+  margin-block: 5px;
+  padding-inline: 26px;
   padding-block: 1rem;
   height: 100%;
   width: 100%;
@@ -580,7 +587,7 @@ function capitalizeFirstLetter(str: string) {
 }
 
 .resItem {
-  margin-block: 1rem;
+  margin-block: 5px;
   height: 100%;
   width: 100%;
   display: flex;
@@ -605,6 +612,10 @@ function capitalizeFirstLetter(str: string) {
 
 i {
   transition: opacity 0.3s ease;
+}
+
+.uploader {
+  margin-block: 30px;
 }
 
 [data-theme='dark'] {
@@ -636,8 +647,11 @@ i {
 }
 
 @media (min-width: 1024px) {
+  .uploader {
+    margin-block: 35px;
+  }
   .resItem {
-    min-height: 500px;
+    min-height: 400px;
   }
 
   .file-container {
