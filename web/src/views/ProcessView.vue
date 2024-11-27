@@ -61,7 +61,7 @@
         </a-row>
 
         <!-- Stop Task Section -->
-        <a-row justify="center" style="margin-block: 2rem" gutter="30">
+        <a-row justify="center" style="margin-block: 35px" gutter="30">
           <a-col :span="6">
             <a-button
               :disabled="
@@ -220,7 +220,7 @@
                           />
                         </div>
                         <div
-                          style="text-align: center; height: 40px; padding-top: 2px; width: 100%"
+                          style="text-align: center; padding-inline: 10px;height: 40px; padding-top: 2px; width: 100%"
                         >
                           <p
                             style="
@@ -229,6 +229,7 @@
                               white-space: nowrap;
                               width: 100%;
                               font-size: medium;
+                              padding-left: 5px
                             "
                           >
                             Input: {{ truncateString(item.input) }} | Modality:
@@ -268,12 +269,12 @@
                       class="checkbox-hidden"
                     >
                       <div
-                        style="display: flex; flex-direction: row; height: 35px; margin-top: -15px"
+                        style="display: flex; flex-direction: row; height: 35px; margin-top: -12px"
                       >
                         <h3
                           style="
                             padding-inline: 6px;
-                            padding-top: 4px;
+                            align-self: center;
                             padding-right: 10px;
                             text-align: end;
                             font-size: medium;
@@ -294,7 +295,7 @@
                           size="medium"
                           @click="uploadCsv"
                           danger
-                          style="width: 80%; text-overflow: ellipsis; overflow: hidden"
+                          style="width: 80%; text-overflow: ellipsis; overflow: hidden; margin-top: -2px"
                           :disabled="
                             tip !== false ||
                             processStatus.outlier == 1 ||
@@ -392,7 +393,7 @@
             </div>
           </div>
           <!-- Operation Section -->
-          <a-row justify="center" style="margin-block: 2rem" :gutter="20">
+          <a-row justify="center" style="margin-block: 30px" :gutter="20">
             <!-- Delete Item -->
             <a-col :span="2">
               <a-button

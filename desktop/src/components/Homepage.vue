@@ -94,32 +94,36 @@ const info = useInfo();
 </template>
 
 <style scoped>
-@media (min-width: 1024px) {
-  p {
-    font-size: 1.1rem;
+p {
     padding-left: 10px;
   }
 
-}
 .taskItem{
   /* height:35vh */
   height: fit-content
 }
 .introItem {
+  font-size: 23px;
   text-decoration: none;
   font-weight: 500;
   color: inherit;
-  border-radius: 5px;
+  border-radius: 10px;
   padding: 5px 10px;
 }
 .introItem:hover {
     background-color: rgba(165, 162, 162, 0.384);
-    border-radius: 5px;
+    border-radius: 10px;
     padding: 5px 10px;
   }
 .homeContainer{
-  margin-top: 2rem;
+  margin-top: 25px;
+  /* margin-top: 2rem; */
   /* min-height: calc(100vh-200px); */
+}
+@media (min-width: 1024px) {
+  p {
+    font-size: 1.1rem;
+  }
 
 }
 </style>

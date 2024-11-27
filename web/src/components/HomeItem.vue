@@ -38,7 +38,6 @@ i {
 }
 
 h2 {
-  font-size: 1.4rem;
   font-weight: 500;
   margin-bottom: 0.4rem;
   color: var(--color-heading);

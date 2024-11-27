@@ -1,5 +1,5 @@
 {
     "apiUrl": "http://localhost:8848",
     "cookieExpire": 600,
-    "login": false
+    "login": true
 }
