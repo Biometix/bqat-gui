@@ -31,42 +31,26 @@ html {
   overflow-y: scroll;
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: rgba(165, 162, 162, 0.384);
-    border-radius: 10px;
-    padding: 8px 20px;
-  }
-
+a:hover {
+  background-color: rgba(165, 162, 162, 0.384);
+  /* border-radius: 10px; */
+  /* padding: 8px 20px; */
 }
 
 @media (min-width: 1024px) {
   #app {
     margin: 0 6rem;
     padding: 0 1rem;
+    min-width: 1000px;
   }
   .body {
     margin-top: 1rem;
   }
 }
-/* WebKit browsers (Chrome, Safari, etc.) */
-::-webkit-scrollbar {
-  width: 6px;   /* Thinner scrollbar width */
-  height: 6px;  /* Thinner scrollbar height for horizontal bars */
-}
 
-/* The "thumb" of the scrollbar (the draggable part) */
-::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.4); /* Darker color for the thumb */
-  border-radius: 10px;                  /* Rounded corners */
-  border: 1px solid rgba(255, 255, 255, 0.3); /* Optional border to improve contrast */
+h3{
+  font-size: 20px;
 }
-
-/* The scrollbar track (the area below or around the thumb) */
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1); /* Light background color */
-}
-
 .scroll-container {
   -webkit-overflow-scrolling: touch;
 }

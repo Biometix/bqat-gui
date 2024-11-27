@@ -15,10 +15,8 @@ import { initialiseTask, checkRunning } from './components/utils.ts'
 import { Modal, Input } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
-import { inject } from 'vue';
 
 
-const env = inject('env');
 const openSetting = ref(false)
 const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)')
 const darkSetting = {
@@ -327,9 +325,9 @@ onMounted(async () => {
           <template #title>
             <span>{{ version }}</span>
           </template>
-          <img v-if="!API.landing" alt="BQAT logo" class="logo" src="./assets/logo-bqat.png" />
+          <img v-if="!API.landing||!API.login" alt="BQAT logo" class="logo" src="./assets/logo-bqat.png" />
         </a-tooltip>
-        <div v-if="!API.landing" style="margin-bottom: 8px; margin-left: 20px">
+        <div v-if="!API.landing||!API.login" style="margin-bottom: 8px; font-size: 25px">
           <RouterLink to="/">Home</RouterLink>
           <RouterLink to="/input">Input</RouterLink>
           <RouterLink to="/results">Results</RouterLink>
@@ -342,12 +340,12 @@ onMounted(async () => {
   <body class="body">
     <RouterView />
     <a-float-button
-      v-if="!API.landing"
+      v-if="!API.landing||!API.login"
       :badge="{ count: info.process.taskStatus.filter((item) => item.status == 1).length }"
       shape="square"
       @click="goToTaskBoard"
       :style="{
-        right: '70px',
+        right: '55px',
         top: '70px',
         width: '140px',
         height: '40px'
@@ -369,7 +367,7 @@ onMounted(async () => {
       </template>
     </a-float-button>
 
-    <a-float-button-group v-if="!API.landing" trigger="hover" type="primary" class="floatButtons">
+    <a-float-button-group v-if="!API.landing||!API.login" trigger="hover" type="primary" class="floatButtons">
       <template #icon>
         <a-badge v-if="!validApi" color="red" style="position: absolute; top: 0px; left: 20px" />
         <SettingOutlined
@@ -443,7 +441,7 @@ nav {
   position: relative;
   z-index: 10;
   width: 100%;
-  font-size: 20px;
+  /* font-size: 20px; */
   text-align: center;
   margin-top: 1rem;
 }
@@ -459,7 +457,8 @@ nav a.router-link-exact-active:hover {
 
 nav a {
   display: inline-block;
-  padding: 0 1rem;
+  padding: 0 15px;
+  border-radius: 10px; 
   /* border-left: 1px solid var(--color-border); */
 }
 
@@ -483,6 +482,7 @@ nav a:first-of-type {
     font-size: 1.5rem;
     height: 100px;
     max-width: 1200px;
+    min-width: 600px;
     width: 80%;
   }
   header {

@@ -70,11 +70,11 @@ onMounted(async () => {
   <a-flex
     v-if="API.landing"
     vertical
-    justify="top"
-    style="width: 100%; min-width: 400px; margin-top: 0rem"
+    justify="center" align="center"
+    style="width: 100%; min-width: 400px; align-self: center"
   >
     <a-row style="align-self: center">
-      <a-flex justify="center" align="center" vertical style="margin-bottom: 5rem">
+      <a-flex justify="center" align="center" vertical style="margin-top: -10rem;margin-bottom: 5rem">
         <!-- <img alt="BQAT logo" class="landing" src="../assets/logo-bqat.png" /> -->
         <h1 class="logo">BQAT</h1>
         <h3>Biometric Quality Assessment Tool</h3>
@@ -89,6 +89,7 @@ onMounted(async () => {
           :placeholder="loading == -1 ? 'accesskey error' : 'Please enter your access key here'"
           allowClear
           size="large"
+          autofocus
           @pressEnter="validateKey"
         />
       </a-row>

@@ -324,7 +324,15 @@
               <h2 style="margin-block: 10px">
                 <span class="bi bi-check2-square"></span> Select Biometircs Modality / Engine:
               </h2>
-              <a-radio-group size="large" v-model:value="scanInfo.scan.modality" @change="scanInfo.scan.modality=='face'?scanInfo.scan.engine=['bqat']:scanInfo.scan.engine=['default']">
+              <a-radio-group
+                size="large"
+                v-model:value="scanInfo.scan.modality"
+                @change="
+                  scanInfo.scan.modality == 'face'
+                    ? (scanInfo.scan.engine = ['bqat'])
+                    : (scanInfo.scan.engine = ['default'])
+                "
+              >
                 <a-radio-button value="face">Face</a-radio-button>
                 <a-radio-button value="fingerprint">Fingerprint</a-radio-button>
                 <a-radio-button value="iris">Iris</a-radio-button>
@@ -603,7 +611,15 @@
               <h2 style="margin-bottom: 10px">
                 <span class="bi bi-check2-square"></span> Select Biometrics Modality / Engine:
               </h2>
-              <a-radio-group size="large" v-model:value="scanInfo.scan.modality" @change="scanInfo.scan.modality=='face'?scanInfo.scan.engine=['bqat']:scanInfo.scan.engine=['default']">
+              <a-radio-group
+                size="large"
+                v-model:value="scanInfo.scan.modality"
+                @change="
+                  scanInfo.scan.modality == 'face'
+                    ? (scanInfo.scan.engine = ['bqat'])
+                    : (scanInfo.scan.engine = ['default'])
+                "
+              >
                 <a-radio-button value="face">Face</a-radio-button>
                 <a-radio-button value="fingerprint">Fingerprint</a-radio-button>
                 <a-radio-button value="iris">Iris</a-radio-button>
@@ -710,8 +726,8 @@ const openNotificationWithIcon = (type: string) => {
     })
   } else if (type === 'notZip') {
     notification['error']({
-      message: 'Dropped File Is Not Zip Folder',
-      description: 'Please select Zip folder.',
+      message: 'Dropped File Is Not Zip File',
+      description: 'Please select Zip file.',
       placement: 'top'
     })
   }
@@ -826,7 +842,11 @@ const modalityOptions = computed(() => {
         label: 'BIQT'
       }
     ]
-  } else if (scanInfo.value.scan.modality == 'iris'|| scanInfo.value.scan.modality == 'fingerprint' || scanInfo.value.scan.modality == 'speech') {
+  } else if (
+    scanInfo.value.scan.modality == 'iris' ||
+    scanInfo.value.scan.modality == 'fingerprint' ||
+    scanInfo.value.scan.modality == 'speech'
+  ) {
     return [
       {
         value: 'default',
@@ -834,7 +854,6 @@ const modalityOptions = computed(() => {
       }
     ]
   }
-
 })
 // const cascadeModalityOptions = ref<CascaderProps['options']>([
 //   {
@@ -1282,11 +1301,16 @@ const submitScan1 = async () => {
     formData.append(`files`, file.originFileObj, file.name)
   })
   let modality = scanInfo.value.scan.modality
-  let engine = modality=='face'&&scanInfo.value.scan.engine.length>1?'fusion':modality=='face'?scanInfo.value.scan.engine[0]:''
-  let fusionEngines = modality=='face'? scanInfo.value.scan.engine:[]
+  let engine =
+    modality == 'face' && scanInfo.value.scan.engine.length > 1
+      ? 'fusion'
+      : modality == 'face'
+        ? scanInfo.value.scan.engine[0]
+        : ''
+  let fusionEngines = modality == 'face' ? scanInfo.value.scan.engine : []
   let fusionCode = fusionEngines.length > 1 ? getFusionCode(fusionEngines) : 0
-  console.log(modality,engine,fusionEngines,fusionCode)
-  const url = `${API.api}/scan/remote?modality=${modality}${engine?'&engine='+engine:''}${fusionCode!=0?'&fusion='+fusionCode:''}`
+  console.log(modality, engine, fusionEngines, fusionCode)
+  const url = `${API.api}/scan/remote?modality=${modality}${engine ? '&engine=' + engine : ''}${fusionCode != 0 ? '&fusion=' + fusionCode : ''}`
 
   try {
     const data = await API.authFetch(url, {
@@ -1341,11 +1365,16 @@ const submitScan1 = async () => {
 //submit the scan task, update status & taskIDs, start a new process timer, redirect to process page
 const submitScan2 = async () => {
   let modality = scanInfo.value.scan.modality
-  let engine = modality=='face'&&scanInfo.value.scan.engine.length>1?'fusion':modality=='face'?scanInfo.value.scan.engine[0]:''
-  let fusionEngines = modality=='face'? scanInfo.value.scan.engine:[]
+  let engine =
+    modality == 'face' && scanInfo.value.scan.engine.length > 1
+      ? 'fusion'
+      : modality == 'face'
+        ? scanInfo.value.scan.engine[0]
+        : ''
+  let fusionEngines = modality == 'face' ? scanInfo.value.scan.engine : []
   let fusionCode = fusionEngines.length > 1 ? getFusionCode(fusionEngines) : 0
 
-  console.log(modality,engine,fusionEngines,fusionCode)
+  console.log(modality, engine, fusionEngines, fusionCode)
   submittedScan.value = true
   const input = scanInfo.value.scan.folderPath
   let requestBody = {}
@@ -1475,8 +1504,12 @@ const clearTask = async () => {
   }
 }
 const dropZip = (e) => {
-  // console.log(e.dataTransfer.files[0])
-  if (e.dataTransfer.files[0].type !== 'application/zip') {
+  e.preventDefault() // Prevent default behavior (e.g., opening the file)
+  // Access the dragged files
+  const file = e.dataTransfer.files[0]
+
+  if (file.name.includes('.zip') || file.type == 'application/zip') {
+  } else {
     openNotificationWithIcon('notZip')
   }
 }
@@ -1682,7 +1715,7 @@ const getETA = async (tid) => {
 .scanContainer {
   width: 80%;
   max-width: 1200px;
-  margin-top: 1rem;
+  margin-top: 10px;
 }
 
 .customStyle1 {
@@ -1728,7 +1761,7 @@ i {
   width: 100%;
   height: 100%;
   background-color: rgba(242, 242, 242, 0.3);
-  border-radius: 15px;
+  border-radius: 10px;
   cursor: not-allowed;
   pointer-events: auto;
 }
@@ -1800,7 +1833,7 @@ i {
 }
 @media (min-width: 1024px) {
   .scanContainer {
-    margin-top: 0rem;
+    margin-top: 0px;
   }
 }
 @media (max-width: 1024px) {
