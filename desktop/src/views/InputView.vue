@@ -1231,8 +1231,9 @@ const convertImageBackend = async (file, name) => {
       },
       body: JSON.stringify(requestBody)
     })
-
-    scanInfo.value.scan.converted.push({ name: name, data: data })
+    if (data) {
+      scanInfo.value.scan.converted.push({ name: name, data: data })
+    }
   } catch (error) {
     console.error('Failed to convert Image')
   }
@@ -1317,45 +1318,46 @@ const submitScan1 = async () => {
       method: 'POST',
       body: formData
     })
-
-    const input = `temp/+${data.tid}`
-    const newTaskStatus = {
-      tid: data.tid,
-      collection: '',
-      name: data.tid.substring(0, 5),
-      status: 1,
-      percent: 0,
-      eta: 0,
-      num: 0,
-      total: scanInfo.value.scan.validFileList.length,
-      mode: modality,
-      engine: engine,
-      input: input,
-      modified: '',
-      elapse: 0,
-      logs: [],
-      options: {
+    if (data) {
+      const input = `temp/+${data.tid}`
+      const newTaskStatus = {
+        tid: data.tid,
+        collection: '',
+        name: data.tid.substring(0, 5),
+        status: 1,
+        percent: 0,
+        eta: 0,
+        num: 0,
+        total: scanInfo.value.scan.validFileList.length,
         mode: modality,
         engine: engine,
-        source: [],
-        target: null,
-        confidence: null,
-        pattern: null,
-        type: null,
-        batch: null,
-        fusion: fusionCode
+        input: input,
+        modified: '',
+        elapse: 0,
+        logs: [],
+        options: {
+          mode: modality,
+          engine: engine,
+          source: [],
+          target: null,
+          confidence: null,
+          pattern: null,
+          type: null,
+          batch: null,
+          fusion: fusionCode
+        }
       }
+
+      const timeStamp = Date.now()
+      scanInfo.value.process.timer = 0
+      scanInfo.value.process.timeRecord = 0
+
+      scanInfo.value.process.taskStatus.unshift(newTaskStatus)
+      scanStatus.updateStatus('process', 1)
+      clearScan()
+      scanStatus.updateStatus('scan', 2)
+      router.push({ path: '/tasks', query: { timeStamp } })
     }
-
-    const timeStamp = Date.now()
-    scanInfo.value.process.timer = 0
-    scanInfo.value.process.timeRecord = 0
-
-    scanInfo.value.process.taskStatus.unshift(newTaskStatus)
-    scanStatus.updateStatus('process', 1)
-    clearScan()
-    scanStatus.updateStatus('scan', 2)
-    router.push({ path: '/tasks', query: { timeStamp } })
   } catch (error) {
     console.error('Error submitting task:', error)
     submittedScan.value = false
@@ -1411,46 +1413,46 @@ const submitScan2 = async () => {
     if (data) {
       clearTimeout(timeoutId) // Clear timeout when request completes
       //do status check
-    }
-    const newTaskStatus = {
-      tid: data.tid,
-      collection: '',
-      name: data.tid.substring(0, 5),
-      status: 1,
-      percent: 0,
-      eta: 0,
-      num: 0,
-      total: scanInfo.value.scan.length,
-      mode: modality,
-      engine: engine,
-      input: input,
-      modified: '',
-      elapse: 0,
-      logs: [],
-      options: {
+      const newTaskStatus = {
+        tid: data.tid,
+        collection: '',
+        name: data.tid.substring(0, 5),
+        status: 1,
+        percent: 0,
+        eta: 0,
+        num: 0,
+        total: scanInfo.value.scan.length,
         mode: modality,
         engine: engine,
-        source: [],
-        target: null,
-        confidence: null,
-        pattern: null,
-        type: null,
-        batch: null,
-        fusion: fusionCode
+        input: input,
+        modified: '',
+        elapse: 0,
+        logs: [],
+        options: {
+          mode: modality,
+          engine: engine,
+          source: [],
+          target: null,
+          confidence: null,
+          pattern: null,
+          type: null,
+          batch: null,
+          fusion: fusionCode
+        }
       }
+      //push item to the top of array
+      scanInfo.value.process.taskStatus.unshift(newTaskStatus)
+
+      const timeStamp = Date.now()
+      scanInfo.value.process.timer = 0
+      scanInfo.value.process.timeRecord = 0
+
+      // await startNewTask(data.tid)
+      scanStatus.updateStatus('process', 1)
+      clearScan()
+      scanStatus.updateStatus('scan', 2)
+      router.push({ path: '/tasks', query: { timeStamp } })
     }
-    //push item to the top of array
-    scanInfo.value.process.taskStatus.unshift(newTaskStatus)
-
-    const timeStamp = Date.now()
-    scanInfo.value.process.timer = 0
-    scanInfo.value.process.timeRecord = 0
-
-    // await startNewTask(data.tid)
-    scanStatus.updateStatus('process', 1)
-    clearScan()
-    scanStatus.updateStatus('scan', 2)
-    router.push({ path: '/tasks', query: { timeStamp } })
   } catch (error) {
     console.log(error)
     errorMessage.value = error?.detail[0]?.msg
@@ -1491,13 +1493,15 @@ const clearTask = async () => {
       method: 'POST',
       headers: { accept: 'application/json' }
     })
-    clearInterval(checkInternalStatus)
-    preprocessInfo.value.preprocess.progress = false
-    preprocessStatus.updateStatus('preprocess', 2)
-    preprocessInfo.value.preprocess.id = ''
-    eta.value = -1
-    submittedStop.value = false
-    openNotificationWithIcon('stop')
+    if (data) {
+      clearInterval(checkInternalStatus)
+      preprocessInfo.value.preprocess.progress = false
+      preprocessStatus.updateStatus('preprocess', 2)
+      preprocessInfo.value.preprocess.id = ''
+      eta.value = -1
+      submittedStop.value = false
+      openNotificationWithIcon('stop')
+    }
   } catch (error) {
     openNotificationWithIcon('error')
     console.error('Error cancel task:', error)
@@ -1575,22 +1579,24 @@ const submitPreprocess = async () => {
     //   throw new Error('Failed to submit preprocessing task')
     // }
     // const data = await response.json()
-    console.log(data)
-    preprocessStatus.updateStatus('preprocess', 1)
-    preprocessInfo.value.preprocess.progress = true
-    preprocessInfo.value.preprocess.id = data['Preprocessing task in progress']
-    eta.value = -1
-    checkInternalStatus = setInterval(async () => {
-      if (preprocessInfo.value.preprocess.id != '' && preprocessStatus.preprocess == 1) {
-        // Note: if the task propcessing fast, can not get ETA
-        getETA(preprocessInfo.value.preprocess.id)
-        if (eta.value <= 0 || eta.value == null) {
-          checkPreprocess()
+    if (data) {
+      console.log(data)
+      preprocessStatus.updateStatus('preprocess', 1)
+      preprocessInfo.value.preprocess.progress = true
+      preprocessInfo.value.preprocess.id = data['Preprocessing task in progress']
+      eta.value = -1
+      checkInternalStatus = setInterval(async () => {
+        if (preprocessInfo.value.preprocess.id != '' && preprocessStatus.preprocess == 1) {
+          // Note: if the task propcessing fast, can not get ETA
+          getETA(preprocessInfo.value.preprocess.id)
+          if (eta.value <= 0 || eta.value == null) {
+            checkPreprocess()
+          }
+        } else {
+          clearInterval(checkInternalStatus)
         }
-      } else {
-        clearInterval(checkInternalStatus)
-      }
-    }, 1000)
+      }, 1000)
+    }
   } catch (error) {
     errorMessage.value = error.detail[0].msg
     showError.value = true
@@ -1606,23 +1612,24 @@ const checkPreprocess = async () => {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
       })
-
-      console.log(data)
-      outputPath.value = data.target
-      if (data.status == 2 || data.status == -1) {
-        if (data.status == -1) {
-          preprocessStatus.updateStatus('preprocess', -1)
-          console.error('preprocessing task failed')
+      if (data) {
+        console.log(data)
+        outputPath.value = data.target
+        if (data.status == 2 || data.status == -1) {
+          if (data.status == -1) {
+            preprocessStatus.updateStatus('preprocess', -1)
+            console.error('preprocessing task failed')
+          }
+          preprocessStatus.updateStatus('preprocess', 2)
+          preprocessInfo.value.preprocess.id = ''
+          preprocessInfo.value.preprocess.progress = false
+          const index = scanInfo.value.scan.inputType.indexOf(preprocessInfo.value.preprocess.type)
+          if (index === -1) {
+            scanInfo.value.scan.inputType.push(preprocessInfo.value.preprocess.type)
+          }
+          checkInputFolder()
+          preprocessInfo.value.scan.folderPath = outputPath.value
         }
-        preprocessStatus.updateStatus('preprocess', 2)
-        preprocessInfo.value.preprocess.id = ''
-        preprocessInfo.value.preprocess.progress = false
-        const index = scanInfo.value.scan.inputType.indexOf(preprocessInfo.value.preprocess.type)
-        if (index === -1) {
-          scanInfo.value.scan.inputType.push(preprocessInfo.value.preprocess.type)
-        }
-        checkInputFolder()
-        preprocessInfo.value.scan.folderPath = outputPath.value
       }
     } catch (error) {
       console.error('Error check preprocessing task status:', error)
@@ -1674,7 +1681,7 @@ const getETA = async (tid) => {
     //   console.log(eta.value)
     // }
     // const data = await response.json()
-    if (data.done != 0) {
+    if (data && data.done != 0) {
       eta.value = data.eta
       if (data.eta == 0) {
         eta.value = -1

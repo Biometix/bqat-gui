@@ -455,12 +455,14 @@ const deleteFolder = async (tabIndex, rootIndex, item) => {
       mode: 'cors'
     })
 
-    console.log(data)
-    openNotificationWithIcon('delete')
-    status.updateStatus('files', 2)
-    const index = API.inputTree[rootIndex].children.findIndex((x) => x.value === item)
-    if (index !== -1) {
-      API.inputTree[rootIndex].children.splice(index, 1)
+    if (data) {
+      console.log(data)
+      openNotificationWithIcon('delete')
+      status.updateStatus('files', 2)
+      const index = API.inputTree[rootIndex].children.findIndex((x) => x.value === item)
+      if (index !== -1) {
+        API.inputTree[rootIndex].children.splice(index, 1)
+      }
     }
   } catch (error) {
     openNotificationWithIcon('error')

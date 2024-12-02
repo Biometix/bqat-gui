@@ -220,7 +220,13 @@
                           />
                         </div>
                         <div
-                          style="text-align: center; padding-inline: 10px;height: 40px; padding-top: 2px; width: 100%"
+                          style="
+                            text-align: center;
+                            padding-inline: 10px;
+                            height: 40px;
+                            padding-top: 2px;
+                            width: 100%;
+                          "
                         >
                           <p
                             style="
@@ -229,7 +235,7 @@
                               white-space: nowrap;
                               width: 100%;
                               font-size: medium;
-                              padding-left: 5px
+                              padding-left: 5px;
                             "
                           >
                             Input: {{ truncateString(item.input) }} | Modality:
@@ -295,7 +301,12 @@
                           size="medium"
                           @click="uploadCsv"
                           danger
-                          style="width: 80%; text-overflow: ellipsis; overflow: hidden; margin-top: -2px"
+                          style="
+                            width: 80%;
+                            text-overflow: ellipsis;
+                            overflow: hidden;
+                            margin-top: -2px;
+                          "
                           :disabled="
                             tip !== false ||
                             processStatus.outlier == 1 ||
@@ -1596,8 +1607,10 @@ const deleteTask = async () => {
         method: 'DELETE',
         headers: { accept: 'application/json' }
       })
-      openNotificationWithIcon('delete')
-      console.log('delete task', data)
+      if (data) {
+        openNotificationWithIcon('delete')
+        console.log('delete task', data)
+      }
     } catch (error) {
       openNotificationWithIcon('error')
       console.error('Error delete task:', error)
@@ -1609,7 +1622,9 @@ const deleteTask = async () => {
         method: 'DELETE',
         headers: { accept: 'application/json' }
       })
-      console.log('delete test profiles', data)
+      if (data) {
+        console.log('delete test profiles', data)
+      }
     } catch (error) {
       console.error('Error delete test profiles:', error)
     }
@@ -1649,14 +1664,15 @@ const cancelTask = async (tid) => {
       method: 'POST',
       headers: { accept: 'application/json' }
     })
-
-    processInfo.value.process.selectedItems = []
-    processInfo.value.process.taskStatus.splice(0, 1)
-    processInfo.value.process.timer == -1
-    processInfo.value.process.timeRecord == 0
-    openNotificationWithIcon('cancel')
-    processStatus.updateStatus('process', 0)
-    getCancel.value = false
+    if (data) {
+      processInfo.value.process.selectedItems = []
+      processInfo.value.process.taskStatus.splice(0, 1)
+      processInfo.value.process.timer == -1
+      processInfo.value.process.timeRecord == 0
+      openNotificationWithIcon('cancel')
+      processStatus.updateStatus('process', 0)
+      getCancel.value = false
+    }
   } catch (error) {
     console.error('Error cancel task:', error)
     getCancel.value = false
@@ -1671,22 +1687,21 @@ const stopTask = async (tid) => {
       method: 'POST',
       headers: { accept: 'application/json' }
     })
-
-    // processInfo.value.process.selectedItems = []
-    // processInfo.value.process.taskStatus.filter((item) => item.status === 1)
-    const task = processInfo.value.process.taskStatus.find((item) => item.tid === tid)
-    if (task) {
-      task.status = 0
-      task.elapse = processInfo.value.process.timeRecord
-    } else {
-      console.error(`Task with tid ${tid} not found`) // Optional: Handle the case where the task is not found
+    if (data) {
+      const task = processInfo.value.process.taskStatus.find((item) => item.tid === tid)
+      if (task) {
+        task.status = 0
+        task.elapse = processInfo.value.process.timeRecord
+      } else {
+        console.error(`Task with tid ${tid} not found`) // Optional: Handle the case where the task is not found
+      }
+      processInfo.value.process.timer == -1
+      processInfo.value.process.timeRecord == 0
+      // API.testTimer = 0
+      openNotificationWithIcon('stop')
+      processStatus.updateStatus('process', 0)
+      getStop.value = false
     }
-    processInfo.value.process.timer == -1
-    processInfo.value.process.timeRecord == 0
-    // API.testTimer = 0
-    openNotificationWithIcon('stop')
-    processStatus.updateStatus('process', 0)
-    getStop.value = false
   } catch (error) {
     console.error('Error cancel task:', error)
     getStop.value = false
@@ -1701,48 +1716,50 @@ const resumeTask = async (tid) => {
       method: 'POST',
       headers: { accept: 'application/json' }
     })
-    const task = processInfo.value.process.taskStatus.find((item) => item.tid === tid)
-    if (task) {
-      task.status = 1
-      task.logs = []
-      processInfo.value.process.timer = 0
-      processInfo.value.process.timeRecord = task.elapse
-      // API.testTimer = 0
-      openNotificationWithIcon('resume')
-      processStatus.updateStatus('process', 1)
-      const checkTaskStatus = setInterval(async () => {
-        // console.log('check task status...')
-        tasksToUpdateOnPage.value = processInfo.value.process.taskStatus.filter(
-          (item) => item.status == 1
-        )
-        if (tasksToUpdateOnPage.value.length > 0) {
-          const controller = new AbortController()
-          const signal = controller.signal
-          try {
-            // Race between the getTaskETA function and a timeout of 5 seconds
-            await Promise.race([
-              getTaskETA(tasksToUpdateOnPage.value, signal),
-              new Promise((_, reject) =>
-                setTimeout(() => {
-                  controller.abort() // Abort the request after 5 seconds
-                  reject(new Error('Request timed out'))
-                }, 5000)
-              )
-            ])
-          } catch (error) {
-            console.error(error.message) // Logs "Request timed out" if the request takes longer than 5 seconds
+    if (data) {
+      const task = processInfo.value.process.taskStatus.find((item) => item.tid === tid)
+      if (task) {
+        task.status = 1
+        task.logs = []
+        processInfo.value.process.timer = 0
+        processInfo.value.process.timeRecord = task.elapse
+        // API.testTimer = 0
+        openNotificationWithIcon('resume')
+        processStatus.updateStatus('process', 1)
+        const checkTaskStatus = setInterval(async () => {
+          // console.log('check task status...')
+          tasksToUpdateOnPage.value = processInfo.value.process.taskStatus.filter(
+            (item) => item.status == 1
+          )
+          if (tasksToUpdateOnPage.value.length > 0) {
+            const controller = new AbortController()
+            const signal = controller.signal
+            try {
+              // Race between the getTaskETA function and a timeout of 5 seconds
+              await Promise.race([
+                getTaskETA(tasksToUpdateOnPage.value, signal),
+                new Promise((_, reject) =>
+                  setTimeout(() => {
+                    controller.abort() // Abort the request after 5 seconds
+                    reject(new Error('Request timed out'))
+                  }, 5000)
+                )
+              ])
+            } catch (error) {
+              console.error(error.message) // Logs "Request timed out" if the request takes longer than 5 seconds
+            }
+            // await getTaskETA(tasksToUpdateOnPage.value)
+          } else {
+            clearInterval(checkTaskStatus)
+            processInfo.value.process.timer = -1
+            processInfo.value.process.timeRecord = 0
           }
-          // await getTaskETA(tasksToUpdateOnPage.value)
-        } else {
-          clearInterval(checkTaskStatus)
-          processInfo.value.process.timer = -1
-          processInfo.value.process.timeRecord = 0
-        }
-      }, 10000)
-    } else {
-      console.error(`Task with tid ${tid} not found`) // Optional: Handle the case where the task is not found
+        }, 10000)
+      } else {
+        console.error(`Task with tid ${tid} not found`) // Optional: Handle the case where the task is not found
+      }
+      getResume.value = false
     }
-    getResume.value = false
   } catch (error) {
     openNotificationWithIcon('error')
     console.error('Error cancel task:', error)
@@ -1806,26 +1823,28 @@ const getCsv = async (type) => {
         method: 'GET',
         headers: { accept: 'application/json' }
       })
-      if (type == 'preview') {
-        // console.log(data)
-        csvdata.value = data
-          .filter((item) =>
-            item.log ? Object.values(item).length > 2 : Object.values(item).length > 1
-          )
-          .slice(0, 50)
-        csvlog.value = data.filter((item) => item.log && item.log.length > 0)
-        getPreview.value = false
-        if (data.length > 0) {
-          const allHeaders = new Set() // Use a Set to avoid duplicates
-          data.forEach((row) => {
-            Object.keys(row).forEach((key) => allHeaders.add(key))
-          })
-          csvHeaders.value = Array.from(allHeaders) // Convert Set to Array for headers
+      if (data) {
+        if (type == 'preview') {
+          // console.log(data)
+          csvdata.value = data
+            .filter((item) =>
+              item.log ? Object.values(item).length > 2 : Object.values(item).length > 1
+            )
+            .slice(0, 50)
+          csvlog.value = data.filter((item) => item.log && item.log.length > 0)
+          getPreview.value = false
+          if (data.length > 0) {
+            const allHeaders = new Set() // Use a Set to avoid duplicates
+            data.forEach((row) => {
+              Object.keys(row).forEach((key) => allHeaders.add(key))
+            })
+            csvHeaders.value = Array.from(allHeaders) // Convert Set to Array for headers
+          }
+          scrollToBottom()
+        } else {
+          getDownlaod.value = false
+          downloadCsv(data)
         }
-        scrollToBottom()
-      } else {
-        getDownlaod.value = false
-        downloadCsv(data)
       }
     } catch (e) {
       getPreview.value = false
@@ -1922,46 +1941,47 @@ const checkOutlierLog = async (id) => {
       method: 'GET',
       headers: { accept: 'application/json' }
     })
-
-    const outliers = data.filter((item) => item?.collection == id)
-    if (outliers.length > 0) {
-      const outlier = outliers[0]
-      if (outlier.status == 2) {
-        // console.log(outlier)
-        const url2 = `${API.api}/scan/${id}/outliers`
-        try {
-          const data = await API.authFetch(url2, {
-            method: 'GET',
-            headers: { accept: 'application/json' }
-          })
-          outlierData.value = data
+    if (data) {
+      const outliers = data.filter((item) => item?.collection == id)
+      if (outliers.length > 0) {
+        const outlier = outliers[0]
+        if (outlier.status == 2) {
+          // console.log(outlier)
+          const url2 = `${API.api}/scan/${id}/outliers`
+          try {
+            const data = await API.authFetch(url2, {
+              method: 'GET',
+              headers: { accept: 'application/json' }
+            })
+            outlierData.value = data
+            outlierLog.value = true
+            processStatus.updateStatus('outlier', 0)
+            if (data.length > 0) {
+              processStatus.updateStatus('outlier', 2)
+              const allHeaders = new Set() // Use a Set to avoid duplicates
+              data.forEach((row) => {
+                Object.keys(row).forEach((key) => allHeaders.add(key))
+              })
+              outlierHeaders.value = Array.from(allHeaders) // Convert Set to Array for headers
+            }
+          } catch (error) {
+            console.error('retrive outlier error', error)
+            processStatus.updateStatus('outlier', 0)
+          }
+        } else {
           outlierLog.value = true
           processStatus.updateStatus('outlier', 0)
-          if (data.length > 0) {
-            processStatus.updateStatus('outlier', 2)
-            const allHeaders = new Set() // Use a Set to avoid duplicates
-            data.forEach((row) => {
-              Object.keys(row).forEach((key) => allHeaders.add(key))
-            })
-            outlierHeaders.value = Array.from(allHeaders) // Convert Set to Array for headers
+          if (outlier.status == 3) {
+            outlierError.value = outlier.logs[0]
           }
-        } catch (error) {
-          console.error('retrive outlier error', error)
-          processStatus.updateStatus('outlier', 0)
+          if (outlier.status == 0) {
+            outlierError.value = "Task has been stopped or haven't start"
+          }
         }
       } else {
-        outlierLog.value = true
+        console.log('no outlier log')
         processStatus.updateStatus('outlier', 0)
-        if (outlier.status == 3) {
-          outlierError.value = outlier.logs[0]
-        }
-        if (outlier.status == 0) {
-          outlierError.value = "Task has been stopped or haven't start"
-        }
       }
-    } else {
-      console.log('no outlier log')
-      processStatus.updateStatus('outlier', 0)
     }
   } catch (error) {
     processStatus.updateStatus('outlier', 0)
@@ -2041,7 +2061,7 @@ const getTaskETA = async (tasksToUpdate, signal) => {
           headers: { accept: 'application/json' },
           signal: signal
         })
-        if (data.done != 0) {
+        if (data && data.done != 0) {
           item.eta = data.eta
           item.percent = Math.floor((data.done * 100) / data.total)
           item.num = data.done
@@ -2077,47 +2097,49 @@ const checkTaskLogAfterError = async (item) => {
       method: 'GET',
       headers: { accept: 'application/json' }
     })
-    if (data[0]?.status == 2) {
-      item.eta = 0
-      item.percent = 100
-      item.status = 2
-      item.num = data[0].finished
-      item.elapse = data[0].elapse
-      item.logs = data[0]?.logs
+    if (data) {
+      if (data[0]?.status == 2) {
+        item.eta = 0
+        item.percent = 100
+        item.status = 2
+        item.num = data[0].finished
+        item.elapse = data[0].elapse
+        item.logs = data[0]?.logs
 
-      const index = processInfo.value.process.taskList.findIndex(
-        (x) => x.collection === item?.collection
-      )
-      if (index == -1) processInfo.value.process.taskList.push(item)
-      processStatus.updateStatus('process', 2)
-    }
-    if (data[0]?.status == 3) {
-      console.log('process crashed')
-      item.status = 3
-      item.percent = -1
-      item.logs = data[0]?.logs
-      openNotificationWithIcon('taskError', data[0]?.logs[0])
-      const index = processInfo.value.process.taskList.findIndex(
-        (x) => x.collection === item?.collection
-      )
-      if (index == -1) processInfo.value.process.taskList.push(item)
-      // await stopTask(item.tid)
-      processStatus.updateStatus('process', 2)
-    }
-    if (data[0]?.status == 0) {
-      console.log('Task stopped')
-      item.status = 0
-      item.logs = data[0]?.logs
-      processStatus.updateStatus('process', 2)
-      //Note: For testing restart Docker
-    }
-    if (data[0]?.status == 1) {
-      console.log('large dataset crashed')
-      await stopTask(item.tid)
-      //Note: For testing restart Docker
-      setTimeout(async () => {
-        await resumeTask(item.tid)
-      }, 1000 * 60)
+        const index = processInfo.value.process.taskList.findIndex(
+          (x) => x.collection === item?.collection
+        )
+        if (index == -1) processInfo.value.process.taskList.push(item)
+        processStatus.updateStatus('process', 2)
+      }
+      if (data[0]?.status == 3) {
+        console.log('process crashed')
+        item.status = 3
+        item.percent = -1
+        item.logs = data[0]?.logs
+        openNotificationWithIcon('taskError', data[0]?.logs[0])
+        const index = processInfo.value.process.taskList.findIndex(
+          (x) => x.collection === item?.collection
+        )
+        if (index == -1) processInfo.value.process.taskList.push(item)
+        // await stopTask(item.tid)
+        processStatus.updateStatus('process', 2)
+      }
+      if (data[0]?.status == 0) {
+        console.log('Task stopped')
+        item.status = 0
+        item.logs = data[0]?.logs
+        processStatus.updateStatus('process', 2)
+        //Note: For testing restart Docker
+      }
+      if (data[0]?.status == 1) {
+        console.log('large dataset crashed')
+        await stopTask(item.tid)
+        //Note: For testing restart Docker
+        setTimeout(async () => {
+          await resumeTask(item.tid)
+        }, 1000 * 60)
+      }
     }
   } catch (error) {
     console.log('can not find task log', error)
@@ -2149,17 +2171,18 @@ const updateTaskCollection = async (tasksToUpdate) => {
         method: 'GET',
         headers: { accept: 'application/json' }
       })
-
-      // if (!response.ok) {
-      //   throw new Error('Failed to log task')
-      // }
-      // const tempData = await response.json()
-      const data = tempData[0]
-      if (data) {
-        item.collection = data?.collection
-        item.modified = data.modified
-        // console.log(item.modified)
-        item.elapse = data.elapse
+      if (tempData) {
+        // if (!response.ok) {
+        //   throw new Error('Failed to log task')
+        // }
+        // const tempData = await response.json()
+        const data = tempData[0]
+        if (data) {
+          item.collection = data?.collection
+          item.modified = data.modified
+          // console.log(item.modified)
+          item.elapse = data.elapse
+        }
       }
     } catch (error) {
       console.error('Error logging task:', error)
@@ -2200,10 +2223,11 @@ const stopOutlierTask = async () => {
       method: 'POST',
       headers: { accept: 'application/json' }
     })
-
-    clearInterval(checkOutlierInterval)
-    processStatus.updateStatus('outlier', 0)
-    processInfo.value.outlier.id = ''
+    if (data) {
+      clearInterval(checkOutlierInterval)
+      processStatus.updateStatus('outlier', 0)
+      processInfo.value.outlier.id = ''
+    }
   } catch (error) {
     console.error('Error cancel task:', error)
   }
@@ -2341,17 +2365,18 @@ const startOutlierTask = async () => {
         contamination: contaminationNum.value / 100
       })
     })
-
-    processInfo.value.outlier.id = temp['outlier detection task in progress']
-    processInfo.value.outlier.iconLoading = true
-    processStatus.updateStatus('outlier', 1)
-    checkOutlierInterval = setInterval(() => {
-      if (processInfo.value.outlier.id != '' && processStatus.outlier == 1) {
-        getOutlierStatus(processInfo.value.outlier.id)
-      } else {
-        clearInterval(checkOutlierInterval)
-      }
-    }, 1000)
+    if (temp) {
+      processInfo.value.outlier.id = temp['outlier detection task in progress']
+      processInfo.value.outlier.iconLoading = true
+      processStatus.updateStatus('outlier', 1)
+      checkOutlierInterval = setInterval(() => {
+        if (processInfo.value.outlier.id != '' && processStatus.outlier == 1) {
+          getOutlierStatus(processInfo.value.outlier.id)
+        } else {
+          clearInterval(checkOutlierInterval)
+        }
+      }, 1000)
+    }
   } catch (error) {
     console.error('Error detect outlier:', error)
     processInfo.value.outlier.iconLoading = false
@@ -2367,29 +2392,30 @@ const checkOutlier = async (id, withData = false, download = false) => {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
     })
-
-    processStatus.updateStatus('outlier', 2)
-    // scrollToBottom()
-    processInfo.value.outlier.id = ''
-    processInfo.value.outlier.iconLoading = false
-    if (download) {
-      downloadOutlier(data)
-    } else {
-      clearInterval(checkOutlierInterval)
-      if (data != null) {
-        outlierData.value = data
-      }
-      if (data.length > 0) {
-        const allHeaders = new Set() // Use a Set to avoid duplicates
-        data.forEach((row) => {
-          Object.keys(row).forEach((key) => allHeaders.add(key))
-        })
-        outlierHeaders.value = Array.from(allHeaders) // Convert Set to Array for headers
+    if (data) {
+      processStatus.updateStatus('outlier', 2)
+      // scrollToBottom()
+      processInfo.value.outlier.id = ''
+      processInfo.value.outlier.iconLoading = false
+      if (download) {
+        downloadOutlier(data)
       } else {
-        outlierHeaders.value = []
-        scrollToBottom()
+        clearInterval(checkOutlierInterval)
+        if (data != null) {
+          outlierData.value = data
+        }
+        if (data.length > 0) {
+          const allHeaders = new Set() // Use a Set to avoid duplicates
+          data.forEach((row) => {
+            Object.keys(row).forEach((key) => allHeaders.add(key))
+          })
+          outlierHeaders.value = Array.from(allHeaders) // Convert Set to Array for headers
+        } else {
+          outlierHeaders.value = []
+          scrollToBottom()
+        }
+        scrollToOutlier()
       }
-      scrollToOutlier()
     }
   } catch (error) {
     console.error('Error check outliers task status:', error)
@@ -2413,13 +2439,15 @@ const getOutlierStatus = async (tid) => {
         method: 'GET',
         headers: { accept: 'application/json' }
       })
-      console.log(data[0])
-      if (data[0]?.status == 3) {
-        processInfo.value.outlier.iconLoading = false
-        outlierError.value = data[0].logs[0]
-        processStatus.updateStatus('outlier', 0)
-      } else {
-        checkOutlier(processInfo.value.process.selectedItems[0].collection, false, false)
+      if (data) {
+        console.log(data[0])
+        if (data[0]?.status == 3) {
+          processInfo.value.outlier.iconLoading = false
+          outlierError.value = data[0].logs[0]
+          processStatus.updateStatus('outlier', 0)
+        } else {
+          checkOutlier(processInfo.value.process.selectedItems[0].collection, false, false)
+        }
       }
     } catch (error) {
       console.error(error)
@@ -2470,23 +2498,24 @@ const csvGenerateReport = async () => {
       method: 'POST',
       body: formData
     })
-
-    const tid = data['reporting in progress']
-    let generated = {
-      tid: tid,
-      html: '',
-      blob: new Blob(),
-      id: tid,
-      name: tid.substring(0, 5),
-      modality: '',
-      engine: '',
-      num: 0,
-      total: 0,
-      minimal: false,
-      downsample: 100,
-      modified: ''
+    if (data) {
+      const tid = data['reporting in progress']
+      let generated = {
+        tid: tid,
+        html: '',
+        blob: new Blob(),
+        id: tid,
+        name: tid.substring(0, 5),
+        modality: '',
+        engine: '',
+        num: 0,
+        total: 0,
+        minimal: false,
+        downsample: 100,
+        modified: ''
+      }
+      processInfo.value.result.generatedReport = generated
     }
-    processInfo.value.result.generatedReport = generated
   } catch (error) {
     processInfo.value.result.generatedReport = { id: '', blob: new Blob(), html: '' }
     processStatus.updateStatus('result', 2)
@@ -2509,8 +2538,9 @@ const submitGenerate = async () => {
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify(requestBody)
       })
-
-      item.tid = data['reporting in progress']
+      if (data) {
+        item.tid = data['reporting in progress']
+      }
     } catch (error) {
       console.error('Error generating task report:', error)
       openNotificationWithIcon('reportError')
