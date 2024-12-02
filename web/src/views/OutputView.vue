@@ -576,15 +576,16 @@ const stopReportTask = async () => {
           method: 'POST',
           headers: { accept: 'application/json' }
         })
-
-        resultStatus.updateStatus('result', 2)
-        openNotificationWithIcon('stop')
-        resultInfo.value.result.generatedReport = {
-          id: '',
-          blob: new Blob(),
-          html: ''
+        if (data) {
+          resultStatus.updateStatus('result', 2)
+          openNotificationWithIcon('stop')
+          resultInfo.value.result.generatedReport = {
+            id: '',
+            blob: new Blob(),
+            html: ''
+          }
+          getStop.value = false
         }
-        getStop.value = false
       } catch (error) {
         console.error('Error cancel task:', error)
         getStop.value = false
@@ -600,10 +601,11 @@ const stopReportTask = async () => {
           method: 'POST',
           headers: { accept: 'application/json' }
         })
-
-        resultStatus.updateStatus('result', 2)
-        openNotificationWithIcon('stop')
-        getStop.value = false
+        if (data) {
+          resultStatus.updateStatus('result', 2)
+          openNotificationWithIcon('stop')
+          getStop.value = false
+        }
       } catch (error) {
         console.error('Error cancel task:', error)
         getStop.value = false
@@ -677,12 +679,15 @@ const deleteReport = async (item) => {
       method: 'DELETE',
       headers: { accept: 'application/json' }
     })
-    console.log(data)
-    openNotificationWithIcon('delete')
-    resultStatus.updateStatus('app', 2)
-    const index = resultInfo.value.result.generatedReports.indexOf(item)
-    if (index !== -1) {
-      resultInfo.value.result.generatedReports.splice(index, 1)
+
+    if (data) {
+      console.log(data)
+      openNotificationWithIcon('delete')
+      resultStatus.updateStatus('app', 2)
+      const index = resultInfo.value.result.generatedReports.indexOf(item)
+      if (index !== -1) {
+        resultInfo.value.result.generatedReports.splice(index, 1)
+      }
     }
   } catch (error) {
     openNotificationWithIcon('error')
@@ -698,7 +703,7 @@ const checkGeneratedReport = async () => {
       method: 'GET',
       headers: { accept: 'text/html' }
     })
-    if (!data.includes('not found')) {
+    if (data && !data.includes('not found')) {
       resultInfo.value.result.generatedReport.html = url
       await checkReportDetails(resultInfo.value.result.generatedReport)
       const index = resultInfo.value.result.generatedReports.findIndex(
@@ -724,7 +729,7 @@ const checkReportDetails = async (item) => {
       headers: { accept: 'application/json' }
     })
 
-    if (tempData.length > 0) {
+    if (tempData && tempData.length > 0) {
       const data = tempData.filter((tempItem) => tempItem.tid == item.tid)[0]
       if (data) {
         item.minimal = data.options.minimal
@@ -755,7 +760,7 @@ const checkReport = async (item) => {
       method: 'GET',
       headers: { accept: 'text/html' }
     })
-    if (!temp.includes('not found')) {
+    if (temp && !temp.includes('not found')) {
       const generated = {
         ...item,
         name: item.id.substring(0, 5),
@@ -802,17 +807,19 @@ const checkReportStatus = async () => {
           method: 'GET',
           headers: { accept: 'application/json' }
         })
-        console.log(data)
-        if (data[0]?.status == 3 || data[0]?.status == 0) {
-          const index = resultInfo.value.result.generating.indexOf(item)
-          if (index > -1) {
-            resultInfo.value.result.generating.splice(index, 1) // Remove from original array
+        if (data) {
+          console.log(data)
+          if (data[0]?.status == 3 || data[0]?.status == 0) {
+            const index = resultInfo.value.result.generating.indexOf(item)
+            if (index > -1) {
+              resultInfo.value.result.generating.splice(index, 1) // Remove from original array
+            }
+            openNotificationWithIcon('reportError', data[0]?.status == 3 ? data[0]?.logs[0] : '')
+            resultStatus.updateStatus('result', 0)
+            clearInterval(checkInternalStatus)
+          } else {
+            await checkReport(item)
           }
-          openNotificationWithIcon('reportError', data[0]?.status == 3 ? data[0]?.logs[0] : '')
-          resultStatus.updateStatus('result', 0)
-          clearInterval(checkInternalStatus)
-        } else {
-          await checkReport(item)
         }
       } catch (error) {
         const index = resultInfo.value.result.generating.indexOf(item)
@@ -843,31 +850,33 @@ const checkOneReportStatus = async (type, item) => {
         method: 'GET',
         headers: { accept: 'application/json' }
       })
-      console.log(data)
-      if (data[0]?.status == 3) {
-        resultInfo.value.result.generating.splice(item, 1)
-        openNotificationWithIcon('reportError', data[0]?.logs[0])
-        resultStatus.updateStatus('result', 0)
-        if (type == 1) {
-          clearInterval(checkInternalStatus)
+      if (data) {
+        console.log(data)
+        if (data[0]?.status == 3) {
+          resultInfo.value.result.generating.splice(item, 1)
+          openNotificationWithIcon('reportError', data[0]?.logs[0])
+          resultStatus.updateStatus('result', 0)
+          if (type == 1) {
+            clearInterval(checkInternalStatus)
+          } else {
+            clearInterval(checkExternalStatus)
+          }
+        } else if (data[0]?.status == 0) {
+          resultInfo.value.result.generating.splice(item, 1)
+          openNotificationWithIcon('reportError')
+          resultStatus.updateStatus('result', 0)
+          if (type == 1) {
+            clearInterval(checkInternalStatus)
+          } else {
+            clearInterval(checkExternalStatus)
+          }
         } else {
-          clearInterval(checkExternalStatus)
-        }
-      } else if (data[0]?.status == 0) {
-        resultInfo.value.result.generating.splice(item, 1)
-        openNotificationWithIcon('reportError')
-        resultStatus.updateStatus('result', 0)
-        if (type == 1) {
-          clearInterval(checkInternalStatus)
-        } else {
-          clearInterval(checkExternalStatus)
-        }
-      } else {
-        // resultStatus.updateStatus('result', 2)
-        if (type == 1) {
-          await checkReport(item)
-        } else {
-          await checkGeneratedReport()
+          // resultStatus.updateStatus('result', 2)
+          if (type == 1) {
+            await checkReport(item)
+          } else {
+            await checkGeneratedReport()
+          }
         }
       }
     } catch (error) {
@@ -908,7 +917,7 @@ const fetchReport = async (item) => {
       method: 'GET',
       headers: { accept: 'text/html' }
     })
-    if (!data.includes('{"detail":"Report of')) {
+    if (data && !data.includes('{"detail":"Report of')) {
       // const blob = new Blob([data], { type: 'text/html' })
       item.html = url
       // item.blob=blob
@@ -928,7 +937,7 @@ const fetchReport = async (item) => {
       method: 'GET',
       headers: { accept: 'text/html' }
     })
-    if (!data.includes('{"detail":"Report of')) {
+    if (data && !data.includes('{"detail":"Report of')) {
       // const blob = new Blob([data], { type: 'text/html' })
       item.html = url
       // item.blob=blob
@@ -952,33 +961,35 @@ const initResultLoad = async () => {
       method: 'GET',
       headers: { accept: 'application/json' }
     })
-    for (const item of data) {
-      if (item.status != 0 && item.status != 3) {
-        const newItem = {
-          tid: item.tid,
-          id: item?.collection,
-          name: item?.collection?.substring(0, 5),
-          minimal: item.options.minimal,
-          downsample:
-            item.options.downsample != null && item.options.downsample > 0
-              ? item.options.downsample * 100
-              : 100,
-          modified: item.modified,
-          status: item.status,
-          modality: item.metadata ? item.metadata.mode : '',
-          engine: item.metadata ? item.metadata.engine : '',
-          fusion: item.metadata?.fusion ? item.metadata?.fusion : 0,
-          num: item.metadata ? item.metadata.length : 0,
-          html: ''
-        }
-        if (item.status == 2) {
-          await fetchReport(newItem)
-        } else {
-          await checkRunning(newItem)
+    if (data) {
+      for (const item of data) {
+        if (item.status != 0 && item.status != 3) {
+          const newItem = {
+            tid: item.tid,
+            id: item?.collection,
+            name: item?.collection?.substring(0, 5),
+            minimal: item.options.minimal,
+            downsample:
+              item.options.downsample != null && item.options.downsample > 0
+                ? item.options.downsample * 100
+                : 100,
+            modified: item.modified,
+            status: item.status,
+            modality: item.metadata ? item.metadata.mode : '',
+            engine: item.metadata ? item.metadata.engine : '',
+            fusion: item.metadata?.fusion ? item.metadata?.fusion : 0,
+            num: item.metadata ? item.metadata.length : 0,
+            html: ''
+          }
+          if (item.status == 2) {
+            await fetchReport(newItem)
+          } else {
+            await checkRunning(newItem)
+          }
         }
       }
+      resultStatus.updateStatus('app', 2)
     }
-    resultStatus.updateStatus('app', 2)
   } catch (error) {
     console.error('Error get report logs:', error)
     resultStatus.updateStatus('app', 2)
@@ -994,8 +1005,9 @@ const checkRunning = async (newItem) => {
       method: 'GET',
       headers: { accept: 'application/json' }
     })
-    console.log(data)
-    if (data.type == 'report' && data.tid == newItem.tid) {
+
+    if (data && data.type == 'report' && data.tid == newItem.tid) {
+      console.log(data)
       console.log('3. get running report')
       const index = resultInfo.value.result.generating.findIndex((item) => item.id == newItem.id)
       if (index == -1) {
@@ -1061,7 +1073,7 @@ const generateReportBlob = async (id) => {
       method: 'GET',
       headers: { accept: 'text/html' }
     })
-    if (!data.includes('{"detail":"Report of')) {
+    if (data && !data.includes('{"detail":"Report of')) {
       const blob = new Blob([data], { type: 'text/html' })
       return blob
     }

@@ -241,29 +241,8 @@ export const useApi = defineStore('api', () => {
         apiUrl?: string;
         cookieExpire?: string;
         login?: string;
-      };
-      
-    const config:Config= inject('config');
-    const api = ref(config.apiUrl?config.apiUrl:import.meta.env.VITE_API.toString())
-    const apiList = ref([config.apiUrl?config.apiUrl:import.meta.env.VITE_API.toString()])
-    // const username = ref(env.VITE_USERNAME?env.VITE_USERNAME:import.meta.env.VITE_USERNAME.toString())
-    // const password = ref(env.VITE_PASSWORD?env.VITE_PASSWORD:import.meta.env.VITE_PASSWORD.toString())
-    const login = config.login?config.login:import.meta.env.VITE_LOGIN.toString()
-    const landing = ref(config.login?config.login?false:true:import.meta.env.VITE_LOGIN? import.meta.env.VITE_LOGIN.toString()=='true'?false:true:false)
-    const accessKey = ref(landing.value?btoa('bqat'):'')
-    const testTimer = ref(0)
-    const cookieExpire = ref(config.cookieExpire?config.cookieExpire:import.meta.env.VITE_COOKIE_EXPIRE.toString())
-
-    const folderPath = ref('')
-    const inputFolder = ref([])
-    const inputTree = ref([])
-
-    // Define a type for the fetch options with optional headers
-    type FetchOptions = RequestInit & {
-        headers?: HeadersInit;
     };
 
-    // Helper to set cookie
     const setCookie = (name: string, value: string, sec: number) => {
         const expires = new Date(Date.now() + sec * 1000).toUTCString();
         let encodedValue = btoa(value);
@@ -275,53 +254,82 @@ export const useApi = defineStore('api', () => {
         const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
         return match ? match[2] : null;
     };
-
-
     const clearCookie = (name: string) => {
         document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
     }
 
+
+    const config: Config = inject('config');
+    const api = ref(config.apiUrl ? config.apiUrl : import.meta.env.VITE_API.toString())
+    const apiList = ref([config.apiUrl ? config.apiUrl : import.meta.env.VITE_API.toString()])
+    // const username = ref(env.VITE_USERNAME?env.VITE_USERNAME:import.meta.env.VITE_USERNAME.toString())
+    // const password = ref(env.VITE_PASSWORD?env.VITE_PASSWORD:import.meta.env.VITE_PASSWORD.toString())
+    const login = ref(config.login ? config.login ? true : false : import.meta.env.VITE_LOGIN.toString() == 'true' ? true : false)
+    const landing = ref(config.login ? config.login ? false : true : import.meta.env.VITE_LOGIN ? import.meta.env.VITE_LOGIN.toString() == 'true' ? false : true : false)
+    const accessKey = ref(login.value ? getCookie('accessToken') ? getCookie('accessToken') : '' : 'noKey')
+    const testTimer = ref(0)
+    const cookieExpire = ref(config.cookieExpire ? config.cookieExpire : import.meta.env.VITE_COOKIE_EXPIRE.toString())
+
+    const folderPath = ref('')
+    const inputFolder = ref([])
+    const inputTree = ref([])
+
+    // Define a type for the fetch options with optional headers
+    type FetchOptions = RequestInit & {
+        headers?: HeadersInit;
+    };
+
     // Create a wrapper around fetch to automatically add the Authorization header
     const authFetch = async (url, options: RequestInit = {}) => {
         let token = getCookie('accessToken');
-        if (!token && accessKey.value) {
-            setCookie('accessToken', accessKey.value, cookieExpire.value); // Store new token for 10 min
-            token = accessKey.value;
+
+        if ((token == btoa(accessKey.value) && token) || !login.value) {
+            if (token == btoa(accessKey.value) && token) {
+                setCookie('accessToken', accessKey.value, cookieExpire.value); // Store new token for 10 min
+            } else {
+                clearCookie('accessToken');
+            }
+            options.headers = options.headers || {};
+            // options.headers['Authorization'] = `Bearer ${token}`;
+            // options.credentials = 'include';
+            const timeoutId = setTimeout(() => Promise.reject(new Error('Request timed out')), 600000);
+
+            const fetchPromise = fetch(url, options).then(async response => {
+                clearTimeout(timeoutId);  // Clear timeout when request completes
+                // if (response.status === 403) {
+                //     clearCookie('accessToken');
+                //     console.log('back to landing page!');
+                //     if (!landing.value) {
+                //         router.push({ path: '/landing' });
+                //     }
+                // } else if (token) {
+                //     setCookie('accessToken', atob(token), cookieExpire.value); // Store new token
+                // }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                    return response
+                }
+
+                // Check for JSON or text response
+                const contentType = response.headers.get('Content-Type');
+                const data = contentType && contentType.includes('application/json')
+                    ? await response.json()
+                    : await response.text();
+
+                return data;
+            });
+
+            // return Promise.race([fetchPromise, new Promise((_, reject) => timeoutId)]);
+            return fetchPromise;
+
+        } else {
+            clearCookie('accessToken');
+            console.log('back to landing page!');
+            router.push({ path: '/landing' });
+            return null;
         }
 
-        options.headers = options.headers || {};
-        options.headers['Authorization'] = `Bearer ${token}`;
-        options.credentials = 'include';
-        // const timeoutId = setTimeout(() => Promise.reject(new Error('Request timed out')), 600000);
-
-        const fetchPromise = fetch(url, options).then(async response => {
-            // clearTimeout(timeoutId);  // Clear timeout when request completes
-            if (response.status === 403) {
-                clearCookie('accessToken');
-                console.log('back to landing page!');
-                if (!landing.value) {
-                    router.push({ path: '/landing' });
-                }
-            } else if (token) {
-                setCookie('accessToken', atob(token), cookieExpire.value); // Store new token
-            }
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-                return response
-            }
-
-            // Check for JSON or text response
-            const contentType = response.headers.get('Content-Type');
-            const data = contentType && contentType.includes('application/json')
-                ? await response.json()
-                : await response.text();
-
-            return data;
-        });
-
-        // return Promise.race([fetchPromise, new Promise((_, reject) => timeoutId)]);
-        return fetchPromise;
     };
 
     function updateApi(newapi) {
@@ -339,48 +347,6 @@ export const useApi = defineStore('api', () => {
         inputFolder.value = newpath
     }
 
-    // function updateInputTree(data) {
-    //     const nestedStructure = [];
-
-    //     // Iterate through each item in the data array
-    //     data.forEach((item, index1) => {
-    //         // Split the directory path into segments
-    //         const segments = item.dir.split('/');
-
-    //         // Initialize reference to the current level of the nested structure
-    //         let currentLevel = nestedStructure;
-
-    //         // Iterate through each segment to build the nested structure
-    //         segments.forEach((segment, index) => {
-    //             // Check if the segment already exists in the current level
-    //             let existingNode = currentLevel.find(node => node.title === segment);
-
-    //             // If node doesn't exist, create a new node
-    //             if (!existingNode) {
-    //                 const newNode = {
-    //                     title: segment,
-    //                     value: index == 0 && index1 == 0 ? segment : item.dir,
-    //                     children: [],
-    //                     count: index === segments.length - 1 ? item.count : 0,
-    //                     disabled: index == 0 && index1 == 0 ? true : false
-    //                 };
-    //                 currentLevel.push(newNode);
-    //                 existingNode = newNode;
-    //             }
-
-    //             // Move to the next level
-    //             currentLevel = existingNode.children;
-
-    //             // Add count to the last segment
-    //             if (index === segments.length - 1) {
-    //                 existingNode.count = item.count;
-    //             }
-    //         });
-    //     });
-
-    //     inputTree.value = nestedStructure ? nestedStructure[0] ?.children : []
-    //     // console.log(inputTree.value)
-    // }
     function updateInputTree(data) {
         const nestedStructure = [];
 
