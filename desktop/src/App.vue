@@ -16,7 +16,6 @@ import { Modal, Input } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
 
-
 const openSetting = ref(false)
 const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)')
 const darkSetting = {
@@ -179,6 +178,16 @@ const requestUrl = async (signal) => {
       method: 'GET',
       signal: signal
     })
+    if (data) {
+      validApi.value = true
+      requestApi.value = false
+      return true
+    } else {
+      validApi.value = false
+      requestApi.value = false
+      return false
+    }
+
     // Check if the response is OK
     // if (!response.ok) {
     //   console.log('There was a problem with the new API address')
@@ -188,9 +197,6 @@ const requestUrl = async (signal) => {
     // }
     // const data = await response.json()
     // Set the API status as valid
-    validApi.value = true
-    requestApi.value = false
-    return true
   } catch (error) {
     // Catch any errors (e.g., network errors, aborted requests)
     console.log('There was a problem with the new API address:', error)
@@ -245,10 +251,11 @@ const purgeDatabase = async () => {
       method: 'POST',
       headers: { accept: 'application/json' }
     })
-
+    if (data) {
+      openNotificationWithIcon('purgeSuccess')
+      window.location.reload()
+    }
     // Process the successful response data
-    openNotificationWithIcon('purgeSuccess')
-    window.location.reload()
   } catch (error) {
     // Handle errors here
     openNotificationWithIcon('purgeError')
@@ -285,17 +292,22 @@ const showBadge = ref(
 )
 
 watch(
-  () => API.landing,
+  () => API.landing && API.login,
   () => {
     console.log('landing changed')
     validateUrl()
-    API.accessKey = ''
+    // API.accessKey = ''
   }
 )
 onMounted(async () => {
   document.documentElement.setAttribute('data-theme', prefersDarkScheme.matches ? 'dark' : 'light')
-  if ((!API.getCookie('accessToken')||API.getCookie('accessToken')==null)&&!API.landing) {
-    console.log(API.getCookie('accessToken'),API.landing)
+  if (
+    (!API.getCookie('accessToken') || API.getCookie('accessToken') == null) &&
+    !API.landing &&
+    API.login
+  ) {
+    console.log('no token')
+    console.log(API.getCookie('accessToken'), API.landing)
     router.push({ path: '/landing' })
   } else {
     try {
@@ -325,9 +337,14 @@ onMounted(async () => {
           <template #title>
             <span>{{ version }}</span>
           </template>
-          <img v-if="!API.landing||!API.login" alt="BQAT logo" class="logo" src="./assets/logo-bqat.png" />
+          <img
+            v-if="!API.landing || !API.login"
+            alt="BQAT logo"
+            class="logo"
+            src="./assets/logo-bqat.png"
+          />
         </a-tooltip>
-        <div v-if="!API.landing||!API.login" style="margin-bottom: 8px; font-size: 25px">
+        <div v-if="!API.landing || !API.login" style="margin-bottom: 8px; font-size: 25px">
           <RouterLink to="/">Home</RouterLink>
           <RouterLink to="/input">Input</RouterLink>
           <RouterLink to="/results">Results</RouterLink>
@@ -340,7 +357,7 @@ onMounted(async () => {
   <body class="body">
     <RouterView />
     <a-float-button
-      v-if="!API.landing||!API.login"
+      v-if="!API.landing || !API.login"
       :badge="{ count: info.process.taskStatus.filter((item) => item.status == 1).length }"
       shape="square"
       @click="goToTaskBoard"
@@ -367,7 +384,12 @@ onMounted(async () => {
       </template>
     </a-float-button>
 
-    <a-float-button-group v-if="!API.landing||!API.login" trigger="hover" type="primary" class="floatButtons">
+    <a-float-button-group
+      v-if="!API.landing || !API.login"
+      trigger="hover"
+      type="primary"
+      class="floatButtons"
+    >
       <template #icon>
         <a-badge v-if="!validApi" color="red" style="position: absolute; top: 0px; left: 20px" />
         <SettingOutlined
@@ -458,7 +480,7 @@ nav a.router-link-exact-active:hover {
 nav a {
   display: inline-block;
   padding: 0 15px;
-  border-radius: 10px; 
+  border-radius: 10px;
   /* border-left: 1px solid var(--color-border); */
 }
 

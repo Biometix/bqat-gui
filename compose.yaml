@@ -36,7 +36,6 @@ services:
     depends_on:
       - mongo
       - redis
-    # env_file: .env
     environment:
       MGO_URL: mongodb://root:admin@mongo:27017/
       SCAN_DB: scan

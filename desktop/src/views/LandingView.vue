@@ -11,21 +11,23 @@ const status = useStatus()
 const loading = ref(0)
 const version = ref('NA')
 
-const validateKey = async () => {
+const validateKey = async (key) => {
   loading.value = 1
   try {
     const res = await fetch(`${API.api}/validate`, {
       method: 'POST',
-      body:API.accessKey
+      body:key
     })
     const data=await res.json()
     if (data) {
       loading.value = 2
       await finishLanding()
     } else {
+      API.accessKey=''
       loading.value = -1
     }
   } catch (error) {
+    API.accessKey=''
     loading.value = -1
     console.log(error)
   }
@@ -39,10 +41,12 @@ const finishLanding = async () => {
   API.landing = false
 }
 onMounted(async () => {
+  // console.log('landing')
   //Public info endpoint
   if(API.landing){
     router.push('/')
   }
+  API.accessKey=''
   API.landing = true
   fetch(
     new Request(`${API.api}/info`, {
@@ -57,7 +61,7 @@ onMounted(async () => {
     })
 
   if (API.getCookie('accessToken')) {
-    await validateKey()
+    await validateKey(API.getCookie('accessToken'))
   }
 })
 </script>
@@ -90,11 +94,11 @@ onMounted(async () => {
           allowClear
           size="large"
           autofocus
-          @pressEnter="validateKey"
+          @pressEnter="validateKey(API.accessKey)"
         />
       </a-row>
       <a-row>
-        <a-button type="default" size="large" :loading="loading == 1" @click="validateKey"
+        <a-button type="default" size="large" :loading="loading == 1" @click="validateKey(API.accessKey)"
           >Log in</a-button
         >
       </a-row>
