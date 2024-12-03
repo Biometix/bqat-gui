@@ -294,8 +294,10 @@ const showBadge = ref(
 watch(
   () => API.landing && API.login,
   () => {
-    console.log('landing changed')
-    validateUrl()
+    if (API.landing && API.login) {
+      console.log('landing changed')
+      validateUrl()
+    }
     // API.accessKey = ''
   }
 )
