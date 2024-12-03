@@ -16,19 +16,22 @@ const validateKey = async (key) => {
   try {
     const res = await fetch(`${API.api}/validate`, {
       method: 'POST',
-      body:key
+      body: key
     })
-    const data=await res.json()
-    if (data) {
+    const data = await res.json()
+    if (data == true) {
+      // console.log(key,API.accessKey)
       loading.value = 2
       await finishLanding()
     } else {
-      API.accessKey=''
+      API.accessKey = '';
+      API.clearCookie('accessToken')
       loading.value = -1
     }
   } catch (error) {
-    API.accessKey=''
+    API.accessKey = '';
     loading.value = -1
+    API.clearCookie('accessToken')
     console.log(error)
   }
 }
@@ -43,10 +46,10 @@ const finishLanding = async () => {
 onMounted(async () => {
   // console.log('landing')
   //Public info endpoint
-  if(API.landing){
+  if (API.landing || !API.login) {
     router.push('/')
   }
-  API.accessKey=''
+  API.accessKey = ''
   API.landing = true
   fetch(
     new Request(`${API.api}/info`, {
@@ -61,7 +64,12 @@ onMounted(async () => {
     })
 
   if (API.getCookie('accessToken')) {
-    await validateKey(API.getCookie('accessToken'))
+    try {
+      const cookieValue = API.getCookie('accessToken')
+      await validateKey(atob(cookieValue))
+    } catch (error) {
+      console.error('Error decoding access token:', error)
+    }
   }
 })
 </script>
@@ -74,11 +82,17 @@ onMounted(async () => {
   <a-flex
     v-if="API.landing"
     vertical
-    justify="center" align="center"
+    justify="center"
+    align="center"
     style="width: 100%; min-width: 400px; align-self: center"
   >
     <a-row style="align-self: center">
-      <a-flex justify="center" align="center" vertical style="margin-top: -10rem;margin-bottom: 5rem">
+      <a-flex
+        justify="center"
+        align="center"
+        vertical
+        style="margin-top: -10rem; margin-bottom: 5rem"
+      >
         <!-- <img alt="BQAT logo" class="landing" src="../assets/logo-bqat.png" /> -->
         <h1 class="logo">BQAT</h1>
         <h3>Biometric Quality Assessment Tool</h3>
@@ -98,7 +112,11 @@ onMounted(async () => {
         />
       </a-row>
       <a-row>
-        <a-button type="default" size="large" :loading="loading == 1" @click="validateKey(API.accessKey)"
+        <a-button
+          type="default"
+          size="large"
+          :loading="loading == 1"
+          @click="validateKey(API.accessKey)"
           >Log in</a-button
         >
       </a-row>
