@@ -266,7 +266,22 @@ export const useApi = defineStore('api', () => {
     // const password = ref(env.VITE_PASSWORD?env.VITE_PASSWORD:import.meta.env.VITE_PASSWORD.toString())
     const login = ref(config.login ? config.login ? true : false : import.meta.env.VITE_LOGIN.toString() == 'true' ? true : false)
     const landing = ref(config.login ? config.login ? false : true : import.meta.env.VITE_LOGIN ? import.meta.env.VITE_LOGIN.toString() == 'true' ? false : true : false)
-    const accessKey = ref(login.value ? getCookie('accessToken') ? getCookie('accessToken') : '' : 'noKey')
+    const accessKey = ref<string>('');
+    if (login.value) {
+        const token = getCookie('accessToken');
+        if (token) {
+            try {
+                accessKey.value = atob(token);
+            } catch (error) {
+                console.error('Invalid Base64 token:', error);
+                accessKey.value = '';
+            }
+        } else {
+            accessKey.value = '';
+        }
+    } else {
+        accessKey.value = 'noKey';
+    }
     const testTimer = ref(0)
     const cookieExpire = ref(config.cookieExpire ? config.cookieExpire : import.meta.env.VITE_COOKIE_EXPIRE.toString())
 
@@ -281,13 +296,18 @@ export const useApi = defineStore('api', () => {
 
     // Create a wrapper around fetch to automatically add the Authorization header
     const authFetch = async (url, options: RequestInit = {}) => {
-        let token = getCookie('accessToken');
-
-        if ((token == btoa(accessKey.value) && token) || !login.value) {
-            if (token == btoa(accessKey.value) && token) {
-                setCookie('accessToken', accessKey.value, cookieExpire.value); // Store new token for 10 min
-            } else {
-                clearCookie('accessToken');
+        let token = '';
+        try {
+            const cookieValue = getCookie('accessToken');
+            if (cookieValue) {
+                token = atob(cookieValue);
+            }
+        } catch (error) {
+            console.error('Error decoding access token:', error);
+        }
+        if ((token == accessKey.value && token) || !login.value) {
+            if (token == accessKey.value && token) {
+                setCookie('accessToken', accessKey.value, cookieExpire.value); // Renew token for 10 min
             }
             options.headers = options.headers || {};
             // options.headers['Authorization'] = `Bearer ${token}`;
@@ -324,7 +344,6 @@ export const useApi = defineStore('api', () => {
             return fetchPromise;
 
         } else {
-            clearCookie('accessToken');
             console.log('back to landing page!');
             router.push({ path: '/landing' });
             return null;
@@ -383,6 +402,6 @@ export const useApi = defineStore('api', () => {
         inputTree.value = nestedStructure ? nestedStructure[0] ?.children : []
     }
 
-    return { testTimer, accessKey, landing, login, cookieExpire, setCookie, getCookie, api, apiList, updateApi, folderPath, updateFolderPath, updateInputFolder, inputFolder, inputTree, updateInputTree, authFetch }
+    return { testTimer, accessKey, landing, login, cookieExpire, setCookie, getCookie, clearCookie, api, apiList, updateApi, folderPath, updateFolderPath, updateInputFolder, inputFolder, inputTree, updateInputTree, authFetch }
 })
 
