@@ -294,6 +294,13 @@ export const useApi = defineStore('api', () => {
         headers?: HeadersInit;
     };
 
+    class AccessKeyError extends Error {
+        constructor(message:string) {
+          super(message);
+          this.name = "AccessKey Not correct";
+        }
+      }
+
     // Create a wrapper around fetch to automatically add the Authorization header
     const authFetch = async (url, options: RequestInit = {}) => {
         let token = '';
@@ -325,7 +332,6 @@ export const useApi = defineStore('api', () => {
                 // } else if (token) {
                 //     setCookie('accessToken', atob(token), cookieExpire.value); // Store new token
                 // }
-
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                     return response
@@ -346,7 +352,7 @@ export const useApi = defineStore('api', () => {
         } else {
             console.log('back to landing page!');
             router.push({ path: '/landing' });
-            return null;
+            throw new AccessKeyError('AccessKey error')
         }
 
     };

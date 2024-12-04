@@ -187,7 +187,6 @@ const requestUrl = async (signal) => {
       requestApi.value = false
       return false
     }
-
     // Check if the response is OK
     // if (!response.ok) {
     //   console.log('There was a problem with the new API address')
@@ -251,10 +250,8 @@ const purgeDatabase = async () => {
       method: 'POST',
       headers: { accept: 'application/json' }
     })
-    if (data) {
       openNotificationWithIcon('purgeSuccess')
       window.location.reload()
-    }
     // Process the successful response data
   } catch (error) {
     // Handle errors here
