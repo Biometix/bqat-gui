@@ -1493,7 +1493,6 @@ const clearTask = async () => {
       method: 'POST',
       headers: { accept: 'application/json' }
     })
-    if (data) {
       clearInterval(checkInternalStatus)
       preprocessInfo.value.preprocess.progress = false
       preprocessStatus.updateStatus('preprocess', 2)
@@ -1501,7 +1500,7 @@ const clearTask = async () => {
       eta.value = -1
       submittedStop.value = false
       openNotificationWithIcon('stop')
-    }
+    
   } catch (error) {
     openNotificationWithIcon('error')
     console.error('Error cancel task:', error)

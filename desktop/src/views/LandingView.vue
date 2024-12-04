@@ -19,7 +19,7 @@ const validateKey = async (key) => {
       body: key
     })
     const data = await res.json()
-    if (data == true) {
+    if (data) {
       // console.log(key,API.accessKey)
       loading.value = 2
       await finishLanding()
