@@ -7,7 +7,7 @@ Biometric Quality Assessment Tool (BQAT) - GUI
 <img alt="GitHub issues" src="https://img.shields.io/github/issues-raw/biometix/bqat-gui">
 <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/biometix/bqat-gui">
 <img alt="GitHub" src="https://img.shields.io/github/license/biometix/bqat-gui">
-[![Release Status](https://github.com/Biometix/bqat-gui/actions/workflows/release.yml/badge.svg)](https://github.com/Biometix/bqat-gui/actions/workflows/release.yml)
+[![Release Status](https://github.com/Biometix/bqat-gui/actions/workflows/release.yml/badge.svg?branch=)](https://github.com/Biometix/bqat-gui/actions/workflows/release.yml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 > [biometix.github.io](https://biometix.github.io/)
