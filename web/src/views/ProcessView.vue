@@ -1664,15 +1664,14 @@ const cancelTask = async (tid) => {
       method: 'POST',
       headers: { accept: 'application/json' }
     })
-    if (data) {
-      processInfo.value.process.selectedItems = []
-      processInfo.value.process.taskStatus.splice(0, 1)
-      processInfo.value.process.timer == -1
-      processInfo.value.process.timeRecord == 0
-      openNotificationWithIcon('cancel')
-      processStatus.updateStatus('process', 0)
-      getCancel.value = false
-    }
+
+    processInfo.value.process.selectedItems = []
+    processInfo.value.process.taskStatus.splice(0, 1)
+    processInfo.value.process.timer == -1
+    processInfo.value.process.timeRecord == 0
+    openNotificationWithIcon('cancel')
+    processStatus.updateStatus('process', 0)
+    getCancel.value = false
   } catch (error) {
     console.error('Error cancel task:', error)
     getCancel.value = false
@@ -1687,7 +1686,7 @@ const stopTask = async (tid) => {
       method: 'POST',
       headers: { accept: 'application/json' }
     })
-    if (data) {
+
       const task = processInfo.value.process.taskStatus.find((item) => item.tid === tid)
       if (task) {
         task.status = 0
@@ -1701,7 +1700,7 @@ const stopTask = async (tid) => {
       openNotificationWithIcon('stop')
       processStatus.updateStatus('process', 0)
       getStop.value = false
-    }
+  
   } catch (error) {
     console.error('Error cancel task:', error)
     getStop.value = false
@@ -1716,7 +1715,6 @@ const resumeTask = async (tid) => {
       method: 'POST',
       headers: { accept: 'application/json' }
     })
-    if (data) {
       const task = processInfo.value.process.taskStatus.find((item) => item.tid === tid)
       if (task) {
         task.status = 1
@@ -1759,7 +1757,6 @@ const resumeTask = async (tid) => {
         console.error(`Task with tid ${tid} not found`) // Optional: Handle the case where the task is not found
       }
       getResume.value = false
-    }
   } catch (error) {
     openNotificationWithIcon('error')
     console.error('Error cancel task:', error)
@@ -2223,11 +2220,10 @@ const stopOutlierTask = async () => {
       method: 'POST',
       headers: { accept: 'application/json' }
     })
-    if (data) {
       clearInterval(checkOutlierInterval)
       processStatus.updateStatus('outlier', 0)
       processInfo.value.outlier.id = ''
-    }
+
   } catch (error) {
     console.error('Error cancel task:', error)
   }

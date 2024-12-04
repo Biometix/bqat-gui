@@ -576,7 +576,7 @@ const stopReportTask = async () => {
           method: 'POST',
           headers: { accept: 'application/json' }
         })
-        if (data) {
+
           resultStatus.updateStatus('result', 2)
           openNotificationWithIcon('stop')
           resultInfo.value.result.generatedReport = {
@@ -585,7 +585,6 @@ const stopReportTask = async () => {
             html: ''
           }
           getStop.value = false
-        }
       } catch (error) {
         console.error('Error cancel task:', error)
         getStop.value = false
@@ -601,7 +600,9 @@ const stopReportTask = async () => {
           method: 'POST',
           headers: { accept: 'application/json' }
         })
+
         if (data) {
+          console.log(data)
           resultStatus.updateStatus('result', 2)
           openNotificationWithIcon('stop')
           getStop.value = false
@@ -610,8 +611,6 @@ const stopReportTask = async () => {
         console.error('Error cancel task:', error)
         getStop.value = false
       }
-
-      // })
     }
   }, 500)
 }
