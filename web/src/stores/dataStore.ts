@@ -262,10 +262,8 @@ export const useApi = defineStore('api', () => {
     const config: Config = inject('config');
     const api = ref(config.apiUrl ? config.apiUrl : import.meta.env.VITE_API.toString())
     const apiList = ref([config.apiUrl ? config.apiUrl : import.meta.env.VITE_API.toString()])
-    // const username = ref(env.VITE_USERNAME?env.VITE_USERNAME:import.meta.env.VITE_USERNAME.toString())
-    // const password = ref(env.VITE_PASSWORD?env.VITE_PASSWORD:import.meta.env.VITE_PASSWORD.toString())
     const login = ref(config.login ? config.login ? true : false : import.meta.env.VITE_LOGIN.toString() == 'true' ? true : false)
-    const landing = ref(config.login ? config.login ? false : true : import.meta.env.VITE_LOGIN ? import.meta.env.VITE_LOGIN.toString() == 'true' ? false : true : false)
+    const landing = ref(false)
     const accessKey = ref<string>('');
     if (login.value) {
         const token = getCookie('accessToken');
@@ -323,15 +321,7 @@ export const useApi = defineStore('api', () => {
 
             const fetchPromise = fetch(url, options).then(async response => {
                 clearTimeout(timeoutId);  // Clear timeout when request completes
-                // if (response.status === 403) {
-                //     clearCookie('accessToken');
-                //     console.log('back to landing page!');
-                //     if (!landing.value) {
-                //         router.push({ path: '/landing' });
-                //     }
-                // } else if (token) {
-                //     setCookie('accessToken', atob(token), cookieExpire.value); // Store new token
-                // }
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                     return response
