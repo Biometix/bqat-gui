@@ -3,7 +3,9 @@
 
 ## 🛠 Fixes
 
-- 🐛 Anth trategy issues
+- 🐛 Auth trategy issues
+
+- Minor refactor
 
 
 <a name="v0.3.10"></a>
