@@ -11,12 +11,12 @@ const status = useStatus()
 const loading = ref(0)
 const version = ref('NA')
 
-const validateKey = async (key) => {
+const validateKey = async () => {
   loading.value = 1
   try {
     const res = await fetch(`${API.api}/validate`, {
       method: 'POST',
-      body: key
+      body: API.accessKey
     })
     const data = await res.json()
     if (data) {
@@ -24,19 +24,19 @@ const validateKey = async (key) => {
       loading.value = 2
       await finishLanding()
     } else {
-      API.accessKey = '';
+      API.accessKey = ''
       API.clearCookie('accessToken')
       loading.value = -1
     }
   } catch (error) {
-    API.accessKey = '';
+    API.accessKey = ''
     loading.value = -1
     API.clearCookie('accessToken')
     console.log(error)
   }
 }
 const finishLanding = async () => {
-  API.setCookie('accessToken', API.accessKey, API.cookieExpire) // Store new token for 10 min
+  API.setCookie('accessToken', API.accessKey, API.cookieExpire) // Renew token for 10 min
   status.updateStatus('app', 1)
   await initialiseTask(API, info, status)
   await checkRunning(API, info, status)
@@ -46,29 +46,30 @@ const finishLanding = async () => {
 onMounted(async () => {
   // console.log('landing')
   //Public info endpoint
-  if (API.landing || !API.login) {
+  if (!API.login) {
     router.push('/')
-  }
-  API.accessKey = ''
-  API.landing = true
-  fetch(
-    new Request(`${API.api}/info`, {
-      method: 'GET'
-    })
-  )
-    .then((response) => {
-      return response.json()
-    })
-    .then((data) => {
-      version.value = data?.version
-    })
-
-  if (API.getCookie('accessToken')) {
-    try {
-      const cookieValue = API.getCookie('accessToken')
-      await validateKey(atob(cookieValue))
-    } catch (error) {
-      console.error('Error decoding access token:', error)
+  } else {
+    API.landing = true
+    API.accessKey = ''
+    fetch(
+      new Request(`${API.api}/info`, {
+        method: 'GET'
+      })
+    )
+      .then((response) => {
+        return response.json()
+      })
+      .then((data) => {
+        version.value = data?.version
+      })
+    if (API.getCookie('accessToken')) {
+      try {
+        const cookieValue = atob(API.getCookie('accessToken'))
+        API.accessKey = cookieValue
+        await validateKey()
+      } catch (error) {
+        console.error('Error decoding access token:', error)
+      }
     }
   }
 })
@@ -108,15 +109,11 @@ onMounted(async () => {
           allowClear
           size="large"
           autofocus
-          @pressEnter="validateKey(API.accessKey)"
+          @pressEnter="validateKey()"
         />
       </a-row>
       <a-row>
-        <a-button
-          type="default"
-          size="large"
-          :loading="loading == 1"
-          @click="validateKey(API.accessKey)"
+        <a-button type="default" size="large" :loading="loading == 1" @click="validateKey()"
           >Log in</a-button
         >
       </a-row>
