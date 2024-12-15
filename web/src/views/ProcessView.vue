@@ -769,7 +769,7 @@
               tip="Table is loading..."
             >
               <div>
-                <p>Higher scores indicate higher likelyhood of abnormaly.</p>
+                <p>Higher scores indicate higher likelihood of anomaly.</p>
                 <h3>
                   Shape: {{ outlierData.length }} ×
                   {{
