@@ -1,7 +1,15 @@
+<a name="v0.3.12"></a>
+# v0.3.12 (2025-02-04)
+
+## 🛠️️ Fixes
+
+- Put default config file in the container
+
+
 <a name="v0.3.11"></a>
 # v0.3.11 (2024-12-05)
 
-## 🛠 Fixes
+## 🛠️ Fixes
 
 - 🐛 Auth trategy issues
 
@@ -11,7 +19,7 @@
 <a name="v0.3.10"></a>
 # v0.3.10 (2024-12-02)
 
-## 🛠 Fixes
+## 🛠️ Fixes
 
 - 🐛 Operational UI issues
 
@@ -19,7 +27,7 @@
 <a name="v0.3.9"></a>
 # v0.3.9 (2024-11-27)
 
-## 🛠 Fixes
+## 🛠️ Fixes
 
 - UI layout issues
 
@@ -43,7 +51,7 @@
 
 - 🙌 Add fail safe logic that work with backend health check feature
 
-## 🛠 Fixes
+## 🛠️ Fixes
 
 - Improve outlier detection UX
 
@@ -55,7 +63,7 @@
 
 - 🙌 Render audio player in preview
 
-## 🛠 Fixes
+## 🛠️ Fixes
 
 - Improve UX
 
@@ -63,7 +71,7 @@
 <a name="v0.3.1"></a>
 # v0.3.1 (2024-09-19)
 
-## 🛠 Fixes
+## 🛠️ Fixes
 
 - Task log loading issue
 
@@ -89,7 +97,7 @@
 
 - 🙌 Implement preprocess layout
 
-## 🛠 Fixes
+## 🛠️ Fixes
 
 - 🔧 Outlier reloading issue
 
@@ -159,7 +167,7 @@
 <a name="v0.2.1"></a>
 # v0.2.1 (2024-05-09)
 
-## 🛠 Fixes
+## 🛠️ Fixes
 
 - 🔧 Internal connnect & image ratio issue
 
@@ -210,7 +218,7 @@
 <a name="v0.1.8"></a>
 # v0.1.8 (2023-08-14)
 
-## 🛠 Fixes
+## 🛠️ Fixes
 
 - Resolve: Remove the samples and and associated documents after retrival [#6](https://gitlab.com/biometix/products/biometric-quality-assessment-tool/bqat-gui/-/issues/6)
 
@@ -227,7 +235,7 @@
 <a name="v0.1.5"></a>
 # v0.1.5 (2023-07-13)
 
-## 🛠 Fixes
+## 🛠️ Fixes
 
 - Hotfix
 
@@ -235,7 +243,7 @@
 <a name="v0.1.4"></a>
 # v0.1.4 (2023-07-13)
 
-## 🛠 Fixes
+## 🛠️ Fixes
 
 - hotfix-temp-folder
 
@@ -243,7 +251,7 @@
 <a name="v0.1.3"></a>
 # v0.1.3 (2023-07-11)
 
-## 🛠 Fixes
+## 🛠️ Fixes
 
 
 - Fix temporary export file issue [#2](https://gitlab.com/biometix/products/biometric-quality-assessment-tool/bqat-gui/-/issues/2)
@@ -279,7 +287,7 @@
 
 - Upgrade clear button
 
-## 🛠 Fixes
+## 🛠️ Fixes
 
 - Temporary csv
 

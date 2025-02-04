@@ -10,8 +10,8 @@ services:
       context: web
     ports:
       - 9949:9949
-    volumes:
-      - ./config.json:/usr/share/nginx/html/config.json
+    # volumes:
+    #   - ./config.json:/usr/share/nginx/html/config.json
     depends_on:
       - api
     profiles:
