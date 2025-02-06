@@ -11,7 +11,7 @@ import { useInfo, useStatus, useApi } from './stores/dataStore.js'
 import { ref, watchEffect, watch, computed, onMounted } from 'vue'
 import { notification } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
-import { initialiseTask, checkRunning } from './components/utils.ts'
+import { initialiseTask, checkRunning, checkOutlierDesp } from './components/utils.ts'
 import { Modal, Input } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
@@ -310,6 +310,7 @@ onMounted(async () => {
         status.updateStatus('app', 1)
         await initialiseTask(API, info, status)
         await checkRunning(API, info, status)
+        await checkOutlierDesp(API, info)
       } else {
         status.updateStatus('app', -1)
         openNotificationWithIcon('hostError')

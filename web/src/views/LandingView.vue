@@ -2,7 +2,7 @@
 import { useApi, useInfo, useStatus } from '../stores/dataStore'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { initialiseTask, checkRunning } from '../components/utils.ts'
+import { initialiseTask, checkRunning, checkOutlierDesp} from '../components/utils.ts'
 
 const router = useRouter()
 const API = useApi()
@@ -40,6 +40,7 @@ const finishLanding = async () => {
   status.updateStatus('app', 1)
   await initialiseTask(API, info, status)
   await checkRunning(API, info, status)
+  await checkOutlierDesp(API, info)
   router.push('/')
   API.landing = false
 }
