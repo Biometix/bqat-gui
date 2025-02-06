@@ -88,7 +88,8 @@ export const useInfo = defineStore('info', () => {
         folderPath: '',
         length: 0,
         activeKeys: [6],
-        iconLoading: false
+        iconLoading: false,
+        description:{}
     })
 
     const preprocess = ref({
@@ -196,7 +197,8 @@ export const useInfo = defineStore('info', () => {
             folderPath: '',
             length: 0,
             activeKeys: [6],
-            iconLoading: false
+            iconLoading: false,
+            description:{}
         }
         outlier.value = newOutlier
     }

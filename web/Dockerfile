@@ -21,6 +21,7 @@ WORKDIR /usr/share/nginx/html
 RUN rm -rf ./*
 
 COPY --from=build-stage /app/dist /usr/share/nginx/html
+COPY config.json /usr/share/nginx/html/
 
 EXPOSE 9949
 
