@@ -1,6 +1,12 @@
 <a name="v0.3.12"></a>
 # v0.3.12 (2025-02-04)
 
+## 🚀 Features
+
+- 💡 Fetch quality metric description from API
+
+- 💡 Better preview table for outliers
+
 ## 🛠️️ Fixes
 
 - Put default config file in the container

@@ -659,7 +659,80 @@
 
           <a-card hoverable>
             <a-flex vertical gap="middle">
-              <h2><i class="bi bi-columns-gap"></i> Configure Detection Parameters:</h2>
+              <a-flex horizental justify="space-between">
+                <h2><i class="bi bi-columns-gap"></i> Configure Detection Parameters:</h2>
+                <a-popover trigger="click" placement="topLeft">
+                  <!-- <template #title>
+                    <h3>Column Description</h3>
+                  </template> -->
+                  <template #content>
+                    <div style="height: 350px; width: 500px; overflow: scroll">
+                      <div
+                        v-if="
+                          processInfo.outlier.columns.some((innerArray) =>
+                            innerArray.includes('face-bqat')
+                          )
+                        "
+                      >
+                        <a-divider><h3>Engine:BQAT-Column Description</h3></a-divider>
+                        <p v-for="(value, key) in processInfo.outlier.description['face-bqat']">
+                          [{{ key }}] : {{ value }}
+                        </p>
+                      </div>
+                      <div
+                        v-if="
+                          processInfo.outlier.columns.some((innerArray) =>
+                            innerArray.includes('face-biqt')
+                          )
+                        "
+                        style="height: 400px; width: 500px; overflow: scroll"
+                      >
+                        <a-divider><h3>Engine:BIQT-Column Description</h3> </a-divider>
+                        <p v-for="(value, key) in processInfo.outlier.description['face-biqt']">
+                          [{{ key }}] : {{ value }}
+                        </p>
+                      </div>
+                      <div
+                        v-if="
+                          processInfo.outlier.columns.some((innerArray) =>
+                            innerArray.includes('face-ofiq')
+                          )
+                        "
+                      >
+                        <a-divider><h3>Engine:OFIQ-Column Description</h3> </a-divider>
+                        <p v-for="(value, key) in processInfo.outlier.description['face-ofiq']">
+                          [{{ key }}] : {{ value }}
+                        </p>
+                      </div>
+                      <div
+                        v-if="
+                          processInfo.outlier.columns.some((innerArray) =>
+                            innerArray.includes('fingerprint')
+                          )
+                        "
+                      >
+                        <a-divider><h3>Engine:FINGERPRINT-Column Description</h3> </a-divider>
+                        <p v-for="(value, key) in processInfo.outlier.description['fingerprint']">
+                          [{{ key }}] : {{ value }}
+                        </p>
+                      </div>
+                      <div
+                        v-if="
+                          processInfo.outlier.columns.some((innerArray) =>
+                            innerArray.includes('iris')
+                          )
+                        "
+                      >
+                        <a-divider><h3>Engine:IRIS-Column Description</h3></a-divider>
+                        <p v-for="(value, key) in processInfo.outlier.description['iris']">
+                          [{{ key }}] : {{ value }}
+                        </p>
+                      </div>
+                    </div>
+                  </template>
+                  <span class="bi bi-info-circle" style="font-size: larger; padding: 5px"></span>
+                </a-popover>
+              </a-flex>
               <a-row gutter="10">
                 <a-cascader
                   class="outlierOption"
@@ -951,7 +1024,6 @@ import Papa from 'papaparse'
 
 import { Modal } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
-import { getFusionCode, parseFusionCode } from '../components/utils.ts'
 
 const csvdata = ref([])
 const csvlog = ref([])
@@ -1050,24 +1122,228 @@ const columnSelect = ref<CascaderProps['options']>([
     label: 'Face (BQAT)',
     children: [
       {
-        value: 'confidence',
-        label: 'Confidence'
+        value: 'ipd',
+        label: 'ipd'
       },
       {
-        value: 'ipd',
-        label: 'IPD'
+        value: 'face_detection',
+        label: 'face_detection'
+      },
+      {
+        value: 'bbox_left',
+        label: 'bbox_left'
+      },
+      {
+        value: 'bbox_right',
+        label: 'bbox_right'
+      },
+      {
+        value: 'bbox_upper',
+        label: 'bbox_upper'
+      },
+      {
+        value: 'bbox_bottom',
+        label: 'bbox_bottom'
+      },
+      {
+        value: 'eye_closed_left',
+        label: 'eye_closed_left'
+      },
+      {
+        value: 'eye_closed_right',
+        label: 'eye_closed_right'
+      },
+      {
+        value: 'pupil_right_x',
+        label: 'pupil_right_x'
+      },
+      {
+        value: 'pupil_right_y',
+        label: 'pupil_right_y'
+      },
+      {
+        value: 'pupil_left_x',
+        label: 'pupil_left_x'
+      },
+      {
+        value: 'pupil_left_y',
+        label: 'pupil_left_y'
+      },
+      {
+        value: 'yaw_pose',
+        label: 'yaw_pose'
       },
       {
         value: 'yaw_degree',
-        label: 'Yaw Degree'
+        label: 'yaw_degree'
+      },
+      {
+        value: 'pitch_pose',
+        label: 'pitch_pose'
       },
       {
         value: 'pitch_degree',
-        label: 'Pitch Degree'
+        label: 'pitch_degree'
+      },
+      {
+        value: 'roll_pose',
+        label: 'roll_pose'
       },
       {
         value: 'roll_degree',
-        label: 'Roll Degree'
+        label: 'roll_degree'
+      },
+      {
+        value: 'smile',
+        label: 'smile'
+      },
+      {
+        value: 'glasses',
+        label: 'glasses'
+      },
+      {
+        value: 'face_ratio',
+        label: 'face_ratio'
+      },
+      {
+        value: 'brightness',
+        label: 'brightness'
+      },
+      {
+        value: 'dynamic_range',
+        label: 'dynamic_range'
+      },
+      {
+        value: 'sharpness',
+        label: 'sharpness'
+      },
+      {
+        value: 'contrast',
+        label: 'contrast'
+      },
+      {
+        value: 'face_offset_x',
+        label: 'face_offset_x'
+      },
+      {
+        value: 'face_offset_y',
+        label: 'face_offset_y'
+      },
+      {
+        value: 'background_colour_name',
+        label: 'background_colour_name'
+      },
+      {
+        value: 'background_colour_rgb',
+        label: 'background_colour_rgb'
+      },
+      {
+        value: 'background_colour_variance',
+        label: 'background_colour_variance'
+      },
+      {
+        value: 'hair_coverage',
+        label: 'hair_coverage'
+      },
+      {
+        value: 'blur_lap_var',
+        label: 'blur_lap_var'
+      },
+      {
+        value: 'blurriness',
+        label: 'blurriness'
+      },
+      {
+        value: 'gaze_right_x',
+        label: 'gaze_right_x'
+      },
+      {
+        value: 'gaze_right_y',
+        label: 'gaze_right_y'
+      },
+      {
+        value: 'gaze_left_x',
+        label: 'gaze_left_x'
+      },
+      {
+        value: 'gaze_left_y',
+        label: 'gaze_left_y'
+      },
+      {
+        value: 'pupil_colour_right_name',
+        label: 'pupil_colour_right_name'
+      },
+      {
+        value: 'pupil_colour_right_rgb',
+        label: 'pupil_colour_right_rgb'
+      },
+      {
+        value: 'pupil_colour_left_name',
+        label: 'pupil_colour_left_name'
+      },
+      {
+        value: 'pupil_colour_left_rgb',
+        label: 'pupil_colour_left_rgb'
+      },
+      {
+        value: 'brisque_quality',
+        label: 'brisque_quality'
+      },
+      {
+        value: 'age',
+        label: 'age'
+      },
+      {
+        value: 'gender',
+        label: 'gender'
+      },
+      {
+        value: 'ethnicity',
+        label: 'ethnicity'
+      },
+      {
+        value: 'emotion',
+        label: 'emotion'
+      },
+      {
+        value: 'is_hologram',
+        label: 'is_hologram'
+      },
+      {
+        value: 'holograms',
+        label: 'holograms'
+      },
+      {
+        value: 'is_glare',
+        label: 'is_glare'
+      },
+      {
+        value: 'glares',
+        label: 'glares'
+      },
+      {
+        value: 'image_height',
+        label: 'image_height'
+      },
+      {
+        value: 'image_width',
+        label: 'image_width'
+      },
+      {
+        value: 'headgear_detection',
+        label: 'headgear_detection'
+      },
+      {
+        value: 'headgear_detection_dark',
+        label: 'headgear_detection_dark'
+      },
+      {
+        value: 'colour_temperature',
+        label: 'colour_temperature'
+      },
+      {
+        value: 'brightness_variance',
+        label: 'brightness_variance'
       }
     ]
   },
@@ -1076,121 +1352,116 @@ const columnSelect = ref<CascaderProps['options']>([
     label: 'Face (OFIQ)',
     children: [
       {
-        label: 'quality',
-        value: 'quality'
-      },
-
-      {
-        label: 'unified_quality_score_scalar',
-        value: 'unified_quality_score_scalar'
+        value: 'quality',
+        label: 'quality'
       },
       {
-        label: 'background_uniformity_scalar',
-        value: 'background_uniformity_scalar'
+        value: 'background_uniformity',
+        label: 'background_uniformity'
       },
       {
-        label: 'illumination_uniformity_scalar',
-        value: 'illumination_uniformity_scalar'
+        value: 'illumination_uniformity',
+        label: 'illumination_uniformity'
       },
       {
-        label: 'luminance_mean_scalar',
-        value: 'luminance_mean_scalar'
+        value: 'luminance_mean',
+        label: 'luminance_mean'
       },
       {
-        label: 'luminance_variance_scalar',
-        value: 'luminance_variance_scalar'
+        value: 'luminance_variance',
+        label: 'luminance_variance'
       },
       {
-        label: 'under_exposure_prevention_scalar',
-        value: 'under_exposure_prevention_scalar'
+        value: 'under_exposure_prevention',
+        label: 'under_exposure_prevention'
       },
       {
-        label: 'over_exposure_prevention_scalar',
-        value: 'over_exposure_prevention_scalar'
+        value: 'over_exposure_prevention',
+        label: 'over_exposure_prevention'
       },
       {
-        label: 'dynamic_range_scalar',
-        value: 'dynamic_range_scalar'
+        value: 'dynamic_range',
+        label: 'dynamic_range'
       },
       {
-        label: 'sharpness_scalar',
-        value: 'sharpness_scalar'
+        value: 'sharpness',
+        label: 'sharpness'
       },
       {
-        label: 'compression_artifacts_scalar',
-        value: 'compression_artifacts_scalar'
+        value: 'compression_artifacts',
+        label: 'compression_artifacts'
       },
       {
-        label: 'natural_colour_scalar',
-        value: 'natural_colour_scalar'
+        value: 'natural_colour',
+        label: 'natural_colour'
       },
       {
-        label: 'single_face_present_scalar',
-        value: 'single_face_present_scalar'
+        value: 'single_face_present',
+        label: 'single_face_present'
       },
       {
-        label: 'eyes_open_scalar',
-        value: 'eyes_open_scalar'
+        value: 'eyes_open',
+        label: 'eyes_open'
       },
       {
-        label: 'mouth_closed_scalar',
-        value: 'mouth_closed_scalar'
+        value: 'mouth_closed',
+        label: 'mouth_closed'
       },
       {
-        label: 'eyes_visible_scalar',
-        value: 'eyes_visible_scalar'
+        value: 'eyes_visible',
+        label: 'eyes_visible'
       },
       {
-        label: 'mouth_occlusion_prevention_scalar',
-        value: 'mouth_occlusion_prevention_scalar'
+        value: 'mouth_occlusion_prevention',
+        label: 'mouth_occlusion_prevention'
       },
       {
-        label: 'face_occlusion_prevention_scalar',
-        value: 'face_occlusion_prevention_scalar'
+        value: 'face_occlusion_prevention',
+        label: 'face_occlusion_prevention'
       },
       {
-        label: 'inter_eye_distance_scalar',
-        value: 'inter_eye_distance_scalar'
+        value: 'inter_eye_distance',
+        label: 'inter_eye_distance'
       },
       {
-        label: 'head_size_scalar',
-        value: 'head_size_scalar'
+        value: 'head_size',
+        label: 'head_size'
       },
       {
-        label: 'leftward_crop_of_the_face_image_scalar',
-        value: 'leftward_crop_of_the_face_image_scalar'
+        value: 'leftward_crop_of_the_face_image',
+        label: 'leftward_crop_of_the_face_image'
       },
       {
-        label: 'rightward_crop_of_the_face_image_scalar',
-        value: 'rightward_crop_of_the_face_image_scalar'
+        value: 'rightward_crop_of_the_face_image',
+        label: 'rightward_crop_of_the_face_image'
       },
       {
-        label: 'downward_crop_of_the_face_image_scalar',
-        value: 'downward_crop_of_the_face_image_scalar'
+        value: 'downward_crop_of_the_face_image',
+        label: 'downward_crop_of_the_face_image'
       },
       {
-        label: 'upward_crop_of_the_face_image_scalar',
-        value: 'upward_crop_of_the_face_image_scalar'
+        value: 'upward_crop_of_the_face_image',
+        label: 'upward_crop_of_the_face_image'
       },
       {
-        label: 'head_pose_yaw_scalar',
-        value: 'head_pose_yaw_scalar'
+        value: 'head_pose_yaw',
+        label: 'head_pose_yaw'
       },
       {
-        label: 'head_pose_pitch_scalar',
-        value: 'head_pose_pitch_scalar'
+        value: 'head_pose_pitch',
+        label: 'head_pose_pitch'
       },
       {
-        label: 'head_pose_roll_scalar',
-        value: 'head_pose_roll_scalar'
+        value: 'head_pose_roll',
+        label: 'head_pose_roll'
       },
       {
-        label: 'expression_neutrality_scalar',
-        value: 'expression_neutrality_scalar'
+        value: 'expression_neutrality',
+        label: 'expression_neutrality'
       },
       {
-        label: 'no_head_coverings_scalar',
-        value: 'no_head_coverings_scalar'
+        value: 'no_head_coverings',
+        label: 'no_head_coverings'
       }
     ]
   },
@@ -1223,54 +1494,12 @@ const columnSelect = ref<CascaderProps['options']>([
         label: 'focus_face'
       },
       {
-        value: 'openbr_IPD',
-        label: 'openbr_IPD'
-      },
-      {
         value: 'openbr_confidence',
         label: 'openbr_confidence'
       },
-
       {
         value: 'opencv_IPD',
         label: 'opencv_IPD'
-      },
-      {
-        value: 'opencv_eye_count',
-        label: 'opencv_eye_count'
-      },
-      {
-        value: 'opencv_face_found',
-        label: 'opencv_face_found'
-      },
-      {
-        value: 'opencv_face_height',
-        label: 'opencv_face_height'
-      },
-      {
-        value: 'opencv_face_width',
-        label: 'opencv_face_width'
-      },
-      {
-        value: 'opencv_frontal_face_found',
-        label: 'opencv_frontal_face_found'
-      },
-      {
-        value: 'opencv_landmarks_count',
-        label: 'opencv_landmarks_count'
-      },
-      {
-        value: 'opencv_mouth_count',
-        label: 'opencv_mouth_count'
-      },
-
-      {
-        value: 'opencv_nose_count',
-        label: 'opencv_nose_count'
-      },
-      {
-        value: 'opencv_profile_face_found',
-        label: 'opencv_profile_face_found'
       },
       {
         value: 'over_exposure',
@@ -1284,110 +1513,13 @@ const columnSelect = ref<CascaderProps['options']>([
         value: 'quality',
         label: 'quality'
       },
-
       {
-        label: 'sap_code',
-        value: 'sap_code'
+        value: 'skin_ratio_face',
+        label: 'skin_ratio_face'
       },
       {
-        label: 'skin_ratio_face',
-        value: 'skin_ratio_face'
-      },
-      {
-        label: 'skin_ratio_full',
-        value: 'skin_ratio_full'
-      },
-      {
-        label: 'image_area',
-        value: 'image_area'
-      },
-      {
-        label: 'image_channels',
-        value: 'image_channels'
-      },
-      {
-        label: 'image_height',
-        value: 'image_height'
-      },
-      {
-        label: 'image_ratio',
-        value: 'image_ratio'
-      },
-      {
-        label: 'image_width',
-        value: 'image_width'
-      },
-      {
-        label: 'openbr_left_eye_x',
-        value: 'openbr_left_eye_x'
-      },
-      {
-        label: 'openbr_left_eye_y',
-        value: 'openbr_left_eye_y'
-      },
-      {
-        label: 'openbr_right_eye_x',
-        value: 'openbr_right_eye_x'
-      },
-      {
-        label: 'openbr_right_eye_y',
-        value: 'openbr_right_eye_y'
-      },
-      {
-        label: 'opencv_face_center_of_mass_x',
-        value: 'opencv_face_center_of_mass_x'
-      },
-      {
-        label: 'opencv_face_center_of_mass_y',
-        value: 'opencv_face_center_of_mass_y'
-      },
-      {
-        label: 'opencv_face_offset_x',
-        value: 'opencv_face_offset_x'
-      },
-      {
-        label: 'opencv_face_offset_y',
-        value: 'opencv_face_offset_y'
-      },
-      {
-        label: 'opencv_face_x',
-        value: 'opencv_face_x'
-      },
-      {
-        label: 'opencv_face_y',
-        value: 'opencv_face_y'
-      },
-      {
-        label: 'opencv_left_eye_x',
-        value: 'opencv_left_eye_x'
-      },
-      {
-        label: 'opencv_left_eye_y',
-        value: 'opencv_left_eye_y'
-      },
-      {
-        label: 'opencv_mouth_x',
-        value: 'opencv_mouth_x'
-      },
-      {
-        label: 'opencv_mouth_y',
-        value: 'opencv_mouth_y'
-      },
-      {
-        label: 'opencv_nose_x',
-        value: 'opencv_nose_x'
-      },
-      {
-        label: 'opencv_nose_y',
-        value: 'opencv_nose_y'
-      },
-      {
-        label: 'opencv_right_eye_x',
-        value: 'opencv_right_eye_x'
-      },
-      {
-        label: 'opencv_right_eye_y',
-        value: 'opencv_right_eye_y'
+        value: 'skin_ratio_full',
+        label: 'skin_ratio_full'
       }
     ]
   },
@@ -1400,20 +1532,24 @@ const columnSelect = ref<CascaderProps['options']>([
         label: 'NFIQ2'
       },
       {
-        value: 'UniformImage',
-        label: 'Uniform Image'
+        value: 'uniform_image',
+        label: 'uniform_image'
       },
       {
-        value: 'EmptyImageOrContrastTooLow',
-        label: 'Empty Image Or Contrast Too Low'
+        value: 'empty_image_or_contrast_too_low',
+        label: 'empty_image_or_contrast_too_low'
       },
       {
-        value: 'SufficientFingerprintForeground',
-        label: 'Sufficient Fingerprint Foreground'
+        value: 'fingerprint_image_with_minutiae',
+        label: 'fingerprint_image_with_minutiae'
       },
       {
-        value: 'EdgeStd',
-        label: 'Edge Std'
+        value: 'sufficient_fingerprint_foreground',
+        label: 'sufficient_fingerprint_foreground'
+      },
+      {
+        value: 'edge_std',
+        label: 'edge_std'
       }
     ]
   },
@@ -1422,24 +1558,72 @@ const columnSelect = ref<CascaderProps['options']>([
     label: 'Iris',
     children: [
       {
+        value: 'quality',
+        label: 'quality'
+      },
+      {
+        value: 'contrast',
+        label: 'contrast'
+      },
+      {
+        value: 'sharpness',
+        label: 'sharpness'
+      },
+      {
+        value: 'iris_diameter',
+        label: 'iris_diameter'
+      },
+      {
+        value: 'percent_visible_iris',
+        label: 'percent_visible_iris'
+      },
+      {
+        value: 'iris_pupil_gs',
+        label: 'iris_pupil_gs'
+      },
+      {
+        value: 'iris_sclera_gs',
+        label: 'iris_sclera_gs'
+      },
+      {
         value: 'iso_overall_quality',
-        label: 'ISO Overall Quality'
+        label: 'iso_overall_quality'
       },
       {
-        value: 'iso_sharpness',
-        label: 'ISO Sharpness'
-      },
-      {
-        value: 'iso_iris_sclera_contrast',
-        label: 'ISO Iris Sclera Contrast'
-      },
-      {
-        value: 'iso_iris_pupil_contrast',
-        label: 'ISO Iris Pupil Contrast'
+        value: 'iso_greyscale_utilization',
+        label: 'iso_greyscale_utilization'
       },
       {
         value: 'iso_iris_pupil_concentricity',
-        label: 'ISO Iris Pupil Concentricity'
+        label: 'iso_iris_pupil_concentricity'
+      },
+      {
+        value: 'iso_iris_pupil_contrast',
+        label: 'iso_iris_pupil_contrast'
+      },
+      {
+        value: 'iso_iris_pupil_ratio',
+        label: 'iso_iris_pupil_ratio'
+      },
+      {
+        value: 'iso_iris_sclera_contrast',
+        label: 'iso_iris_sclera_contrast'
+      },
+      {
+        value: 'iso_margin_adequacy',
+        label: 'iso_margin_adequacy'
+      },
+      {
+        value: 'iso_pupil_boundary_circularity',
+        label: 'iso_pupil_boundary_circularity'
+      },
+      {
+        value: 'iso_sharpness',
+        label: 'iso_sharpness'
+      },
+      {
+        value: 'iso_usable_iris_area',
+        label: 'iso_usable_iris_area'
       }
     ]
   }
@@ -1687,20 +1871,19 @@ const stopTask = async (tid) => {
       headers: { accept: 'application/json' }
     })
 
-      const task = processInfo.value.process.taskStatus.find((item) => item.tid === tid)
-      if (task) {
-        task.status = 0
-        task.elapse = processInfo.value.process.timeRecord
-      } else {
-        console.error(`Task with tid ${tid} not found`) // Optional: Handle the case where the task is not found
-      }
-      processInfo.value.process.timer == -1
-      processInfo.value.process.timeRecord == 0
-      // API.testTimer = 0
-      openNotificationWithIcon('stop')
-      processStatus.updateStatus('process', 0)
-      getStop.value = false
-  
+    const task = processInfo.value.process.taskStatus.find((item) => item.tid === tid)
+    if (task) {
+      task.status = 0
+      task.elapse = processInfo.value.process.timeRecord
+    } else {
+      console.error(`Task with tid ${tid} not found`) // Optional: Handle the case where the task is not found
+    }
+    processInfo.value.process.timer == -1
+    processInfo.value.process.timeRecord == 0
+    // API.testTimer = 0
+    openNotificationWithIcon('stop')
+    processStatus.updateStatus('process', 0)
+    getStop.value = false
   } catch (error) {
     console.error('Error cancel task:', error)
     getStop.value = false
@@ -1715,48 +1898,48 @@ const resumeTask = async (tid) => {
       method: 'POST',
       headers: { accept: 'application/json' }
     })
-      const task = processInfo.value.process.taskStatus.find((item) => item.tid === tid)
-      if (task) {
-        task.status = 1
-        task.logs = []
-        processInfo.value.process.timer = 0
-        processInfo.value.process.timeRecord = task.elapse
-        // API.testTimer = 0
-        openNotificationWithIcon('resume')
-        processStatus.updateStatus('process', 1)
-        const checkTaskStatus = setInterval(async () => {
-          // console.log('check task status...')
-          tasksToUpdateOnPage.value = processInfo.value.process.taskStatus.filter(
-            (item) => item.status == 1
-          )
-          if (tasksToUpdateOnPage.value.length > 0) {
-            const controller = new AbortController()
-            const signal = controller.signal
-            try {
-              // Race between the getTaskETA function and a timeout of 5 seconds
-              await Promise.race([
-                getTaskETA(tasksToUpdateOnPage.value, signal),
-                new Promise((_, reject) =>
-                  setTimeout(() => {
-                    controller.abort() // Abort the request after 5 seconds
-                    reject(new Error('Request timed out'))
-                  }, 5000)
-                )
-              ])
-            } catch (error) {
-              console.error(error.message) // Logs "Request timed out" if the request takes longer than 5 seconds
-            }
-            // await getTaskETA(tasksToUpdateOnPage.value)
-          } else {
-            clearInterval(checkTaskStatus)
-            processInfo.value.process.timer = -1
-            processInfo.value.process.timeRecord = 0
+    const task = processInfo.value.process.taskStatus.find((item) => item.tid === tid)
+    if (task) {
+      task.status = 1
+      task.logs = []
+      processInfo.value.process.timer = 0
+      processInfo.value.process.timeRecord = task.elapse
+      // API.testTimer = 0
+      openNotificationWithIcon('resume')
+      processStatus.updateStatus('process', 1)
+      const checkTaskStatus = setInterval(async () => {
+        // console.log('check task status...')
+        tasksToUpdateOnPage.value = processInfo.value.process.taskStatus.filter(
+          (item) => item.status == 1
+        )
+        if (tasksToUpdateOnPage.value.length > 0) {
+          const controller = new AbortController()
+          const signal = controller.signal
+          try {
+            // Race between the getTaskETA function and a timeout of 5 seconds
+            await Promise.race([
+              getTaskETA(tasksToUpdateOnPage.value, signal),
+              new Promise((_, reject) =>
+                setTimeout(() => {
+                  controller.abort() // Abort the request after 5 seconds
+                  reject(new Error('Request timed out'))
+                }, 5000)
+              )
+            ])
+          } catch (error) {
+            console.error(error.message) // Logs "Request timed out" if the request takes longer than 5 seconds
           }
-        }, 10000)
-      } else {
-        console.error(`Task with tid ${tid} not found`) // Optional: Handle the case where the task is not found
-      }
-      getResume.value = false
+          // await getTaskETA(tasksToUpdateOnPage.value)
+        } else {
+          clearInterval(checkTaskStatus)
+          processInfo.value.process.timer = -1
+          processInfo.value.process.timeRecord = 0
+        }
+      }, 10000)
+    } else {
+      console.error(`Task with tid ${tid} not found`) // Optional: Handle the case where the task is not found
+    }
+    getResume.value = false
   } catch (error) {
     openNotificationWithIcon('error')
     console.error('Error cancel task:', error)
@@ -1980,9 +2163,42 @@ const checkOutlierLog = async (id) => {
         processStatus.updateStatus('outlier', 0)
       }
     }
+    getOutlierColumns()
   } catch (error) {
     processStatus.updateStatus('outlier', 0)
     console.error(error)
+  }
+}
+
+const getOutlierColumns = async () => {
+  const checkItem = processInfo.value.process.selectedItems[0]
+  const url = `${API.api}/scan/${checkItem.collection}/profiles?skip=0&limit=1`
+  try {
+    const data = await API.authFetch(url, {
+      method: 'GET',
+      headers: { accept: 'application/json' }
+    })
+    if (data) {
+      const columns = Object.keys(data[0]).filter((item) => item != 'file' && item != 'log')
+      if (checkItem.engine !== 'fusion' && checkItem.mode != 'speech') {
+        let type = checkItem.mode
+        type += checkItem.engine ? '-' + checkItem.engine : ''
+        const newCol = columns.map((item) => {
+          return { value: item, label: item }
+        })
+        if (columnSelect.value) {
+          const target = columnSelect.value.find((item) => item.value == type)
+          if (target) {
+            target.children = newCol
+            // console.log(target)
+          }
+        }
+      }
+    } else {
+      console.error('nn result data')
+    }
+  } catch (error) {
+    console.log(error)
   }
 }
 
@@ -2220,10 +2436,9 @@ const stopOutlierTask = async () => {
       method: 'POST',
       headers: { accept: 'application/json' }
     })
-      clearInterval(checkOutlierInterval)
-      processStatus.updateStatus('outlier', 0)
-      processInfo.value.outlier.id = ''
-
+    clearInterval(checkOutlierInterval)
+    processStatus.updateStatus('outlier', 0)
+    processInfo.value.outlier.id = ''
   } catch (error) {
     console.error('Error cancel task:', error)
   }

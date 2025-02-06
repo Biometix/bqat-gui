@@ -47,7 +47,7 @@ export const checkRunning = async (API, info, status) => {
             headers: { accept: 'application/json' }
         })
         if (data) {
-          status.updateStatus('app', 2)
+            status.updateStatus('app', 2)
             if (data.type == 'report') {
                 console.log('3. get running report')
                 status.updateStatus('result', 1)
@@ -80,7 +80,49 @@ export const checkRunning = async (API, info, status) => {
         console.error('Error get running task:', error)
     }
 }
+export const checkOutlierDesp = async (API, info) => {
+    const url = `${API.api}/specification`
+    try {
+        const data1 = await API.authFetch(url + '?modality=iris', {
+            method: 'GET',
+            headers: { accept: 'application/json' }
+        })
+        if (data1) {
+            Object.assign(info.value.outlier.description, { 'iris': data1 });
+        }
+        const data2 = await API.authFetch(url + '?modality=fingerprint', {
+            method: 'GET',
+            headers: { accept: 'application/json' }
+        })
+        if (data2) {
+            Object.assign(info.value.outlier.description, { 'fingerprint': data2 });
+        }
+        const data3 = await API.authFetch(url + '?modality=face', {
+            method: 'GET',
+            headers: { accept: 'application/json' }
+        })
+        if (data3) {
+            Object.assign(info.value.outlier.description, { 'face-bqat': data3 });
 
+        }
+        const data4 = await API.authFetch(url + '?modality=face&engine=ofiq', {
+            method: 'GET',
+            headers: { accept: 'application/json' }
+        })
+        if (data4) {
+            Object.assign(info.value.outlier.description,{ 'face-ofiq': data4 });
+        }
+        const data5 = await API.authFetch(url + '?modality=face&engine=biqt', {
+            method: 'GET',
+            headers: { accept: 'application/json' }
+        })
+        if (data5) {
+            Object.assign(info.value.outlier.description, { 'face-biqt': data5 });
+        }
+    } catch (error) {
+        console.error('Error get outlier description:', error)
+    }
+}
 //Check whether the server node crash
 export const checkRayState = async (API, status) => {
     const url = `${API.api}/task/state`
