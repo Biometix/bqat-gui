@@ -31,7 +31,7 @@ services:
 
   api:
     restart: on-failure
-    image: ghcr.io/biometix/bqat-api:v1.4.0-beta
+    image: ghcr.io/biometix/bqat-api:latest
     shm_size: '8gb'
     depends_on:
       - mongo
