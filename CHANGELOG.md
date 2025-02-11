@@ -1,3 +1,11 @@
+<a name="v0.3.13"></a>
+# v0.3.13 (2025-02-11)
+
+## 🛠️️ Fixes
+
+- Outlier table bug resolved
+
+
 <a name="v0.3.12"></a>
 # v0.3.12 (2025-02-04)
 
