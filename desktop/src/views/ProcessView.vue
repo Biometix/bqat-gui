@@ -1,27 +1,16 @@
 <template>
   <a-flex class="processContainer" gap="middle" vertical>
     <a-card hoverable class="processCard">
-      <a-spin
-        size="large"
-        style="margin-top: 20%; height: 100%"
-        :indicator="indicator"
-        :spinning="tip"
-        :tip="tip"
-      >
+      <a-spin size="large" style="margin-top: 20%; height: 100%" :indicator="indicator" :spinning="tip" :tip="tip">
         <!-- Task Info Section -->
         <a-row :gutter="16" justify="center">
           <a-col :span="6">
-            <a-statistic
-              title="Current Task"
-              :value="
-                processInfo.process.taskStatus.filter((item) => item.status == 1).length > 0
-                  ? processInfo.process.taskStatus
-                      .filter((item) => item.status == 1)[0]
-                      .name.toUpperCase() + ' '
-                  : 'NA'
-              "
-              style="text-align: center"
-            >
+            <a-statistic title="Current Task" :value="processInfo.process.taskStatus.filter((item) => item.status == 1).length > 0
+              ? processInfo.process.taskStatus
+                .filter((item) => item.status == 1)[0]
+                .name.toUpperCase() + ' '
+              : 'NA'
+  " style="text-align: center">
               <template #prefix>
                 <i class="bi bi-terminal"></i>
               </template>
@@ -35,26 +24,19 @@
             </a-statistic>
           </a-col>
           <a-col :span="6">
-            <a-statistic
-              title="ETC"
-              :value="
-                processInfo.process.taskStatus.filter((item) => item.status == 1).length > 0
-                  ? formatETA
-                  : '00:00:00'
-              "
-              style="text-align: center"
-            >
+            <a-statistic title="ETC" :value="processInfo.process.taskStatus.filter((item) => item.status == 1).length > 0
+              ? formatETA
+              : '00:00:00'
+              " style="text-align: center">
               <template #prefix>
                 <i class="bi bi-stopwatch"></i>
               </template>
             </a-statistic>
           </a-col>
           <a-col :span="6">
-            <a-statistic
-              title="Processed"
+            <a-statistic title="Processed"
               :value="`${processInfo.process.taskStatus.filter((item) => item.status == 2).length} / ${processInfo.process.taskStatus.length}`"
-              style="text-align: center"
-            >
+              style="text-align: center">
               <template #prefix> <i class="bi bi-check2-circle"></i> </template>``
             </a-statistic>
           </a-col>
@@ -63,181 +45,121 @@
         <!-- Stop Task Section -->
         <a-row justify="center" style="margin-block: 35px" gutter="30">
           <a-col :span="6">
-            <a-button
-              :disabled="
-                processInfo.process.selectedItems.length !== 1 ||
-                getResume ||
-                getCancel ||
-                getStop ||
-                processInfo.process.selectedItems.filter((item) => item.status == 2).length > 0 ||
-                (processStatus.process == 1 &&
-                  processInfo.process.selectedItems.filter((item) => item.status == 1).length == 0)
-              "
-              style="width: 100%; padding: 0px; overflow: hidden"
-              danger
-              @click="showCancelConfirm(processInfo.process.selectedItems[0].tid)"
-              :loading="getCancel"
-            >
-              <i
-                v-if="!getCancel"
-                class="bi bi-stop-circle"
-                style="font-size: 15px; margin-inline: 5px"
-              ></i>
+            <a-button :disabled="processInfo.process.selectedItems.length !== 1 ||
+              getResume ||
+              getCancel ||
+              getStop ||
+              processInfo.process.selectedItems.filter((item) => item.status == 2).length > 0 ||
+              (processStatus.process == 1 &&
+                processInfo.process.selectedItems.filter((item) => item.status == 1).length == 0)
+              " style="width: 100%; padding: 0px; overflow: hidden" danger
+              @click="showCancelConfirm(processInfo.process.selectedItems[0].tid)" :loading="getCancel">
+              <i v-if="!getCancel" class="bi bi-stop-circle" style="font-size: 15px; margin-inline: 5px"></i>
               Cancel Task
             </a-button>
           </a-col>
           <a-col :span="6">
-            <a-button
-              :disabled="
-                processInfo.process.selectedItems.length !== 1 ||
-                getResume ||
-                getCancel ||
-                getStop ||
-                processInfo.process.selectedItems.filter((item) => item.status == 2).length > 0 ||
-                processInfo.process.selectedItems.filter((item) => item.status !== 1).length > 0
-              "
-              style="width: 100%; padding: 0px; overflow: hidden"
-              danger
-              @click="stopTask(processInfo.process.selectedItems[0].tid)"
-              :loading="getStop"
-            >
-              <i
-                v-if="!getStop"
-                class="bi bi-pause-circle"
-                style="font-size: 15px; margin-inline: 5px"
-              ></i>
+            <a-button :disabled="processInfo.process.selectedItems.length !== 1 ||
+              getResume ||
+              getCancel ||
+              getStop ||
+              processInfo.process.selectedItems.filter((item) => item.status == 2).length > 0 ||
+              processInfo.process.selectedItems.filter((item) => item.status !== 1).length > 0
+              " style="width: 100%; padding: 0px; overflow: hidden" danger
+              @click="stopTask(processInfo.process.selectedItems[0].tid)" :loading="getStop">
+              <i v-if="!getStop" class="bi bi-pause-circle" style="font-size: 15px; margin-inline: 5px"></i>
               Stop Task
             </a-button>
           </a-col>
           <a-col :span="6">
-            <a-button
-              :disabled="
-                processStatus.process == 1 ||
-                processStatus.result == 1 ||
-                processStatus.outlier == 1 ||
-                getResume ||
-                processInfo.process.selectedItems.length !== 1 ||
-                processInfo.process.selectedItems.filter((item) => item.status == 2).length > 0
-              "
-              @click="resumeTask(processInfo.process.selectedItems[0].tid)"
-              style="width: 100%; padding: 0px; overflow: hidden"
-              danger
-              :loading="getResume"
-            >
+            <a-button :disabled="processStatus.process == 1 ||
+              processStatus.result == 1 ||
+              processStatus.outlier == 1 ||
+              getResume ||
+              processInfo.process.selectedItems.length !== 1 ||
+              processInfo.process.selectedItems.filter((item) => item.status == 2).length > 0
+              " @click="resumeTask(processInfo.process.selectedItems[0].tid)"
+              style="width: 100%; padding: 0px; overflow: hidden" danger :loading="getResume">
               <!-- @click="resumeTask(processInfo.process.selectedItems[0].tid)" -->
-              <i
-                v-if="!getResume"
-                class="bi bi-play-circle"
-                style="font-size: 15px; margin-inline: 5px"
-              ></i>
+              <i v-if="!getResume" class="bi bi-play-circle" style="font-size: 15px; margin-inline: 5px"></i>
               Resume Task
             </a-button>
           </a-col>
         </a-row>
 
-        <div
-          class="processBoard"
-          :style="{
+        <div class="processBoard" :style="{
+          height:
+            showPreview || showOutlier || showReport
+              ? '450px'
+              : isWideWindow
+                ? 'calc(100vh - 300px)'
+                : 'calc(100vh - 450px)'
+        }">
+          <div class="processTask" :style="{
             height:
               showPreview || showOutlier || showReport
-                ? '450px'
+                ? '400px'
                 : isWideWindow
-                  ? 'calc(100vh - 300px)'
-                  : 'calc(100vh - 450px)'
-          }"
-        >
-          <div
-            class="processTask"
-            :style="{
-              height:
-                showPreview || showOutlier || showReport
-                  ? '400px'
-                  : isWideWindow
-                    ? 'calc(100vh - 525px)'
-                    : 'calc(100vh - 620px)'
-            }"
-          >
+                  ? 'calc(100vh - 525px)'
+                  : 'calc(100vh - 620px)'
+          }">
             <!-- Task Board Section -->
             <div v-if="processInfo.process.taskStatus.length > 0" class="task-card-container">
-              <a-card
-                v-for="(item, index) in processInfo.process.taskStatus"
-                :key="index"
-                hoverable
-                class="taskStyle"
-                bodyStyle="padding: 0px; height: 78px;"
-                :style="{
+              <a-card v-for="(item, index) in processInfo.process.taskStatus" :key="index" hoverable class="taskStyle"
+                bodyStyle="padding: 0px; height: 78px;" :style="{
                   backgroundColor: processInfo.process.selectedItems[item.tid]
                     ? item.status != 2
                       ? 'rgba(200, 200, 200,0.7)'
                       : 'rgba(200, 200, 200,0.7)'
                     : 'rgba(200, 200, 200,0.2)'
-                }"
-              >
+                }">
                 <a-tooltip
                   :title="`${formatDate(
                     item.modified
-                  )} | ${convertSecondsToHMS(Number(item.elapse))} ${item.logs.length > 0 ? ' | ' + item.logs[0] : ''}`"
-                >
+                  )} | ${convertSecondsToHMS(Number(item.elapse))} ${item.logs.length > 0 ? ' | ' + item.logs[0] : ''}`">
                   <div style="width: 100%">
-                    <a-checkbox
-                      class="checkbox-hidden"
-                      v-model:checked="processInfo.process.selectedItems[item.tid]"
-                      @change="(e) => selectTask(e, item)"
-                    >
+                    <a-checkbox class="checkbox-hidden" v-model:checked="processInfo.process.selectedItems[item.tid]"
+                      @change="(e) => selectTask(e, item)">
                       <a-spin :spinning="item.status == 1">
-                        <div
-                          style="
+                        <div style="
                             display: flex;
                             flex-direction: row;
                             height: 35px;
                             margin-top: -20px;
                             padding-top: 5px;
                             padding-inline: 10px;
-                          "
-                        >
-                          <p
-                            style="
+                          ">
+                          <p style="
                               padding: 5px;
                               text-align: end;
                               font-size: medium;
                               font-weight: normal;
-                            "
-                          >
+                            ">
                             {{ item.name.toUpperCase() }}:
                           </p>
-                          <a-progress
-                            class="progressStyle"
-                            :size="[300, 20]"
-                            :stroke-color="{ '0%': '#ff1a2d', '100%': '#99000d' }"
-                            :percent="item.percent"
-                            :status="
-                              item.status == 3
-                                ? 'exception'
-                                : item.status == 2
-                                  ? 'success'
-                                  : 'normal'
-                            "
-                          />
+                          <a-progress class="progressStyle" :size="[300, 20]"
+                            :stroke-color="{ '0%': '#ff1a2d', '100%': '#99000d' }" :percent="item.percent" :status="item.status == 3
+                              ? 'exception'
+                              : item.status == 2
+                                ? 'success'
+                                : 'normal'
+                              " />
                         </div>
-                        <div
-                          style="
+                        <div style="
                             text-align: center;
                             padding-inline: 10px;
                             height: 40px;
                             padding-top: 2px;
                             width: 100%;
-                          "
-                        >
-                          <p
-                            style="
+                          ">
+                          <p style="
                               overflow: hidden;
                               text-overflow: ellipsis;
                               white-space: nowrap;
                               width: 100%;
                               font-size: medium;
                               padding-left: 5px;
-                            "
-                          >
+                            ">
                             Input: {{ truncateString(item.input) }} | Modality:
                             {{ capitalizeFirstLetter(item.mode) }} | Engine:
                             {{
@@ -256,63 +178,38 @@
                 </a-tooltip>
               </a-card>
 
-              <a-card
-                hoverable
-                class="taskStyle"
-                bodyStyle="padding: 10px 10px; height: 70px"
-                :style="{
-                  height: '70px',
-                  backgroundColor: processInfo.process.selectedExternal
-                    ? 'rgba(200, 200, 200,0.7)'
-                    : 'rgba(200, 200, 200,0.2)'
-                }"
-              >
+              <a-card hoverable class="taskStyle" bodyStyle="padding: 10px 10px; height: 70px" :style="{
+                height: '70px',
+                backgroundColor: processInfo.process.selectedExternal
+                  ? 'rgba(200, 200, 200,0.7)'
+                  : 'rgba(200, 200, 200,0.2)'
+              }">
                 <a-tooltip title="Import CSV to Generate Report">
                   <div style="display: flex; flex-direction: row">
-                    <a-checkbox
-                      :disabled="!processInfo.result.selectedCsv[0]"
-                      v-model:checked="processInfo.process.selectedExternal"
-                      class="checkbox-hidden"
-                    >
-                      <div
-                        style="display: flex; flex-direction: row; height: 35px; margin-top: -12px"
-                      >
-                        <h3
-                          style="
+                    <a-checkbox :disabled="!processInfo.result.selectedCsv[0]"
+                      v-model:checked="processInfo.process.selectedExternal" class="checkbox-hidden">
+                      <div style="display: flex; flex-direction: row; height: 35px; margin-top: -12px">
+                        <h3 style="
                             padding-inline: 6px;
                             align-self: center;
                             padding-right: 10px;
                             text-align: end;
                             font-size: medium;
                             font-weight: normal;
-                          "
-                        >
+                          ">
                           External:
                         </h3>
 
-                        <input
-                          type="file"
-                          ref="uploadRef"
-                          accept=".csv"
-                          style="display: none"
-                          @change="selectCsv"
-                        />
-                        <a-button
-                          size="medium"
-                          @click="uploadCsv"
-                          danger
-                          style="
+                        <input type="file" ref="uploadRef" accept=".csv" style="display: none" @change="selectCsv" />
+                        <a-button size="medium" @click="uploadCsv" danger style="
                             width: 80%;
                             text-overflow: ellipsis;
                             overflow: hidden;
                             margin-top: -2px;
-                          "
-                          :disabled="
-                            tip !== false ||
+                          " :disabled="tip !== false ||
                             processStatus.outlier == 1 ||
                             processStatus.preprocess == 1
-                          "
-                        >
+                            ">
                           {{
                             processInfo.result.selectedCsv[0]
                               ? processInfo.result.selectedCsv[0].name
@@ -333,57 +230,33 @@
 
             <!-- Empty Task Board Section -->
             <div v-else class="processItem">
-              <a-card
-                hoverable
-                class="taskStyle"
-                bodyStyle="padding: 10px 10px; height: 85px;"
-                :style="{
-                  height: '70px',
-                  backgroundColor: processInfo.process.selectedExternal
-                    ? 'rgba(200, 200, 200,0.7)'
-                    : 'rgba(200, 200, 200,0.2)'
-                }"
-              >
+              <a-card hoverable class="taskStyle" bodyStyle="padding: 10px 10px; height: 85px;" :style="{
+                height: '70px',
+                backgroundColor: processInfo.process.selectedExternal
+                  ? 'rgba(200, 200, 200,0.7)'
+                  : 'rgba(200, 200, 200,0.2)'
+              }">
                 <a-tooltip title="Use External CSV to Generate Report">
                   <div style="display: flex; flex-direction: row; height: 40px">
-                    <a-checkbox
-                      class="checkbox-hidden"
-                      :disabled="!processInfo.result.selectedCsv[0]"
-                      v-model:checked="processInfo.process.selectedExternal"
-                    >
-                      <div
-                        style="display: flex; flex-direction: row; height: 35px; margin-top: -15px"
-                      >
-                        <h3
-                          style="
+                    <a-checkbox class="checkbox-hidden" :disabled="!processInfo.result.selectedCsv[0]"
+                      v-model:checked="processInfo.process.selectedExternal">
+                      <div style="display: flex; flex-direction: row; height: 35px; margin-top: -15px">
+                        <h3 style="
                             padding-inline: 6px;
                             padding-top: 4px;
                             text-align: end;
                             font-size: large;
                             font-weight: bold;
-                          "
-                        >
+                          ">
                           External:
                         </h3>
 
-                        <input
-                          type="file"
-                          ref="uploadRef"
-                          accept=".csv"
-                          style="display: none"
-                          @change="selectCsv"
-                        />
-                        <a-button
-                          size="large"
-                          @click="uploadCsv"
-                          danger
-                          style="width: 80%; text-overflow: ellipsis; overflow: hidden"
-                          :disabled="
-                            tip !== false ||
+                        <input type="file" ref="uploadRef" accept=".csv" style="display: none" @change="selectCsv" />
+                        <a-button size="large" @click="uploadCsv" danger
+                          style="width: 80%; text-overflow: ellipsis; overflow: hidden" :disabled="tip !== false ||
                             processStatus.outlier == 1 ||
                             processStatus.preprocess == 1
-                          "
-                        >
+                            ">
                           {{
                             processInfo.result.selectedCsv[0]
                               ? processInfo.result.selectedCsv[0].name
@@ -407,139 +280,100 @@
           <a-row justify="center" style="margin-block: 30px" :gutter="20">
             <!-- Delete Item -->
             <a-col :span="2">
-              <a-button
-                style="width: 100%; padding: 0"
-                size="large"
-                danger
-                @click="showDeleteConfirm"
-                :disabled="
-                  processInfo.process.selectedItems.length < 1 ||
-                  processStatus.outlier == 1 ||
-                  processStatus.result == 1 ||
-                  processInfo.process.selectedItems.filter((item) => item.status == 1).length > 0
-                "
-              >
+              <a-button style="width: 100%; padding: 0" size="large" danger @click="showDeleteConfirm" :disabled="processInfo.process.selectedItems.length < 1 ||
+                processStatus.outlier == 1 ||
+                processStatus.result == 1 ||
+                processInfo.process.selectedItems.filter((item) => item.status == 1).length > 0
+                ">
                 <DeleteOutlined />
               </a-button>
             </a-col>
 
             <!-- Preview Result -->
             <a-col :span="5">
-              <a-button
-                style="width: 100%; height: 100%; padding: 0"
-                size="large"
-                :disabled="
-                  processInfo.process.selectedItems.length != 1 ||
-                  processStatus.outlier == 1 ||
-                  processStatus.result == 1 ||
-                  processInfo.process.selectedItems.filter((item) => item.status == 1).length > 0
-                "
-                @click="getCsv('preview')"
-                :loading="getPreview"
-              >
+              <a-button style="width: 100%; height: 100%; padding: 0" size="large" :disabled="processInfo.process.selectedItems.length != 1 ||
+                processStatus.outlier == 1 ||
+                processStatus.result == 1 ||
+                processInfo.process.selectedItems.filter((item) => item.status == 1).length > 0
+                " @click="getCsv('preview')" :loading="getPreview">
                 <i id="test" class="bi bi-table" style="margin-right: 5px; font-size: 18px"></i>
-                Preview</a-button
-              >
+                Preview</a-button>
             </a-col>
 
             <!-- Download Result -->
             <a-col :span="5">
-              <a-button
-                style="width: 100%; height: 100%; padding: 0"
-                size="large"
-                :disabled="
-                  processInfo.process.selectedItems.length < 1 ||
-                  processStatus.outlier == 1 ||
-                  processStatus.result == 1 ||
-                  processInfo.process.selectedItems.filter((item) => item.status == 1).length > 0
-                "
-                @click="getCsv('download')"
-                :loading="getDownlaod"
-              >
-                <i
-                  id="test"
-                  class="bi bi-database-add"
-                  style="margin-right: 5px; font-size: 18px"
-                ></i>
-                Download</a-button
-              >
+              <a-button style="width: 100%; height: 100%; padding: 0" size="large" :disabled="processInfo.process.selectedItems.length < 1 ||
+                processStatus.outlier == 1 ||
+                processStatus.result == 1 ||
+                processInfo.process.selectedItems.filter((item) => item.status == 1).length > 0
+                " @click="getCsv('download')" :loading="getDownlaod">
+                <i id="test" class="bi bi-database-add" style="margin-right: 5px; font-size: 18px"></i>
+                Download</a-button>
             </a-col>
 
             <!-- Detect Outliers -->
             <a-col :span="6">
-              <a-button
-                style="width: 100%; height: 100%; padding: 0"
-                size="large"
-                @click="getOutlier()"
-                :disabled="
-                  processInfo.process.selectedItems.length != 1 ||
-                  processStatus.process == 1 ||
-                  processStatus.outlier == 1 ||
-                  processStatus.result == 1 ||
-                  processInfo.process.selectedItems.filter((item) => item.status == 1).length > 0
-                "
-                :loading="processStatus.outlier == 1"
-              >
+              <a-button style="width: 100%; height: 100%; padding: 0" size="large" @click="getOutlier()" :disabled="processInfo.process.selectedItems.length != 1 ||
+                processStatus.process == 1 ||
+                processStatus.outlier == 1 ||
+                processStatus.result == 1 ||
+                processInfo.process.selectedItems.filter((item) => item.status == 1).length > 0
+                " :loading="processStatus.outlier == 1">
                 <i class="bi bi-radar" style="margin-right: 5px; font-size: 18px"></i>
-                Get Outliers</a-button
-              ></a-col
-            >
+                Get Outliers</a-button></a-col>
 
             <!-- Generate Report -->
             <a-col :span="6">
-              <a-button
-                style="width: 100%; padding: 0"
-                size="large"
-                @click="getReport()"
-                :loading="processStatus.result == 1"
-                :disabled="
-                  (processInfo.process.selectedItems.length < 1 &&
-                    !processInfo.process.selectedExternal) ||
+              <a-button style="width: 100%; padding: 0" size="large" @click="getReport()"
+                :loading="processStatus.result == 1" :disabled="(processInfo.process.selectedItems.length < 1 &&
+                  !processInfo.process.selectedExternal) ||
                   processStatus.process == 1 ||
                   processStatus.outlier == 1 ||
                   processStatus.result == 1 ||
                   processInfo.process.selectedItems.filter((item) => item.status == 1).length > 0
-                "
-              >
+                  ">
                 <i class="bi bi-clipboard-data" style="margin-right: 5px; font-size: 18px"></i>Get
-                Report</a-button
-              >
+                Report</a-button>
             </a-col>
           </a-row>
         </div>
       </a-spin>
     </a-card>
     <!-- Hidden Function Section -->
-    <a-card
-      v-if="showPreview || showOutlier || showReport"
-      style="width: 100%"
-      hoverable
-      id="bottom-anchor"
-    >
+    <a-card v-if="showPreview || showOutlier || showReport" style="width: 100%" hoverable id="bottom-anchor">
       <!-- Result Section -->
       <a-flex v-if="showPreview" gap="middle" vertical>
-        <br />
         <a-spin :spinning="getPreview">
           <a-card hoverable>
             <a-flex gap="middle" vertical style="width: 100%">
-              <h2><i class="bi bi-kanban"></i> Output Data:</h2>
+              <a-flex horizental justify="space-between">
+                <h2><i class="bi bi-kanban"></i> Output Data:</h2>
+                <a-popover trigger="click" placement="topLeft">
+                  <template #content>
+                    <div style="height: 350px; width: 500px; overflow: scroll">
+                      <a-divider><strong>Quality Metric Description</strong></a-divider>
+                      <p v-for="(value, key) in getQualityMetricSpec(processInfo)">
+                        "<span style="font-weight: bolder;">{{ key }}</span>": {{ value }}
+                      </p>
+                    </div>
+                  </template>
+                  <span class="bi bi-info-circle" style="font-size: larger; padding: 5px"></span>
+                </a-popover>
+              </a-flex>
               <div v-if="csvHeaders.length > 0">
-                <h3>
-                  Shape: {{ processInfo.process.selectedItems[0].num }} ×
-                  {{ csvHeaders.length - 1 }}
-                </h3>
+                <p>
+                  {{ processInfo.process.selectedItems[0].num }} ×
+                  {{ csvHeaders.length - 1 }} (first 50 entries displayed)
+                </p>
                 <div class="table-container">
                   <table>
                     <thead>
                       <tr>
                         <th>index</th>
                         <th>file</th>
-                        <th
-                          v-for="(header, index) in csvHeaders.filter(
-                            (item) => item !== 'log' && item !== 'file'
-                          )"
-                          :key="index"
-                        >
+                        <th v-for="(header, index) in csvHeaders.filter(
+                          (item) => item !== 'log' && item !== 'file'
+                        )" :key="index">
                           {{ header }}
                         </th>
                       </tr>
@@ -554,12 +388,9 @@
                           {{ item['file'] }}
                         </td>
 
-                        <td
-                          v-for="(header, colIndex) in csvHeaders.filter(
-                            (item) => item !== 'log' && item !== 'file'
-                          )"
-                          :key="colIndex"
-                        >
+                        <td v-for="(header, colIndex) in csvHeaders.filter(
+                          (item) => item !== 'log' && item !== 'file'
+                        )" :key="colIndex">
                           {{ item[header] }}
                         </td>
                       </tr>
@@ -570,10 +401,7 @@
                 <a-collapse v-if="csvlog.length > 0">
                   <a-collapse-panel>
                     <template #header>
-                      <a-tooltip
-                        placement="left"
-                        title="Only the first 50 entries displayed if there are more."
-                      >
+                      <a-tooltip placement="left" title="Only the first 50 entries displayed if there are more.">
                         <div>Task log</div>
                       </a-tooltip>
                     </template>
@@ -618,12 +446,8 @@
 
       <!-- Outlier Section  -->
       <a-flex v-if="showOutlier" gap="middle" vertical>
-        <a-spin
-          size="large"
-          :indicator="indicator"
-          :spinning="processStatus.outlier == 1 && outlierHeaders.length == 0"
-          tip="Task is running..."
-        >
+        <a-spin size="large" :indicator="indicator" :spinning="processStatus.outlier == 1 && outlierHeaders.length == 0"
+          tip="Task is running...">
           <a-alert v-if="outlierError" message="Previous Run:" type="warning" show-icon closable>
             <template #description>
               <p>{{ outlierError }}</p>
@@ -640,18 +464,11 @@
             <a-flex vertical gap="middle">
               <h2><i class="bi bi-exclamation-square"></i> Select Outlier Detector:</h2>
 
-              <a-select
-                size="large"
-                ref="select"
-                style="width: 100%; margin-block: 10px"
-                v-model:value="processInfo.outlier.detector"
-                :options="detectorSelect"
-                @click="
-                  () => {
-                    processInfo.outlier.iconLoading = false
-                  }
-                "
-              >
+              <a-select size="large" ref="select" style="width: 100%; margin-block: 10px"
+                v-model:value="processInfo.outlier.detector" :options="detectorSelect" @click="() => {
+                  processInfo.outlier.iconLoading = false
+                }
+                  ">
               </a-select>
             </a-flex>
           </a-card>
@@ -660,72 +477,56 @@
           <a-card hoverable>
             <a-flex vertical gap="middle">
               <a-flex horizental justify="space-between">
-                <h2><i class="bi bi-columns-gap"></i> Configure Detection Parameters:</h2>
-                <a-popover trigger="click" placement="topLeft">
-                  <!-- <template #title>
-                    <h3>Column Description</h3>
-                  </template> -->
+                <h2><i class="bi bi-columns-gap"></i> Select Attributes for Outlier Detection:</h2>
+                <a-popover trigger="hover" placement="topLeft">
                   <template #content>
+                    <a-divider>
+                      <h3>Quality Metric Description</h3>
+                    </a-divider>
                     <div style="height: 350px; width: 500px; overflow: scroll">
-                      <div
-                        v-if="
-                          processInfo.outlier.columns.some((innerArray) =>
-                            innerArray.includes('face-bqat')
-                          )
-                        "
-                      >
-                        <a-divider><h3>Engine:BQAT-Column Description</h3></a-divider>
+                      <div v-if="
+                        processInfo.outlier.columns.some((innerArray) =>
+                          innerArray.includes('face-bqat')
+                        )
+                      ">
                         <p v-for="(value, key) in processInfo.outlier.description['face-bqat']">
-                          [{{ key }}] : {{ value }}
+                          "<span style="font-weight: bolder;">{{ key }}</span>": {{ value }}
                         </p>
                       </div>
-                      <div
-                        v-if="
-                          processInfo.outlier.columns.some((innerArray) =>
-                            innerArray.includes('face-biqt')
-                          )
-                        "
-                        style="height: 400px; width: 500px; overflow: scroll"
-                      >
-                        <a-divider><h3>Engine:BIQT-Column Description</h3> </a-divider>
+                      <div v-if="
+                        processInfo.outlier.columns.some((innerArray) =>
+                          innerArray.includes('face-biqt')
+                        )
+                      " style="height: 400px; width: 500px; overflow: scroll">
                         <p v-for="(value, key) in processInfo.outlier.description['face-biqt']">
-                          [{{ key }}] : {{ value }}
+                          "<span style="font-weight: bolder;">{{ key }}</span>": {{ value }}
                         </p>
                       </div>
-                      <div
-                        v-if="
-                          processInfo.outlier.columns.some((innerArray) =>
-                            innerArray.includes('face-ofiq')
-                          )
-                        "
-                      >
-                        <a-divider><h3>Engine:OFIQ-Column Description</h3> </a-divider>
+                      <div v-if="
+                        processInfo.outlier.columns.some((innerArray) =>
+                          innerArray.includes('face-ofiq')
+                        )
+                      ">
                         <p v-for="(value, key) in processInfo.outlier.description['face-ofiq']">
-                          [{{ key }}] : {{ value }}
+                          "<span style="font-weight: bolder;">{{ key }}</span>": {{ value }}
                         </p>
                       </div>
-                      <div
-                        v-if="
-                          processInfo.outlier.columns.some((innerArray) =>
-                            innerArray.includes('fingerprint')
-                          )
-                        "
-                      >
-                        <a-divider><h3>Engine:FINGERPRINT-Column Description</h3> </a-divider>
+                      <div v-if="
+                        processInfo.outlier.columns.some((innerArray) =>
+                          innerArray.includes('fingerprint')
+                        )
+                      ">
                         <p v-for="(value, key) in processInfo.outlier.description['fingerprint']">
-                          [{{ key }}] : {{ value }}
+                          "<span style="font-weight: bolder;">{{ key }}</span>": {{ value }}
                         </p>
                       </div>
-                      <div
-                        v-if="
-                          processInfo.outlier.columns.some((innerArray) =>
-                            innerArray.includes('iris')
-                          )
-                        "
-                      >
-                        <a-divider><h3>Engine:IRIS-Column Description</h3></a-divider>
+                      <div v-if="
+                        processInfo.outlier.columns.some((innerArray) =>
+                          innerArray.includes('iris')
+                        )
+                      ">
                         <p v-for="(value, key) in processInfo.outlier.description['iris']">
-                          [{{ key }}] : {{ value }}
+                          "<span style="font-weight: bolder;">{{ key }}</span>": {{ value }}
                         </p>
                       </div>
                     </div>
@@ -734,32 +535,16 @@
                 </a-popover>
               </a-flex>
               <a-row gutter="10">
-                <a-cascader
-                  class="outlierOption"
-                  popupClassName="popupClass"
-                  expand-trigger="hover"
-                  multiple
-                  size="large"
-                  v-model:value="processInfo.outlier.columns"
-                  change-on-select
-                  placeholder="Please select the columns to detect"
-                  :options="columnSelect"
-                  style="width: 100%; margin-block: 10px"
-                />
+                <a-cascader class="outlierOption" popupClassName="popupClass" expand-trigger="hover" multiple
+                  size="large" v-model:value="processInfo.outlier.columns" change-on-select
+                  placeholder="Please select the columns to detect" :options="columnSelect"
+                  style="width: 100%; margin-block: 10px" />
                 <a-tooltip>
-                  <template #title
-                    >The proportion of data points considered as outliers in the data set.</template
-                  >
+                  <template #title>The proportion of data points considered as outliers in the data set.</template>
                   <div>
-                    <a-input-number
-                      class="inputNumber"
-                      v-model:value="contaminationNum"
-                      :min="1"
-                      :max="100"
-                      size="large"
-                      style="margin-block: 10px; width: 50%; min-width: 200px"
-                    >
-                      <template #addonBefore>Outliers Threshold:</template>
+                    <a-input-number class="inputNumber" v-model:value="contaminationNum" :min="1" :max="100"
+                      size="large" style="margin-block: 10px; width: 50%; min-width: 200px">
+                      <template #addonBefore>Outlier Threshold:</template>
                       <template #addonAfter>%</template>
                     </a-input-number>
                   </div>
@@ -771,54 +556,31 @@
 
         <a-row justify="center" :gutter="40" style="margin-block: 2rem">
           <a-col :span="12">
-            <a-button
-              :disabled="!processInfo.outlier.iconLoading"
-              style="width: 100%; padding: 0"
-              size="large"
-              type="primary"
-              danger
-              @click="stopOutlierTask"
-            >
+            <a-button :disabled="!processInfo.outlier.iconLoading" style="width: 100%; padding: 0" size="large"
+              type="primary" danger @click="stopOutlierTask">
               <span class="bi bi-stop-circle" style="font-size: 18px; margin-inline: 5px"></span>
               Stop
             </a-button>
           </a-col>
           <a-col :span="12">
-            <a-button
-              style="width: 100%"
-              size="large"
-              type="primary"
-              :loading="processInfo.outlier.iconLoading"
-              :disabled="
-                processInfo.process.selectedItems.length !== 1 ||
+            <a-button style="width: 100%" size="large" type="primary" :loading="processInfo.outlier.iconLoading"
+              :disabled="processInfo.process.selectedItems.length !== 1 ||
                 processInfo.outlier.columns.length == 0
-              "
-              @click="startOutlierTask"
-            >
-              <span
-                v-if="processStatus.outlier !== 1"
-                class="bi bi-play"
-                style="font-style: normal; margin-inline: 5px"
-              ></span>
+                " @click="startOutlierTask">
+              <span v-if="processStatus.outlier !== 1" class="bi bi-play"
+                style="font-style: normal; margin-inline: 5px"></span>
               Start
             </a-button>
           </a-col>
         </a-row>
 
-        <a-card
-          hoverable
-          v-if="outlierHeaders.length > 0 && processStatus.outlier !== 0 && outlierData.length > 0"
-          id="outlier-anchor"
-        >
+        <a-card hoverable v-if="outlierHeaders.length > 0 && processStatus.outlier !== 0 && outlierData.length > 0"
+          id="outlier-anchor">
           <a-flex gap="middle" vertical style="width: 100%">
             <a-row align="space-between" justify="center">
               <h2>
-                <i class="bi bi-kanban"></i> Outliers Detected:
-                <a-button
-                  type="primary"
-                  :disabled="processStatus.outlier == 1"
-                  @click="downloadOutlier(outlierData)"
-                >
+                <i class="bi bi-kanban"></i> Outliers:
+                <a-button type="primary" :disabled="processStatus.outlier == 1" @click="downloadOutlier(outlierData)">
                   <template #icon>
                     <DownloadOutlined />
                   </template>
@@ -827,62 +589,71 @@
 
               <div style="align-self: center">
                 Raw Data
-                <a-switch
-                  v-model:checked="rawData"
-                  @change="
-                    checkOutlier(processInfo.process.selectedItems[0].collection, rawData, false)
-                  "
-                />
+                <a-switch v-model:checked="rawData" @change="
+                  checkOutlier(processInfo.process.selectedItems[0].collection, rawData, false)
+                  " />
               </div>
             </a-row>
-            <a-spin
-              size="large"
-              :indicator="indicator"
-              :spinning="processStatus.outlier == 1"
-              tip="Table is loading..."
-            >
+            <a-spin size="large" :indicator="indicator" :spinning="processStatus.outlier == 1"
+              tip="Table is loading...">
               <div>
-                <p>Higher scores indicate higher likelihood of anomaly.</p>
-                <h3>
-                  Shape: {{ outlierData.length }} ×
+                <p>
+                  {{ outlierData.length }} ×
                   {{
                     outlierHeaders.find((item) => item == 'info')
                       ? outlierHeaders.length - 1
                       : outlierHeaders.length
-                  }}
-                </h3>
+                  }} (first 50 entries displayed)
+                </p>
                 <div class="table-container">
                   <table>
                     <thead>
                       <tr>
                         <th></th>
-                        <th
-                          v-for="(header, index) in outlierHeaders.filter(
-                            (item) => item !== 'info'
-                          )"
-                          :key="index"
-                        >
+                        <th v-for="(header, index) in outlierHeaders.filter(
+                          (item) => item !== 'info'
+                        )" :key="index">
                           {{ header }}
                         </th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="(item, rowIndex) in outlierData.slice(0, 50)" :key="rowIndex">
+                      <tr v-for="(item, rowIndex) in outlierData.slice(0, 50).sort((a, b) => b.score - a.score)"
+                        :key="rowIndex">
                         <td>
                           {{ rowIndex + 1 }}
                         </td>
-                        <td
-                          v-for="(header, colIndex) in outlierHeaders.filter(
-                            (item) => item !== 'info'
-                          )"
-                          :key="colIndex"
-                        >
-                          {{ item[header] }}
+                        <td v-for="(header, colIndex) in outlierHeaders.filter(
+                          (item) => item !== 'info'
+                        )" :key="colIndex">
+                          <a-popover v-if="typeof item[header] === 'string'" :title="item[header].split('/').slice(-1)[0]"
+                            trigger="hover">
+                            <template #content>
+                              <img :src="API.api + '/warehouse/' + item[header]" :alt="item[header]" width="200" style="width: 400px;
+                                height: 300px;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                padding: 10px;
+                                box-sizing: border-box;
+                                background-color: gray;
+                                overflow: hidden;
+                                max-width: 100%;
+                                max-height: 100%;
+                                object-fit: contain;
+                                border-radius: 5px;" />
+                            </template>
+                            <a :href="API.api + '/warehouse/' + item[header]" target="_blank">{{ item[header] }}</a>
+                          </a-popover>
+                          <pre v-else-if="typeof item[header] === 'object'"><code>{{ item[header] }}</code></pre>
+                          <p v-else>{{ item[header] }}</p>
                         </td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
+                <br />
+                <strong>High scores indicate greater likelihood of anomaly.</strong>
                 <a-divider v-if="outlierHeaders.filter((item) => item == 'info').length > 0" />
                 <a-collapse v-if="outlierHeaders.filter((item) => item == 'info').length > 0">
                   <a-collapse-panel header="info">
@@ -890,27 +661,18 @@
                       <table>
                         <thead>
                           <tr>
-                            <th
-                              v-for="(header, index) in outlierHeaders.filter(
-                                (item) => item == 'file' || item == 'info'
-                              )"
-                              :key="index"
-                            >
+                            <th v-for="(header, index) in outlierHeaders.filter(
+                              (item) => item == 'file' || item == 'info'
+                            )" :key="index">
                               {{ header }}
                             </th>
                           </tr>
                         </thead>
                         <tbody>
-                          <tr
-                            v-for="(item, rowIndex) in outlierData.filter((item) => item.info)"
-                            :key="rowIndex"
-                          >
-                            <td
-                              v-for="(header, colIndex) in outlierHeaders.filter(
-                                (item) => item == 'file' || item == 'info'
-                              )"
-                              :key="colIndex"
-                            >
+                          <tr v-for="(item, rowIndex) in outlierData.filter((item) => item.info)" :key="rowIndex">
+                            <td v-for="(header, colIndex) in outlierHeaders.filter(
+                              (item) => item == 'file' || item == 'info'
+                            )" :key="colIndex">
                               {{ item[header] }}
                             </td>
                           </tr>
@@ -923,13 +685,8 @@
             </a-spin>
           </a-flex>
         </a-card>
-        <a-alert
-          v-else-if="outlierHeaders.length >= 0 && processStatus.outlier == 2"
-          message="No outlier detected"
-          type="info"
-          show-icon
-          closable
-        >
+        <a-alert v-else-if="outlierHeaders.length >= 0 && processStatus.outlier == 2" message="No outlier detected"
+          type="info" show-icon closable>
           <template #description>
             <p>{{ outlierData.length + ' outliers detected in this dataset. ' }}</p>
           </template>
@@ -938,12 +695,7 @@
 
       <!-- Report Section -->
       <a-flex v-if="showReport" gap="middle" vertical>
-        <a-spin
-          size="large"
-          :indicator="indicator"
-          :spinning="processStatus.result == 1"
-          tip="Task is running..."
-        >
+        <a-spin size="large" :indicator="indicator" :spinning="processStatus.result == 1" tip="Task is running...">
           <br />
           <a-card hoverable>
             <a-flex gap="middle" vertical style="width: 100%">
@@ -964,24 +716,12 @@
               <a-row justify="center" :gutter="40">
                 <a-col :span="12">
                   <a-tooltip title="Subset of the original output data">
-                    <a-input-number
-                      size="large"
-                      style="width: 85%"
-                      v-model:value="processInfo.result.downsample"
-                      addon-before="Downsample"
-                      addon-after="%"
-                      placeholder="100"
-                      min="1"
-                      max="100"
-                  /></a-tooltip>
+                    <a-input-number size="large" style="width: 85%" v-model:value="processInfo.result.downsample"
+                      addon-before="Downsample" addon-after="%" placeholder="100" min="1" max="100" /></a-tooltip>
                 </a-col>
                 <a-col :span="12">
-                  <a-checkbox
-                    style="font-size: 17px"
-                    size="large"
-                    v-model:checked="processInfo.result.minimal"
-                    >Minimal</a-checkbox
-                  >
+                  <a-checkbox style="font-size: 17px" size="large"
+                    v-model:checked="processInfo.result.minimal">Minimal</a-checkbox>
                 </a-col>
               </a-row>
             </a-flex>
@@ -989,19 +729,12 @@
 
           <a-row justify="center" :gutter="40" style="margin-block: 2rem">
             <a-col :span="24">
-              <a-button
-                size="large"
-                :disabled="
-                  processStatus.result == 1 ||
-                  (generateExternal && !processInfo.process.selectedExternal) ||
-                  (!generateExternal && processInfo.process.selectedItems.length < 1)
-                "
-                style="width: 100%"
-                type="primary"
-                @click="generateReport"
-                ><span class="bi bi-play" style="font-size: 18px; margin-inline: 5px"></span>
-                Start</a-button
-              >
+              <a-button size="large" :disabled="processStatus.result == 1 ||
+                (generateExternal && !processInfo.process.selectedExternal) ||
+                (!generateExternal && processInfo.process.selectedItems.length < 1)
+                " style="width: 100%" type="primary" @click="generateReport"><span class="bi bi-play"
+                  style="font-size: 18px; margin-inline: 5px"></span>
+                Start</a-button>
             </a-col>
           </a-row>
         </a-spin>
@@ -2835,30 +2568,69 @@ const generateReport = async () => {
   checkModeTab()
 }
 
-// watch(
-//   () => API.testTimer,
-//   async (value) => {
-//     if (value % (60 * 60 * 5) === 0 && value !== 0) {
-//       console.log('5 hours timeout----Stop task')
-//       // Find the task with status == 1 (active task)
-//       const activeTask = processInfo.value.process.taskStatus.find((item) => item.status === 1)
+const handleGoToImage = async (item: string) => {
+  window.open(API.api + '/warehouse/' + item, '_blank')
+}
 
-//       if (activeTask) {
-//         const tid = activeTask.tid
-//         await stopTask(tid)
-//         setTimeout(
-//           async () => {
-//             console.log('3 mins timeout----Resume task')
-//             await resumeTask(tid)
-//           },
-//           1000 * 60 * 3
-//         )
-//       } else {
-//         console.warn('No active task found to stop.')
-//       }
-//     }
-//   }
-// )
+// watch(
+  //   () => API.testTimer,
+  //   async (value) => {
+    //     if (value % (60 * 60 * 5) === 0 && value !== 0) {
+      //       console.log('5 hours timeout----Stop task')
+      //       // Find the task with status == 1 (active task)
+      //       const activeTask = processInfo.value.process.taskStatus.find((item) => item.status === 1)
+      
+      //       if (activeTask) {
+        //         const tid = activeTask.tid
+        //         await stopTask(tid)
+        //         setTimeout(
+          //           async () => {
+            //             console.log('3 mins timeout----Resume task')
+            //             await resumeTask(tid)
+            //           },
+            //           1000 * 60 * 3
+            //         )
+            //       } else {
+              //         console.warn('No active task found to stop.')
+              //       }
+              //     }
+              //   }
+              // )
+
+function getQualityMetricSpec(processInfo: object) {
+  let taskInfo = processInfo.process.selectedItems[0]
+  switch (taskInfo.mode) {
+    case 'face':
+      switch (taskInfo.engine) {
+        case 'bqat':
+          return processInfo.outlier.description['face-bqat']
+        case 'ofiq':
+          return processInfo.outlier.description['face-ofiq']
+        case 'biqt':
+          return processInfo.outlier.description['face-biqt']
+        case 'fusion':
+          let code = taskInfo.options?.fusion
+          let spec = {}
+          if (code & 4) {
+            spec = { ...spec, ...processInfo.outlier.description['face-bqat'] }
+          }
+          if (code & 2) {
+            spec = { ...spec, ...processInfo.outlier.description['face-ofiq'] }
+          }
+          if (code & 1) {
+            spec = { ...spec, ...processInfo.outlier.description['face-biqt'] }
+          }
+          return spec
+        default:
+          return {}
+      }
+    case 'fingerprint':
+      return processInfo.outlier.description['fingerprint']
+    case 'iris':
+      return processInfo.outlier.description['iris']
+  }
+}
+  
 
 function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1)

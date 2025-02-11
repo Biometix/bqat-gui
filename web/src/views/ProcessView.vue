@@ -626,7 +626,7 @@
                         <td v-for="(header, colIndex) in outlierHeaders.filter(
                           (item) => item !== 'info'
                         )" :key="colIndex">
-                          <a-popover v-if="!Number(item[header])" :title="item[header].split('/').slice(-1)[0]"
+                          <a-popover v-if="typeof item[header] === 'string'" :title="item[header].split('/').slice(-1)[0]"
                             trigger="hover">
                             <template #content>
                               <img :src="API.api + '/warehouse/' + item[header]" :alt="item[header]" width="200" style="width: 400px;
@@ -645,6 +645,7 @@
                             </template>
                             <a :href="API.api + '/warehouse/' + item[header]" target="_blank">{{ item[header] }}</a>
                           </a-popover>
+                          <pre v-else-if="typeof item[header] === 'object'"><code>{{ item[header] }}</code></pre>
                           <p v-else>{{ item[header] }}</p>
                         </td>
                       </tr>
