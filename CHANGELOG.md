@@ -1,3 +1,19 @@
+<a name="v0.4.0"></a>
+# v0.4.0 (2026-02-19)
+
+## 🚀 Features
+
+- Add data viewer component for preview and visualization
+
+- Add benchmarking tool
+
+- Add file manager tab
+
+## ⚙️ Miscellaneous
+
+- Clean up env management
+
+
 <a name="v0.3.13"></a>
 # v0.3.13 (2025-02-11)
 
@@ -129,7 +145,7 @@
 
 - Update the workflow text & icons on home page
 
-## ⚙️ Miscellaneous Tasks
+## ⚙️ Miscellaneous
 
 - Update text&button
 

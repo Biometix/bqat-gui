@@ -13,7 +13,7 @@ a:not(.introItem) {
   text-decoration: none;
   color: rgb(122, 118, 118);
   transition: color 0.4s, background-color 0.4s; /* Specify which properties to transition */
-  padding: 3px;
+  /* padding: 3px; */
 }
 
 .body {
@@ -41,7 +41,7 @@ a:hover {
   #app {
     margin: 0 6rem;
     padding: 0 1rem;
-    min-width: 1000px;
+    min-width: 600px;
   }
   .body {
     margin-top: 1rem;

@@ -96,7 +96,7 @@
                     name="file"
                     :showUploadList="false"
                     accept=".zip,.tar,.gz"
-                    :action="API.api + '/dataset'"
+                    :action="API.api + '/data/archive'"
                     @change="uploadZip"
                   >
                     <p class="ant-upload-drag-icon">
@@ -453,30 +453,31 @@ import { SyncOutlined } from '@ant-design/icons-vue'
 const openNotificationWithIcon = (type: string) => {
   if (type === 'stop') {
     notification['success']({
-      message: 'Stop Task',
-      description: 'Stop current running task successful.',
+      message: 'Task Stopped',
+      description: 'The currently running task has been stopped successfully.',
       placement: 'top'
-    })
+    });
   } else if (type === 'delete') {
     notification['success']({
-      message: 'Delete Item',
-      description: 'Delete selected item successful.',
+      message: 'Item Deleted',
+      description: 'The selected item has been deleted successfully.',
       placement: 'top'
-    })
+    });
   } else if (type === 'error') {
     notification['error']({
       message: 'Action Failed',
-      description: 'Current operation failed. Please check your input and try again.',
+      description: 'The operation could not be completed. Please check your input and try again.',
       placement: 'top'
-    })
+    });
   } else if (type === 'upload') {
     notification['success']({
-      message: 'Upload Zip Folder To Server',
-      description: 'Upload zip folder to server successful.',
+      message: 'Zip Folder Uploaded',
+      description: 'The zip folder has been uploaded to the server successfully.',
       placement: 'top'
-    })
+    });
   }
-}
+};
+
 const router = useRouter()
 const searchItem = ref(null)
 const showItem = ref(null)
