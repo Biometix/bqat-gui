@@ -75,7 +75,7 @@ services:
   
   redis:
     restart: on-failure
-    image: redis:latest
+    image: redis:7-alpine
     ports:
       - 6379:6379
     profiles:
@@ -84,7 +84,7 @@ services:
 
   mongo:
     restart: on-failure
-    image: mongo:latest
+    image: mongo:7
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: admin
@@ -94,19 +94,19 @@ services:
       - default
       - lite
 
-  mongo-express:
-    restart: on-failure
-    image: mongo-express:latest
-    build:
-      context: https://github.com/mongo-express/mongo-express.git
-    ports:
-      - 8081:8081
-    depends_on:
-      - mongo
-    environment:
-      ME_CONFIG_MONGODB_URL: mongodb://root:admin@mongo:27017/
-      ME_CONFIG_SITE_COOKIESECRET: 'cookiesecret'
-      ME_CONFIG_SITE_SESSIONSECRET: 'sessionsecret'
-    profiles:
-      - default
-      - lite
+  # mongo-express:
+  #   restart: on-failure
+  #   image: mongo-express:latest
+  #   build:
+  #     context: https://github.com/mongo-express/mongo-express.git
+  #   ports:
+  #     - 8081:8081
+  #   depends_on:
+  #     - mongo
+  #   environment:
+  #     ME_CONFIG_MONGODB_URL: mongodb://root:admin@mongo:27017/
+  #     ME_CONFIG_SITE_COOKIESECRET: 'cookiesecret'
+  #     ME_CONFIG_SITE_SESSIONSECRET: 'sessionsecret'
+  #   profiles:
+  #     - default
+  #     - lite

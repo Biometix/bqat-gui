@@ -15,8 +15,10 @@ import { initialiseTask, checkRunning, checkOutlierDesp } from './components/uti
 import { Modal, Input } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
+import Benchmark from "./components/Benchmark.vue";
 
 const openSetting = ref(false)
+const openBenchmark = ref(false)
 const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)')
 const darkSetting = {
   algorithm: theme.darkAlgorithm,
@@ -38,13 +40,13 @@ const defaultSetting = {
     }
   }
 }
-
 const colorTheme = ref(prefersDarkScheme.matches ? darkSetting : defaultSetting)
-const currrentTheme = ref('light')
+// const currentTheme = ref('light')
 
 const info = ref(useInfo())
 const status = useStatus()
 const API = useApi()
+API.currentTheme = prefersDarkScheme.matches ? 'dark' : 'light'
 const router = useRouter()
 const tempApi = ref(API.api)
 const validApi = ref(false)
@@ -52,67 +54,123 @@ const requestApi = ref(false)
 const options = ref<{ value: string }[]>(API.apiList.slice(1))
 const version = import.meta.env.VITE_VERSION
 
-const openNotificationWithIcon = (type: string) => {
-  if (type === 'purgeError') {
-    notification['error']({
-      message: 'Deletion failed',
-      description: 'Delete database failed, Please check and try again.',
-      placement: 'top',
-      duration: 3
-    })
-  } else if (type === 'purgeSuccess') {
-    notification['success']({
-      message: 'Database purged',
-      description: 'Successfully reset the database.',
-      placement: 'top',
-      duration: 3
-    })
+const click = ref(false)
+
+
+const openNotificationWithIcon = (type: string, error='') => {
+  switch (type) {
+    case 'purgeError':
+      notification['error']({
+        message: 'Database Deletion Failed',
+        description: 'Unable to delete the database. Please check and try again.',
+        placement: 'top',
+        duration: 3
+      })
+      break
+
+    case 'purgeSuccess':
+      notification['success']({
+        message: 'Database Reset Successful',
+        description: 'The database has been successfully reset.',
+        placement: 'top',
+        duration: 3
+      })
+      break
+
+    case 'hostError':
+      notification['error']({
+        message: 'Server Connection Failed',
+        description:
+          'Failed to connect to the host server. Please check your configuration and try again.',
+        placement: 'top',
+        duration: 3
+      })
+      break
+
+    case 'hostSuccess':
+      notification['success']({
+        message: 'Connected to Server',
+        description: 'Successfully connected to the current server.',
+        placement: 'top',
+        duration: 3
+      })
+      break
+
+    case 'themeDark':
+      notification['success']({
+        message: 'Dark Theme Enabled',
+        description: 'The application is now using the dark theme.',
+        placement: 'top',
+        duration: 3
+      })
+      break
+
+    case 'themeLight':
+      notification['success']({
+        message: 'Light Theme Enabled',
+        description: 'The application is now using the light theme.',
+        placement: 'top',
+        duration: 3
+      })
+      break
+
+    case 'folderError':
+      notification['error']({
+        message: 'Folder Information Missing',
+        description: 'Unable to retrieve folder information. Please check and try again.',
+        placement: 'top',
+        duration: 3
+      })
+      break
+
+    case 'folderSuccess':
+      notification['success']({
+        message: 'Folder Information Retrieved',
+        description: 'Successfully retrieved folder information.',
+        placement: 'top',
+        duration: 3
+      })
+      break
+
+    case 'error':
+      notification['error']({
+        message: 'Operation Failed',
+        description: error,
+        placement: 'top',
+        duration: 1
+      })
+      break
+
+    case 'uploadSuccess':
+      notification['success']({
+        message: 'Upload Successful',
+        description: 'Selected document(s) have been successfully uploaded to the server.',
+        placement: 'top',
+        duration: 3
+      })
+      break
+
+    default:
+      console.warn('Unknown notification type:', type)
   }
-  if (type === 'hostError') {
-    notification['error']({
-      message: 'Fail to Connect',
-      description:
-        'Connection to host server failed, Please check your configuration and try again.',
-      placement: 'top',
-      duration: 3
+}
+
+const checkInputFolder = async () => {
+  // console.log('1')
+  status.updateStatus('files', 1)
+  try {
+    const data = await API.authFetch(`${API.api}/task/inputs/folders`, {
+      method: 'GET'
     })
-  } else if (type === 'hostSuccess') {
-    notification['success']({
-      message: 'Connect to Server',
-      description: 'Successfully connect to current server.',
-      placement: 'top',
-      duration: 3
-    })
-  }
-  if (type === 'themeDark') {
-    notification['success']({
-      message: 'Dark theme activated',
-      description: 'Successfully switch to dark theme..',
-      placement: 'top',
-      duration: 3
-    })
-  } else if (type === 'themeLight') {
-    notification['success']({
-      message: 'Light theme activated',
-      description: 'Successfully switch light theme.',
-      placement: 'top',
-      duration: 3
-    })
-  }
-  if (type === 'folderError') {
-    notification['error']({
-      message: 'No input folder info',
-      description: 'Failed to retrieve input folder info , Please check and try again.',
-      placement: 'top',
-      duration: 3
-    })
-  } else if (type === 'folderSuccess') {
-    notification['success']({
-      message: 'Input folder info retrieved',
-      description: 'Successfully retrieve input folder info.',
-      placement: 'top',
-      duration: 3
-    })
+    if (data) {
+      API.updateInputFolder(data)
+      API.updateInputTree(data)
+      status.updateStatus('files', 2)
+      // console.log('2')
+    }
+  } catch (error) {
+    status.updateStatus('files', -1)
+    console.error('the API can not be reach', error)
   }
 }
 
@@ -264,14 +322,18 @@ const switchTheme = () => {
   if (colorTheme.value.token.colorPrimary == 'orange') {
     colorTheme.value = defaultSetting
     document.documentElement.setAttribute('data-theme', 'light')
-    currrentTheme.value = 'light'
+    API.currentTheme = 'light'
     openNotificationWithIcon('themeLight')
   } else {
     colorTheme.value = darkSetting
     document.documentElement.setAttribute('data-theme', 'dark')
-    currrentTheme.value = 'dark'
+    API.currentTheme = 'dark'
     openNotificationWithIcon('themeDark')
   }
+}
+const benchmarkTest = () => {
+  openBenchmark.value = true
+  // console.log('benchmark')
 }
 
 const goToTaskBoard = () => {
@@ -380,6 +442,14 @@ onMounted(async () => {
         />
       </template>
 
+      <a-float-button tooltip="Benchmark Task" @click="benchmarkTest">
+        <template #icon>
+          <span
+            :style="{ color: colorTheme.token.colorPrimary == 'orange' ? 'white' : 'black' }"
+            class="bi bi-building-check"
+          ></span>
+        </template>
+      </a-float-button>
       <a-float-button tooltip="Switch Theme" @click="switchTheme">
         <template #icon>
           <span
@@ -428,6 +498,133 @@ onMounted(async () => {
         </div>
       </a-flex>
     </a-modal>
+    <a-modal
+      v-model:open="openBenchmark"
+      centered
+      width="60%"
+      wrap-class-name="full-modal"
+      style="min-width: 1000px; max-width: 1600px"
+      :footer="null"
+    >
+      <Benchmark />
+    </a-modal>
+
+    <!-- <a-modal
+      v-model:open="openBenchmark"
+      centered
+      width="60%"
+      wrap-class-name="full-modal"
+      style="min-width: 1000px; max-width: 1600px"
+    >
+      <template #title>
+        <h2 style="text-align: center; margin: 10px">Benchmark Testing</h2>
+      </template>
+      <a-flex vertical width="100%" gap="middle">
+        <a-card style="width: 100%">
+          <a-row gutter="10">
+            <a-col :span="9" align="center">
+              <a-radio-group
+                size="large"
+                style="width: 100%"
+                v-model:value="testItem.modal"
+                @change="
+                  testItem.modal == 'face'
+                    ? (testItem.engine = ['bqat'])
+                    : (testItem.engine = ['default'])
+                "
+              >
+                <a-radio-button value="face">Face</a-radio-button>
+                <a-radio-button value="fingerprint">Fingerprint</a-radio-button>
+                <a-radio-button value="iris">Iris</a-radio-button>
+                <a-radio-button value="speech">Voice</a-radio-button>
+              </a-radio-group>
+              <a-select
+                style="width: 90%; margin: 10px"
+                v-model:value="testItem.engine"
+                mode="multiple"
+                :allowClear="true"
+                placeholder="Please select"
+                size="large"
+                :options="modalityOptions"
+              />
+              <div>
+                <a-button type="primary" style="margin-inline: 10px" @click="addOneTest"
+                  >Add One Test</a-button
+                >
+                <a-button type="primary" style="margin-inline: 10px" @click="addAllTest"
+                  >Test All</a-button
+                >
+              </div>
+            </a-col>
+            <a-col :span="8" align="center" justify="center">
+              <a-statistic-countdown
+                title="Testing elapse"
+                :value="Date.now() + 1000 * 10 * 60 * 24 * 2 + 1000 * 30"
+                format="HH:mm:ss:SSS"
+                style="margin-block: 20px"
+              />
+            </a-col>
+            <a-col :span="7" align="center" justify="center">
+              <a-progress type="circle" :percent="100" :format="() => '100%'" />
+            </a-col>
+          </a-row>
+        </a-card>
+        <a-card  style="width: 100%; height:60vh; overflow-y: scroll">
+          <a-row v-if="testItems.length>0" v-for="item,index in testItems" gutter="10">
+            <a-card  :key="index" :bordered="true" hoverable style="width: 100%; margin: 5px">
+              <a-row>
+                <a-col :span="16" align="center">
+                  <a-row>
+                    <a-col :span="8">
+                      <p>Modal: {{item.modal}}</p>
+                    </a-col>
+                    <a-col :span="8">
+                      <p>Engine: {{ item.engine }}</p>
+                    </a-col>
+                    <a-col :span="8">
+                      <p>
+                        Pass:
+                        <a href="http://">
+                          [{{
+                            Math.round(
+                              benchMarkMockData.engines.face.total *
+                                benchMarkMockData.engines.face.pass
+                            )
+                          }}/{{ benchMarkMockData.engines.face.total }}]</a
+                        >
+                      </p>
+                    </a-col>
+                  </a-row>
+                  <a-row>
+                    <a-col :span="8">
+                      <p>System Info:</p>
+                   
+                    </a-col>
+                    <a-col :span="16">
+                      <a-card :loading="true" size="small">loading...</a-card>
+                    </a-col>
+                  </a-row>
+                </a-col>
+                <a-col :span="8" align="center">
+                  <a-progress
+                    type="circle"
+                    size="large"
+                    :percent="benchMarkMockData.engines.face.pass * 100"
+                /></a-col>
+              </a-row>
+              <a-row style="margin-top: 20px" align="center">
+                <a-progress style="width: 90%" percent="90" />
+              </a-row>
+            </a-card>
+          </a-row>
+          <a-empty v-else></a-empty>
+        </a-card>
+      </a-flex>
+      <template #footer>
+
+      </template>
+
+    </a-modal> -->
   </body>
 </template>
 

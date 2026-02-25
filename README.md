@@ -32,8 +32,8 @@ Find the GUI at `localhost:7860`.
 ``` sh
 # To start dev server
 cd bqat_gui
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 ### Desktop
@@ -41,8 +41,8 @@ npm run dev
 ``` sh
 # To start dev server
 cd desktop
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 
 ### Deploy as Docker container
 
@@ -72,17 +72,17 @@ bqat-gui
 
 ``` sh
 cd desktop
-npm install
+pnpm install
 
 # Build executable for Windows (exe)
-npm run build-win
+pnpm run build-win
 
 # Build executable for Linux (AppImage)
-npm run build-linux
+pnpm run build-linux
 
 # Build executable for macOS (dmg)
-npm i dmg-license # keep in mind this should not be committed because its an Mac only dependency
-npm run build-mac
+pnpm i dmg-license # keep in mind this should not be committed because its an Mac only dependency
+pnpm run build-mac
 ```
 ## Note
 - Note: OFIQ retrive data only from top level of input folder

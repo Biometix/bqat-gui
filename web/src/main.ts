@@ -11,8 +11,20 @@ import router from './router'
 // Bootstrap
 import 'bootstrap-icons/font/bootstrap-icons.css'
 
-
 const app = createApp(App)
+
+// TODO: Potential Google Analytics embed
+// const script = document.createElement('script')
+// script.setAttribute('async', '')
+// script.src = 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX'
+// document.head.appendChild(script)
+
+// window.dataLayer = window.dataLayer || []
+// function gtag() {
+//   window.dataLayer.push(arguments)
+// }
+// gtag('js', new Date())
+// gtag('config', 'G-XXXXXXXXXX') // Replace with your Measurement ID
 
 
 fetch('config.json')
@@ -32,14 +44,9 @@ fetch('config.json')
         app.use(createPinia());
         app.use(router);
         app.use(Antd);
-
         app.mount('#app');
     })
     .catch((error) => {
         console.error('Failed to load config.json file:', error);
     });
 
-// app.use(createPinia())
-// app.use(router)
-// app.use(Antd);
-// app.mount('#app')

@@ -27,7 +27,9 @@ else
 
     cd "$bqat_gui_desktop" && \
     rm -r "$bqat_gui_desktop/src/" && \
+    rm -r "$bqat_gui_desktop/public/" && \
     cp -R "$bqat_gui_web/src" "$bqat_gui_desktop/src" && \
+    cp -R "$bqat_gui_web/public" "$bqat_gui_desktop/public" && \
     echo 'copy src to desktop'
 
     npm run type-check && \
