@@ -1,16 +1,27 @@
 <template>
-  <a-flex class="processContainer" gap="middle" vertical>
+  <a-flex class="processContainer" vertical>
     <a-card hoverable class="processCard">
-      <a-spin size="large" style="margin-top: 20%; height: 100%" :indicator="indicator" :spinning="tip" :tip="tip">
+      <a-spin
+        size="large"
+        style="margin-top: 20%; height: 100%"
+        :indicator="indicator"
+        :spinning="tip"
+        :tip="tip"
+      >
         <!-- Task Info Section -->
         <a-row :gutter="16" justify="center">
           <a-col :span="6">
-            <a-statistic title="Current Task" :value="processInfo.process.taskStatus.filter((item) => item.status == 1).length > 0
-              ? processInfo.process.taskStatus
-                .filter((item) => item.status == 1)[0]
-                .name.toUpperCase() + ' '
-              : 'NA'
-  " style="text-align: center">
+            <a-statistic
+              title="Current Task"
+              :value="
+                processInfo.process.taskStatus.filter((item) => item.status == 1).length > 0
+                  ? processInfo.process.taskStatus
+                      .filter((item) => item.status == 1)[0]
+                      .name.toUpperCase() + ' '
+                  : 'NA'
+              "
+              style="text-align: center"
+            >
               <template #prefix>
                 <i class="bi bi-terminal"></i>
               </template>
@@ -24,19 +35,26 @@
             </a-statistic>
           </a-col>
           <a-col :span="6">
-            <a-statistic title="ETC" :value="processInfo.process.taskStatus.filter((item) => item.status == 1).length > 0
-              ? formatETA
-              : '00:00:00'
-              " style="text-align: center">
+            <a-statistic
+              title="ETC"
+              :value="
+                processInfo.process.taskStatus.filter((item) => item.status == 1).length > 0
+                  ? formatETA
+                  : '00:00:00'
+              "
+              style="text-align: center"
+            >
               <template #prefix>
                 <i class="bi bi-stopwatch"></i>
               </template>
             </a-statistic>
           </a-col>
           <a-col :span="6">
-            <a-statistic title="Processed"
+            <a-statistic
+              title="Processed"
               :value="`${processInfo.process.taskStatus.filter((item) => item.status == 2).length} / ${processInfo.process.taskStatus.length}`"
-              style="text-align: center">
+              style="text-align: center"
+            >
               <template #prefix> <i class="bi bi-check2-circle"></i> </template>``
             </a-statistic>
           </a-col>
@@ -45,121 +63,185 @@
         <!-- Stop Task Section -->
         <a-row justify="center" style="margin-block: 35px" gutter="30">
           <a-col :span="6">
-            <a-button :disabled="processInfo.process.selectedItems.length !== 1 ||
-              getResume ||
-              getCancel ||
-              getStop ||
-              processInfo.process.selectedItems.filter((item) => item.status == 2).length > 0 ||
-              (processStatus.process == 1 &&
-                processInfo.process.selectedItems.filter((item) => item.status == 1).length == 0)
-              " style="width: 100%; padding: 0px; overflow: hidden" danger
-              @click="showCancelConfirm(processInfo.process.selectedItems[0].tid)" :loading="getCancel">
-              <i v-if="!getCancel" class="bi bi-stop-circle" style="font-size: 15px; margin-inline: 5px"></i>
+            <a-button
+              :disabled="
+                processInfo.process.selectedItems.length !== 1 ||
+                getResume ||
+                getCancel ||
+                getStop ||
+                processInfo.process.selectedItems.filter((item) => item.status == 2).length > 0 ||
+                (processStatus.process == 1 &&
+                  processInfo.process.selectedItems.filter((item) => item.status == 1).length == 0)
+              "
+              style="width: 100%; padding: 0px; overflow: hidden"
+              danger
+              @click="showCancelConfirm(processInfo.process.selectedItems[0].tid)"
+              :loading="getCancel"
+            >
+              <i
+                v-if="!getCancel"
+                class="bi bi-stop-circle"
+                style="font-size: 15px; margin-inline: 5px"
+              ></i>
               Cancel Task
             </a-button>
           </a-col>
           <a-col :span="6">
-            <a-button :disabled="processInfo.process.selectedItems.length !== 1 ||
-              getResume ||
-              getCancel ||
-              getStop ||
-              processInfo.process.selectedItems.filter((item) => item.status == 2).length > 0 ||
-              processInfo.process.selectedItems.filter((item) => item.status !== 1).length > 0
-              " style="width: 100%; padding: 0px; overflow: hidden" danger
-              @click="stopTask(processInfo.process.selectedItems[0].tid)" :loading="getStop">
-              <i v-if="!getStop" class="bi bi-pause-circle" style="font-size: 15px; margin-inline: 5px"></i>
+            <a-button
+              :disabled="
+                processInfo.process.selectedItems.length !== 1 ||
+                getResume ||
+                getCancel ||
+                getStop ||
+                processInfo.process.selectedItems.filter((item) => item.status == 2).length > 0 ||
+                processInfo.process.selectedItems.filter((item) => item.status !== 1).length > 0
+              "
+              style="width: 100%; padding: 0px; overflow: hidden"
+              danger
+              @click="stopTask(processInfo.process.selectedItems[0].tid)"
+              :loading="getStop"
+            >
+              <i
+                v-if="!getStop"
+                class="bi bi-pause-circle"
+                style="font-size: 15px; margin-inline: 5px"
+              ></i>
               Stop Task
             </a-button>
           </a-col>
           <a-col :span="6">
-            <a-button :disabled="processStatus.process == 1 ||
-              processStatus.result == 1 ||
-              processStatus.outlier == 1 ||
-              getResume ||
-              processInfo.process.selectedItems.length !== 1 ||
-              processInfo.process.selectedItems.filter((item) => item.status == 2).length > 0
-              " @click="resumeTask(processInfo.process.selectedItems[0].tid)"
-              style="width: 100%; padding: 0px; overflow: hidden" danger :loading="getResume">
+            <a-button
+              :disabled="
+                processStatus.process == 1 ||
+                processStatus.result == 1 ||
+                processStatus.outlier == 1 ||
+                getResume ||
+                processInfo.process.selectedItems.length !== 1 ||
+                processInfo.process.selectedItems[0].status == 1
+              "
+              @click="resumeTask(processInfo.process.selectedItems[0].tid)"
+              style="width: 100%; padding: 0px; overflow: hidden"
+              danger
+              :loading="getResume"
+            >
               <!-- @click="resumeTask(processInfo.process.selectedItems[0].tid)" -->
-              <i v-if="!getResume" class="bi bi-play-circle" style="font-size: 15px; margin-inline: 5px"></i>
+              <i
+                v-if="!getResume"
+                class="bi bi-play-circle"
+                style="font-size: 15px; margin-inline: 5px"
+              ></i>
               Resume Task
             </a-button>
           </a-col>
         </a-row>
 
-        <div class="processBoard" :style="{
-          height:
-            showPreview || showOutlier || showReport
-              ? '450px'
-              : isWideWindow
-                ? 'calc(100vh - 300px)'
-                : 'calc(100vh - 450px)'
-        }">
-          <div class="processTask" :style="{
+        <a-badge
+          :count="processInfo.process.selectedItems.length"
+          style="position: absolute; top: 78px; right: 0px; z-index: 1000"
+        />
+        <div
+          class="processBoard"
+          :style="{
             height:
               showPreview || showOutlier || showReport
-                ? '400px'
+                ? '450px'
                 : isWideWindow
-                  ? 'calc(100vh - 525px)'
-                  : 'calc(100vh - 620px)'
-          }">
+                  ? 'calc(100vh - 300px)'
+                  : 'calc(100vh - 450px)'
+          }"
+        >
+          <div
+            class="processTask"
+            :style="{
+              height:
+                showPreview || showOutlier || showReport
+                  ? '400px'
+                  : isWideWindow
+                    ? 'calc(100vh - 525px)'
+                    : 'calc(100vh - 620px)'
+            }"
+          >
             <!-- Task Board Section -->
             <div v-if="processInfo.process.taskStatus.length > 0" class="task-card-container">
-              <a-card v-for="(item, index) in processInfo.process.taskStatus" :key="index" hoverable class="taskStyle"
-                bodyStyle="padding: 0px; height: 78px;" :style="{
+              <a-card
+                v-for="(item, index) in processInfo.process.taskStatus"
+                :key="index"
+                hoverable
+                class="taskStyle"
+                bodyStyle="padding: 0px; height: 78px;"
+                :style="{
                   backgroundColor: processInfo.process.selectedItems[item.tid]
                     ? item.status != 2
                       ? 'rgba(200, 200, 200,0.7)'
                       : 'rgba(200, 200, 200,0.7)'
                     : 'rgba(200, 200, 200,0.2)'
-                }">
+                }"
+              >
                 <a-tooltip
                   :title="`${formatDate(
                     item.modified
-                  )} | ${convertSecondsToHMS(Number(item.elapse))} ${item.logs.length > 0 ? ' | ' + item.logs[0] : ''}`">
+                  )} | ${convertSecondsToHMS(Number(item.elapse))} ${item.logs.length > 0 ? ' | ' + item.logs[0] : ''}`"
+                >
                   <div style="width: 100%">
-                    <a-checkbox class="checkbox-hidden" v-model:checked="processInfo.process.selectedItems[item.tid]"
-                      @change="(e) => selectTask(e, item)">
+                    <a-checkbox
+                      class="checkbox-hidden"
+                      v-model:checked="processInfo.process.selectedItems[item.tid]"
+                      @change="(e) => selectTask(e, item)"
+                    >
                       <a-spin :spinning="item.status == 1">
-                        <div style="
+                        <div
+                          style="
                             display: flex;
                             flex-direction: row;
                             height: 35px;
                             margin-top: -20px;
                             padding-top: 5px;
                             padding-inline: 10px;
-                          ">
-                          <p style="
+                          "
+                        >
+                          <p
+                            style="
                               padding: 5px;
                               text-align: end;
                               font-size: medium;
                               font-weight: normal;
-                            ">
+                            "
+                          >
                             {{ item.name.toUpperCase() }}:
                           </p>
-                          <a-progress class="progressStyle" :size="[300, 20]"
-                            :stroke-color="{ '0%': '#ff1a2d', '100%': '#99000d' }" :percent="item.percent" :status="item.status == 3
-                              ? 'exception'
-                              : item.status == 2
-                                ? 'success'
-                                : 'normal'
-                              " />
+                          <a-progress
+                            class="progressStyle"
+                            :size="[300, 20]"
+                            :stroke-color="{ '0%': '#ff1a2d', '100%': '#99000d' }"
+                            :percent="item.percent"
+                            :status="
+                              item.status == 3
+                                ? 'exception'
+                                : item.status == 2
+                                  ? 'success'
+                                  : 'normal'
+                            "
+                          />
                         </div>
-                        <div style="
+                        <div
+                          style="
                             text-align: center;
                             padding-inline: 10px;
                             height: 40px;
                             padding-top: 2px;
                             width: 100%;
-                          ">
-                          <p style="
+                          "
+                        >
+                          <p
+                            style="
                               overflow: hidden;
                               text-overflow: ellipsis;
                               white-space: nowrap;
                               width: 100%;
                               font-size: medium;
                               padding-left: 5px;
-                            ">
+                            "
+                          >
                             Input: {{ truncateString(item.input) }} | Modality:
                             {{ capitalizeFirstLetter(item.mode) }} | Engine:
                             {{
@@ -178,38 +260,63 @@
                 </a-tooltip>
               </a-card>
 
-              <a-card hoverable class="taskStyle" bodyStyle="padding: 10px 10px; height: 70px" :style="{
-                height: '70px',
-                backgroundColor: processInfo.process.selectedExternal
-                  ? 'rgba(200, 200, 200,0.7)'
-                  : 'rgba(200, 200, 200,0.2)'
-              }">
+              <a-card
+                hoverable
+                class="taskStyle"
+                bodyStyle="padding: 10px 10px; height: 70px"
+                :style="{
+                  height: '70px',
+                  backgroundColor: processInfo.process.selectedExternal
+                    ? 'rgba(200, 200, 200,0.7)'
+                    : 'rgba(200, 200, 200,0.2)'
+                }"
+              >
                 <a-tooltip title="Import CSV to Generate Report">
                   <div style="display: flex; flex-direction: row">
-                    <a-checkbox :disabled="!processInfo.result.selectedCsv[0]"
-                      v-model:checked="processInfo.process.selectedExternal" class="checkbox-hidden">
-                      <div style="display: flex; flex-direction: row; height: 35px; margin-top: -12px">
-                        <h3 style="
+                    <a-checkbox
+                      :disabled="!processInfo.result.selectedCsv[0]"
+                      v-model:checked="processInfo.process.selectedExternal"
+                      class="checkbox-hidden"
+                    >
+                      <div
+                        style="display: flex; flex-direction: row; height: 35px; margin-top: -12px"
+                      >
+                        <h3
+                          style="
                             padding-inline: 6px;
                             align-self: center;
                             padding-right: 10px;
                             text-align: end;
                             font-size: medium;
                             font-weight: normal;
-                          ">
+                          "
+                        >
                           External:
                         </h3>
 
-                        <input type="file" ref="uploadRef" accept=".csv" style="display: none" @change="selectCsv" />
-                        <a-button size="medium" @click="uploadCsv" danger style="
+                        <input
+                          type="file"
+                          ref="uploadRef"
+                          accept=".csv"
+                          style="display: none"
+                          @change="selectCsv"
+                        />
+                        <a-button
+                          size="medium"
+                          @click="uploadCsv"
+                          danger
+                          style="
                             width: 80%;
                             text-overflow: ellipsis;
                             overflow: hidden;
                             margin-top: -2px;
-                          " :disabled="tip !== false ||
+                          "
+                          :disabled="
+                            tip !== false ||
                             processStatus.outlier == 1 ||
                             processStatus.preprocess == 1
-                            ">
+                          "
+                        >
                           {{
                             processInfo.result.selectedCsv[0]
                               ? processInfo.result.selectedCsv[0].name
@@ -230,33 +337,57 @@
 
             <!-- Empty Task Board Section -->
             <div v-else class="processItem">
-              <a-card hoverable class="taskStyle" bodyStyle="padding: 10px 10px; height: 85px;" :style="{
-                height: '70px',
-                backgroundColor: processInfo.process.selectedExternal
-                  ? 'rgba(200, 200, 200,0.7)'
-                  : 'rgba(200, 200, 200,0.2)'
-              }">
+              <a-card
+                hoverable
+                class="taskStyle"
+                bodyStyle="padding: 10px 10px; height: 85px;"
+                :style="{
+                  height: '70px',
+                  backgroundColor: processInfo.process.selectedExternal
+                    ? 'rgba(200, 200, 200,0.7)'
+                    : 'rgba(200, 200, 200,0.2)'
+                }"
+              >
                 <a-tooltip title="Use External CSV to Generate Report">
                   <div style="display: flex; flex-direction: row; height: 40px">
-                    <a-checkbox class="checkbox-hidden" :disabled="!processInfo.result.selectedCsv[0]"
-                      v-model:checked="processInfo.process.selectedExternal">
-                      <div style="display: flex; flex-direction: row; height: 35px; margin-top: -15px">
-                        <h3 style="
+                    <a-checkbox
+                      class="checkbox-hidden"
+                      :disabled="!processInfo.result.selectedCsv[0]"
+                      v-model:checked="processInfo.process.selectedExternal"
+                    >
+                      <div
+                        style="display: flex; flex-direction: row; height: 35px; margin-top: -15px"
+                      >
+                        <h3
+                          style="
                             padding-inline: 6px;
                             padding-top: 4px;
                             text-align: end;
                             font-size: large;
                             font-weight: bold;
-                          ">
+                          "
+                        >
                           External:
                         </h3>
 
-                        <input type="file" ref="uploadRef" accept=".csv" style="display: none" @change="selectCsv" />
-                        <a-button size="large" @click="uploadCsv" danger
-                          style="width: 80%; text-overflow: ellipsis; overflow: hidden" :disabled="tip !== false ||
+                        <input
+                          type="file"
+                          ref="uploadRef"
+                          accept=".csv"
+                          style="display: none"
+                          @change="selectCsv"
+                        />
+                        <a-button
+                          size="large"
+                          @click="uploadCsv"
+                          danger
+                          style="width: 80%; text-overflow: ellipsis; overflow: hidden"
+                          :disabled="
+                            tip !== false ||
                             processStatus.outlier == 1 ||
                             processStatus.preprocess == 1
-                            ">
+                          "
+                        >
                           {{
                             processInfo.result.selectedCsv[0]
                               ? processInfo.result.selectedCsv[0].name
@@ -279,68 +410,138 @@
           <!-- Operation Section -->
           <a-row justify="center" style="margin-block: 30px" :gutter="20">
             <!-- Delete Item -->
-            <a-col :span="2">
-              <a-button style="width: 100%; padding: 0" size="large" danger @click="showDeleteConfirm" :disabled="processInfo.process.selectedItems.length < 1 ||
-                processStatus.outlier == 1 ||
-                processStatus.result == 1 ||
-                processInfo.process.selectedItems.filter((item) => item.status == 1).length > 0
-                ">
+            <a-col :span="4">
+              <a-button
+                style="width: 100%; padding: 0"
+                size="large"
+                danger
+                @click="showDeleteConfirm"
+                :disabled="
+                  processInfo.process.selectedItems.length < 1 ||
+                  processStatus.outlier == 1 ||
+                  processStatus.result == 1 ||
+                  processInfo.process.selectedItems.filter((item) => item.status == 1).length > 0
+                "
+              >
                 <DeleteOutlined />
               </a-button>
             </a-col>
 
+            <!-- Detect Modal -->
+            <!-- <a-col :span="4">
+              <a-button
+                style="width: 100%; height: 100%; padding: 0"
+                size="large"
+                :disabled="
+                  processInfo.process.selectedItems.length != 1 ||
+                  processStatus.outlier == 1 ||
+                  processStatus.result == 1 ||
+                  processInfo.process.selectedItems.filter((item) => item.status == 1).length > 0
+                "
+                @click="getInfo(processInfo.process.selectedItems[0].input.split('/').pop())"
+                :loading="spinInfo"
+              >
+                <i
+                  id="test"
+                  class="bi bi-info-circle"
+                  style="margin-right: 5px; font-size: 19px"
+                ></i>
+                Detect</a-button
+              >
+            </a-col> -->
             <!-- Preview Result -->
             <a-col :span="5">
-              <a-button style="width: 100%; height: 100%; padding: 0" size="large" :disabled="processInfo.process.selectedItems.length != 1 ||
-                processStatus.outlier == 1 ||
-                processStatus.result == 1 ||
-                processInfo.process.selectedItems.filter((item) => item.status == 1).length > 0
-                " @click="getCsv('preview')" :loading="getPreview">
+              <a-button
+                style="width: 100%; height: 100%; padding: 0"
+                size="large"
+                :disabled="
+                  processInfo.process.selectedItems.length != 1 ||
+                  processStatus.outlier == 1 ||
+                  processStatus.result == 1 ||
+                  processInfo.process.selectedItems.filter((item) => item.status == 1).length > 0
+                "
+                @click="getCsv('preview')"
+                :loading="getPreview"
+              >
                 <i id="test" class="bi bi-table" style="margin-right: 5px; font-size: 18px"></i>
-                Preview</a-button>
+                Preview</a-button
+              >
             </a-col>
 
             <!-- Download Result -->
             <a-col :span="5">
-              <a-button style="width: 100%; height: 100%; padding: 0" size="large" :disabled="processInfo.process.selectedItems.length < 1 ||
-                processStatus.outlier == 1 ||
-                processStatus.result == 1 ||
-                processInfo.process.selectedItems.filter((item) => item.status == 1).length > 0
-                " @click="getCsv('download')" :loading="getDownlaod">
-                <i id="test" class="bi bi-database-add" style="margin-right: 5px; font-size: 18px"></i>
-                Download</a-button>
+              <a-button
+                style="width: 100%; height: 100%; padding: 0"
+                size="large"
+                :disabled="
+                  processInfo.process.selectedItems.length < 1 ||
+                  processStatus.outlier == 1 ||
+                  processStatus.result == 1 ||
+                  processInfo.process.selectedItems.filter((item) => item.status == 1).length > 0
+                "
+                @click="getCsv('download')"
+                :loading="getDownload"
+              >
+                <i
+                  id="test"
+                  class="bi bi-database-add"
+                  style="margin-right: 5px; font-size: 18px"
+                ></i>
+                Download</a-button
+              >
             </a-col>
 
             <!-- Detect Outliers -->
-            <a-col :span="6">
-              <a-button style="width: 100%; height: 100%; padding: 0" size="large" @click="getOutlier()" :disabled="processInfo.process.selectedItems.length != 1 ||
-                processStatus.process == 1 ||
-                processStatus.outlier == 1 ||
-                processStatus.result == 1 ||
-                processInfo.process.selectedItems.filter((item) => item.status == 1).length > 0
-                " :loading="processStatus.outlier == 1">
-                <i class="bi bi-radar" style="margin-right: 5px; font-size: 18px"></i>
-                Get Outliers</a-button></a-col>
-
-            <!-- Generate Report -->
-            <a-col :span="6">
-              <a-button style="width: 100%; padding: 0" size="large" @click="getReport()"
-                :loading="processStatus.result == 1" :disabled="(processInfo.process.selectedItems.length < 1 &&
-                  !processInfo.process.selectedExternal) ||
+            <a-col :span="5">
+              <a-button
+                style="width: 100%; height: 100%; padding: 0"
+                size="large"
+                @click="getOutlier()"
+                :disabled="
+                  processInfo.process.selectedItems.length != 1 ||
                   processStatus.process == 1 ||
                   processStatus.outlier == 1 ||
                   processStatus.result == 1 ||
                   processInfo.process.selectedItems.filter((item) => item.status == 1).length > 0
-                  ">
+                "
+                :loading="processStatus.outlier == 1"
+              >
+                <i class="bi bi-radar" style="margin-right: 5px; font-size: 18px"></i>
+                Get Outliers</a-button
+              ></a-col
+            >
+
+            <!-- Generate Report -->
+            <a-col :span="5">
+              <a-button
+                style="width: 100%; padding: 0"
+                size="large"
+                @click="getReport()"
+                :loading="processStatus.result == 1"
+                :disabled="
+                  (processInfo.process.selectedItems.length < 1 &&
+                    !processInfo.process.selectedExternal) ||
+                  processStatus.process == 1 ||
+                  processStatus.outlier == 1 ||
+                  processStatus.result == 1 ||
+                  processInfo.process.selectedItems.filter((item) => item.status == 1).length > 0
+                "
+              >
                 <i class="bi bi-clipboard-data" style="margin-right: 5px; font-size: 18px"></i>Get
-                Report</a-button>
+                Report</a-button
+              >
             </a-col>
           </a-row>
         </div>
       </a-spin>
     </a-card>
     <!-- Hidden Function Section -->
-    <a-card v-if="showPreview || showOutlier || showReport" style="width: 100%" hoverable id="bottom-anchor">
+    <a-card
+      v-if="showPreview || showOutlier || showReport"
+      style="width: 100%"
+      hoverable
+      id="bottom-anchor"
+    >
       <!-- Result Section -->
       <a-flex v-if="showPreview" gap="middle" vertical>
         <a-spin :spinning="getPreview">
@@ -352,8 +553,9 @@
                   <template #content>
                     <div style="height: 350px; width: 500px; overflow: scroll">
                       <a-divider><strong>Quality Metric Description</strong></a-divider>
-                      <p v-for="(value, key) in getQualityMetricSpec(processInfo)">
-                        "<span style="font-weight: bolder;">{{ key }}</span>": {{ value }}
+                      <p v-for="(value, key) in getQualityMetricSpec()">
+                        "<span style="font-weight: bolder">{{ key }}</span
+                        >": {{ value }}
                       </p>
                     </div>
                   </template>
@@ -371,9 +573,12 @@
                       <tr>
                         <th>index</th>
                         <th>file</th>
-                        <th v-for="(header, index) in csvHeaders.filter(
-                          (item) => item !== 'log' && item !== 'file'
-                        )" :key="index">
+                        <th
+                          v-for="(header, index) in csvHeaders.filter(
+                            (item) => item !== 'log' && item !== 'file'
+                          )"
+                          :key="index"
+                        >
                           {{ header }}
                         </th>
                       </tr>
@@ -388,9 +593,12 @@
                           {{ item['file'] }}
                         </td>
 
-                        <td v-for="(header, colIndex) in csvHeaders.filter(
-                          (item) => item !== 'log' && item !== 'file'
-                        )" :key="colIndex">
+                        <td
+                          v-for="(header, colIndex) in csvHeaders.filter(
+                            (item) => item !== 'log' && item !== 'file'
+                          )"
+                          :key="colIndex"
+                        >
                           {{ item[header] }}
                         </td>
                       </tr>
@@ -401,7 +609,10 @@
                 <a-collapse v-if="csvlog.length > 0">
                   <a-collapse-panel>
                     <template #header>
-                      <a-tooltip placement="left" title="Only the first 50 entries displayed if there are more.">
+                      <a-tooltip
+                        placement="left"
+                        title="Only the first 50 entries displayed if there are more."
+                      >
                         <div>Task log</div>
                       </a-tooltip>
                     </template>
@@ -446,8 +657,12 @@
 
       <!-- Outlier Section  -->
       <a-flex v-if="showOutlier" gap="middle" vertical>
-        <a-spin size="large" :indicator="indicator" :spinning="processStatus.outlier == 1 && outlierHeaders.length == 0"
-          tip="Task is running...">
+        <a-spin
+          size="large"
+          :indicator="indicator"
+          :spinning="processStatus.outlier == 1 && outlierHeaders.length == 0"
+          tip="Task is running..."
+        >
           <a-alert v-if="outlierError" message="Previous Run:" type="warning" show-icon closable>
             <template #description>
               <p>{{ outlierError }}</p>
@@ -464,11 +679,18 @@
             <a-flex vertical gap="middle">
               <h2><i class="bi bi-exclamation-square"></i> Select Outlier Detector:</h2>
 
-              <a-select size="large" ref="select" style="width: 100%; margin-block: 10px"
-                v-model:value="processInfo.outlier.detector" :options="detectorSelect" @click="() => {
-                  processInfo.outlier.iconLoading = false
-                }
-                  ">
+              <a-select
+                size="large"
+                ref="select"
+                style="width: 100%; margin-block: 10px"
+                v-model:value="processInfo.outlier.detector"
+                :options="detectorSelect"
+                @click="
+                  () => {
+                    processInfo.outlier.iconLoading = false
+                  }
+                "
+              >
               </a-select>
             </a-flex>
           </a-card>
@@ -484,49 +706,65 @@
                       <h3>Quality Metric Description</h3>
                     </a-divider>
                     <div style="height: 350px; width: 500px; overflow: scroll">
-                      <div v-if="
-                        processInfo.outlier.columns.some((innerArray) =>
-                          innerArray.includes('face-bqat')
-                        )
-                      ">
+                      <div
+                        v-if="
+                          processInfo.outlier.columns.some((innerArray) =>
+                            innerArray.includes('face-bqat')
+                          )
+                        "
+                      >
                         <p v-for="(value, key) in processInfo.outlier.description['face-bqat']">
-                          "<span style="font-weight: bolder;">{{ key }}</span>": {{ value }}
+                          "<span style="font-weight: bolder">{{ key }}</span
+                          >": {{ value }}
                         </p>
                       </div>
-                      <div v-if="
-                        processInfo.outlier.columns.some((innerArray) =>
-                          innerArray.includes('face-biqt')
-                        )
-                      " style="height: 400px; width: 500px; overflow: scroll">
+                      <div
+                        v-if="
+                          processInfo.outlier.columns.some((innerArray) =>
+                            innerArray.includes('face-biqt')
+                          )
+                        "
+                        style="height: 400px; width: 500px; overflow: scroll"
+                      >
                         <p v-for="(value, key) in processInfo.outlier.description['face-biqt']">
-                          "<span style="font-weight: bolder;">{{ key }}</span>": {{ value }}
+                          "<span style="font-weight: bolder">{{ key }}</span
+                          >": {{ value }}
                         </p>
                       </div>
-                      <div v-if="
-                        processInfo.outlier.columns.some((innerArray) =>
-                          innerArray.includes('face-ofiq')
-                        )
-                      ">
+                      <div
+                        v-if="
+                          processInfo.outlier.columns.some((innerArray) =>
+                            innerArray.includes('face-ofiq')
+                          )
+                        "
+                      >
                         <p v-for="(value, key) in processInfo.outlier.description['face-ofiq']">
-                          "<span style="font-weight: bolder;">{{ key }}</span>": {{ value }}
+                          "<span style="font-weight: bolder">{{ key }}</span
+                          >": {{ value }}
                         </p>
                       </div>
-                      <div v-if="
-                        processInfo.outlier.columns.some((innerArray) =>
-                          innerArray.includes('fingerprint')
-                        )
-                      ">
+                      <div
+                        v-if="
+                          processInfo.outlier.columns.some((innerArray) =>
+                            innerArray.includes('fingerprint')
+                          )
+                        "
+                      >
                         <p v-for="(value, key) in processInfo.outlier.description['fingerprint']">
-                          "<span style="font-weight: bolder;">{{ key }}</span>": {{ value }}
+                          "<span style="font-weight: bolder">{{ key }}</span
+                          >": {{ value }}
                         </p>
                       </div>
-                      <div v-if="
-                        processInfo.outlier.columns.some((innerArray) =>
-                          innerArray.includes('iris')
-                        )
-                      ">
+                      <div
+                        v-if="
+                          processInfo.outlier.columns.some((innerArray) =>
+                            innerArray.includes('iris')
+                          )
+                        "
+                      >
                         <p v-for="(value, key) in processInfo.outlier.description['iris']">
-                          "<span style="font-weight: bolder;">{{ key }}</span>": {{ value }}
+                          "<span style="font-weight: bolder">{{ key }}</span
+                          >": {{ value }}
                         </p>
                       </div>
                     </div>
@@ -535,16 +773,32 @@
                 </a-popover>
               </a-flex>
               <a-row gutter="10">
-                <a-cascader class="outlierOption" popupClassName="popupClass" expand-trigger="hover" multiple
-                  size="large" v-model:value="processInfo.outlier.columns" change-on-select
-                  placeholder="Please select the columns to detect" :options="columnSelect"
-                  style="width: 100%; margin-block: 10px" />
+                <a-cascader
+                  class="outlierOption"
+                  popupClassName="popupClass"
+                  expand-trigger="hover"
+                  multiple
+                  size="large"
+                  v-model:value="processInfo.outlier.columns"
+                  change-on-select
+                  placeholder="Please select the columns to detect"
+                  :options="columnSelect"
+                  style="width: 100%; margin-block: 10px"
+                />
                 <a-tooltip>
-                  <template #title>The proportion of data points considered as outliers in the data set.</template>
+                  <template #title
+                    >The proportion of data points considered as outliers in the data set.</template
+                  >
                   <div>
-                    <a-input-number class="inputNumber" v-model:value="contaminationNum" :min="1" :max="100"
-                      size="large" style="margin-block: 10px; width: 50%; min-width: 200px">
-                      <template #addonBefore>Outlier Threshold:</template>
+                    <a-input-number
+                      class="inputNumber"
+                      v-model:value="processInfo.outlier.contamination"
+                      :min="1"
+                      :max="100"
+                      size="large"
+                      style="margin-block: 10px; width: 50%; min-width: 200px"
+                    >
+                      <template #addonBefore>Outliers Threshold:</template>
                       <template #addonAfter>%</template>
                     </a-input-number>
                   </div>
@@ -556,31 +810,55 @@
 
         <a-row justify="center" :gutter="40" style="margin-block: 2rem">
           <a-col :span="12">
-            <a-button :disabled="!processInfo.outlier.iconLoading" style="width: 100%; padding: 0" size="large"
-              type="primary" danger @click="stopOutlierTask">
+            <a-button
+              :disabled="!processInfo.outlier.iconLoading"
+              style="width: 100%; padding: 0"
+              size="large"
+              type="primary"
+              danger
+              @click="stopOutlierTask"
+            >
               <span class="bi bi-stop-circle" style="font-size: 18px; margin-inline: 5px"></span>
               Stop
             </a-button>
           </a-col>
           <a-col :span="12">
-            <a-button style="width: 100%" size="large" type="primary" :loading="processInfo.outlier.iconLoading"
-              :disabled="processInfo.process.selectedItems.length !== 1 ||
+            <a-button
+              style="width: 100%"
+              size="large"
+              type="primary"
+              :loading="processInfo.outlier.iconLoading"
+              :disabled="
+                processInfo.process.selectedItems.length !== 1 ||
                 processInfo.outlier.columns.length == 0
-                " @click="startOutlierTask">
-              <span v-if="processStatus.outlier !== 1" class="bi bi-play"
-                style="font-style: normal; margin-inline: 5px"></span>
+              "
+              @click="startOutlierTask"
+            >
+              <span
+                v-if="processStatus.outlier !== 1"
+                class="bi bi-play"
+                style="font-style: normal; margin-inline: 5px"
+              ></span>
               Start
             </a-button>
           </a-col>
         </a-row>
 
-        <a-card hoverable v-if="outlierHeaders.length > 0 && processStatus.outlier !== 0 && outlierData.length > 0"
-          id="outlier-anchor">
+        <!-- TODO:replace with table modal  -->
+        <!-- <a-card
+          hoverable
+          v-if="outlierHeaders.length > 0 && processStatus.outlier !== 0 && outlierData.length > 0"
+          id="outlier-anchor"
+        >
           <a-flex gap="middle" vertical style="width: 100%">
             <a-row align="space-between" justify="center">
               <h2>
                 <i class="bi bi-kanban"></i> Outliers:
-                <a-button type="primary" :disabled="processStatus.outlier == 1" @click="downloadOutlier(outlierData)">
+                <a-button
+                  type="primary"
+                  :disabled="processStatus.outlier == 1"
+                  @click="downloadOutlier(outlierData)"
+                >
                   <template #icon>
                     <DownloadOutlined />
                   </template>
@@ -589,13 +867,20 @@
 
               <div style="align-self: center">
                 Raw Data
-                <a-switch v-model:checked="rawData" @change="
-                  checkOutlier(processInfo.process.selectedItems[0].collection, rawData, false)
-                  " />
+                <a-switch
+                  v-model:checked="rawData"
+                  @change="
+                    checkOutlier(processInfo.process.selectedItems[0].collection, rawData, false)
+                  "
+                />
               </div>
             </a-row>
-            <a-spin size="large" :indicator="indicator" :spinning="processStatus.outlier == 1"
-              tip="Table is loading...">
+            <a-spin
+              size="large"
+              :indicator="indicator"
+              :spinning="processStatus.outlier == 1"
+              tip="Table is loading..."
+            >
               <div>
                 <p>
                   {{ outlierData.length }} ×
@@ -603,49 +888,74 @@
                     outlierHeaders.find((item) => item == 'info')
                       ? outlierHeaders.length - 1
                       : outlierHeaders.length
-                  }} (first 50 entries displayed)
+                  }}
+                  (first 50 entries displayed)
                 </p>
                 <div class="table-container">
                   <table>
                     <thead>
                       <tr>
                         <th></th>
-                        <th v-for="(header, index) in outlierHeaders.filter(
-                          (item) => item !== 'info'
-                        )" :key="index">
+                        <th
+                          v-for="(header, index) in outlierHeaders.filter(
+                            (item) => item !== 'info'
+                          )"
+                          :key="index"
+                        >
                           {{ header }}
                         </th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="(item, rowIndex) in outlierData.slice(0, 50).sort((a, b) => b.score - a.score)"
-                        :key="rowIndex">
+                      <tr
+                        v-for="(item, rowIndex) in outlierData
+                          .slice(0, 50)
+                          .sort((a, b) => b.score - a.score)"
+                        :key="rowIndex"
+                      >
                         <td>
                           {{ rowIndex + 1 }}
                         </td>
-                        <td v-for="(header, colIndex) in outlierHeaders.filter(
-                          (item) => item !== 'info'
-                        )" :key="colIndex">
-                          <a-popover v-if="typeof item[header] === 'string'" :title="item[header].split('/').slice(-1)[0]"
-                            trigger="hover">
+                        <td
+                          v-for="(header, colIndex) in outlierHeaders.filter(
+                            (item) => item !== 'info'
+                          )"
+                          :key="colIndex"
+                        >
+                          <a-popover
+                            v-if="typeof item[header] === 'string'"
+                            :title="item[header].split('/').slice(-1)[0]"
+                            trigger="hover"
+                          >
                             <template #content>
-                              <img :src="API.api + '/warehouse/' + item[header]" :alt="item[header]" width="200" style="width: 400px;
-                                height: 300px;
-                                display: flex;
-                                justify-content: center;
-                                align-items: center;
-                                padding: 10px;
-                                box-sizing: border-box;
-                                background-color: gray;
-                                overflow: hidden;
-                                max-width: 100%;
-                                max-height: 100%;
-                                object-fit: contain;
-                                border-radius: 5px;" />
+                              <img
+                                :src="API.api + '/warehouse/' + item[header]"
+                                :alt="item[header]"
+                                width="200"
+                                style="
+                                  width: 400px;
+                                  height: 300px;
+                                  display: flex;
+                                  justify-content: center;
+                                  align-items: center;
+                                  padding: 10px;
+                                  box-sizing: border-box;
+                                  background-color: gray;
+                                  overflow: hidden;
+                                  max-width: 100%;
+                                  max-height: 100%;
+                                  object-fit: contain;
+                                  border-radius: 5px;
+                                "
+                              />
                             </template>
-                            <a :href="API.api + '/warehouse/' + item[header]" target="_blank">{{ item[header] }}</a>
+                            <a :href="API.api + '/warehouse/' + item[header]" target="_blank">{{
+                              item[header]
+                            }}</a>
                           </a-popover>
-                          <pre v-else-if="typeof item[header] === 'object'"><code>{{ item[header] }}</code></pre>
+                          <pre
+                            v-else-if="typeof item[header] === 'object'"
+                          ><code>{{ item[header] }}</code></pre>
                           <p v-else>{{ item[header] }}</p>
                         </td>
                       </tr>
@@ -661,18 +971,27 @@
                       <table>
                         <thead>
                           <tr>
-                            <th v-for="(header, index) in outlierHeaders.filter(
-                              (item) => item == 'file' || item == 'info'
-                            )" :key="index">
+                            <th
+                              v-for="(header, index) in outlierHeaders.filter(
+                                (item) => item == 'file' || item == 'info'
+                              )"
+                              :key="index"
+                            >
                               {{ header }}
                             </th>
                           </tr>
                         </thead>
                         <tbody>
-                          <tr v-for="(item, rowIndex) in outlierData.filter((item) => item.info)" :key="rowIndex">
-                            <td v-for="(header, colIndex) in outlierHeaders.filter(
-                              (item) => item == 'file' || item == 'info'
-                            )" :key="colIndex">
+                          <tr
+                            v-for="(item, rowIndex) in outlierData.filter((item) => item.info)"
+                            :key="rowIndex"
+                          >
+                            <td
+                              v-for="(header, colIndex) in outlierHeaders.filter(
+                                (item) => item == 'file' || item == 'info'
+                              )"
+                              :key="colIndex"
+                            >
                               {{ item[header] }}
                             </td>
                           </tr>
@@ -685,17 +1004,27 @@
             </a-spin>
           </a-flex>
         </a-card>
-        <a-alert v-else-if="outlierHeaders.length >= 0 && processStatus.outlier == 2" message="No outlier detected"
-          type="info" show-icon closable>
+        <a-alert
+          v-else-if="outlierHeaders.length >= 0 && processStatus.outlier == 2"
+          message="No outlier detected"
+          type="info"
+          show-icon
+          closable
+        >
           <template #description>
             <p>{{ outlierData.length + ' outliers detected in this dataset. ' }}</p>
           </template>
-        </a-alert>
+        </a-alert> -->
       </a-flex>
 
       <!-- Report Section -->
       <a-flex v-if="showReport" gap="middle" vertical>
-        <a-spin size="large" :indicator="indicator" :spinning="processStatus.result == 1" tip="Task is running...">
+        <a-spin
+          size="large"
+          :indicator="indicator"
+          :spinning="processStatus.result == 1"
+          tip="Task is running..."
+        >
           <br />
           <a-card hoverable>
             <a-flex gap="middle" vertical style="width: 100%">
@@ -716,12 +1045,24 @@
               <a-row justify="center" :gutter="40">
                 <a-col :span="12">
                   <a-tooltip title="Subset of the original output data">
-                    <a-input-number size="large" style="width: 85%" v-model:value="processInfo.result.downsample"
-                      addon-before="Downsample" addon-after="%" placeholder="100" min="1" max="100" /></a-tooltip>
+                    <a-input-number
+                      size="large"
+                      style="width: 85%"
+                      v-model:value="processInfo.result.downsample"
+                      addon-before="Downsample"
+                      addon-after="%"
+                      placeholder="100"
+                      min="1"
+                      max="100"
+                  /></a-tooltip>
                 </a-col>
                 <a-col :span="12">
-                  <a-checkbox style="font-size: 17px" size="large"
-                    v-model:checked="processInfo.result.minimal">Minimal</a-checkbox>
+                  <a-checkbox
+                    style="font-size: 17px"
+                    size="large"
+                    v-model:checked="processInfo.result.minimal"
+                    >Minimal</a-checkbox
+                  >
                 </a-col>
               </a-row>
             </a-flex>
@@ -729,34 +1070,147 @@
 
           <a-row justify="center" :gutter="40" style="margin-block: 2rem">
             <a-col :span="24">
-              <a-button size="large" :disabled="processStatus.result == 1 ||
-                (generateExternal && !processInfo.process.selectedExternal) ||
-                (!generateExternal && processInfo.process.selectedItems.length < 1)
-                " style="width: 100%" type="primary" @click="generateReport"><span class="bi bi-play"
-                  style="font-size: 18px; margin-inline: 5px"></span>
-                Start</a-button>
+              <a-button
+                size="large"
+                :disabled="
+                  processStatus.result == 1 ||
+                  (generateExternal && !processInfo.process.selectedExternal) ||
+                  (!generateExternal && processInfo.process.selectedItems.length < 1)
+                "
+                style="width: 100%"
+                type="primary"
+                @click="generateReport"
+                ><span class="bi bi-play" style="font-size: 18px; margin-inline: 5px"></span>
+                Start</a-button
+              >
             </a-col>
           </a-row>
         </a-spin>
       </a-flex>
     </a-card>
+
+    <a-modal
+      :open="showPreview || (showOutlier && outlierView)"
+      style="width: 100%; max-width: 1600px; justify-content: center; align-items: center"
+      wrap-class-name="full-modal"
+      @cancel="
+        () => {
+          processInfo.dataview.rawData = false
+          if (showOutlier) outlierView = false
+          else showPreview = false
+        }
+      "
+    >
+      <template #footer>
+        <a-button
+          key="submit"
+          type="default"
+          @click="
+            () => {
+              if (showOutlier) {
+                outlierView = true
+                handleSwitchEvent(true)
+              } else showPreview = true
+              dataVisualize = true
+            }
+          "
+          >Visualise</a-button
+        >
+        <a-button
+          key="submit"
+          type="primary"
+          @click="
+            () => {
+              if (showOutlier) {
+                downloadOutlier(processInfo.dataview.outlier)
+                outlierView = false
+              } else {
+                const cleanData = processInfo.dataview.data.map(({ ['key']: _, ...rest }) => rest);
+                downloadCsv(cleanData)
+                showPreview = false
+              }
+            }
+          "
+          >Download</a-button
+        >
+      </template>
+      <template #title>
+        <h3 style="text-align: center; margin-top: 10px">
+          {{ showOutlier ? 'Outliers' : 'Outputs' }}
+        </h3>
+      </template>
+      <div
+        v-if="
+          (showPreview && processInfo.dataview.loadingData) ||
+          (showOutlier && processInfo.dataview.loadingOutlier)
+        "
+        style="margin: 20px; align-items: center; justify-content: center"
+      >
+        <a-skeleton active />
+        <a-skeleton active />
+        <a-skeleton active />
+        <a-skeleton active />
+        <a-skeleton active />
+      </div>
+      <div v-else>
+        <DataViewer
+          :type="showPreview"
+          @download="handleDownloadEvent"
+          @switch="handleSwitchEvent"
+          @rerun="handleRerunEvent"
+        />
+      </div>
+    </a-modal>
+    <a-modal
+      :open="dataVisualize"
+      style="width: 100%; max-width: 1600px; justify-content: center; align-items: center"
+      wrap-class-name="full-modal"
+      destroyOnClose
+      @cancel="
+        () => {
+          dataVisualize = false
+        }
+      "
+    >
+      <template #footer>
+        <a-button
+          key="submit"
+          type="default"
+          @click="
+            () => {
+              if (showOutlier) outlierView = true
+              else showPreview = true
+              dataVisualize = false
+            }
+          "
+          >Raw Data</a-button
+        >
+        <a-button key="submit" type="primary" @click="downloadPlots">Download</a-button>
+      </template>
+      <template #title>
+        <h3 style="text-align: center; margin-top: 10px">Data Visualiser</h3>
+      </template>
+      <DataVisualiser :type="!showOutlier" />
+    </a-modal>
   </a-flex>
 </template>
 
 <script setup lang="ts">
 import { useStatus, useInfo, useApi } from '../stores/dataStore.js'
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { json2csv } from 'json-2-csv'
-import { DeleteOutlined, DownloadOutlined } from '@ant-design/icons-vue'
+import { DeleteOutlined } from '@ant-design/icons-vue'
 import type { SelectProps, CascaderProps } from 'ant-design-vue'
 import { notification } from 'ant-design-vue'
 import { h } from 'vue'
 import { SyncOutlined } from '@ant-design/icons-vue'
 import Papa from 'papaparse'
-
 import { Modal } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
+import DataViewer from '../components/DataViewer.vue'
+import DataVisualiser from '../components/DataVisualiser.vue'
+import { initialiseTask } from '../components/utils'
 
 const csvdata = ref([])
 const csvlog = ref([])
@@ -771,11 +1225,12 @@ const router = useRouter()
 const showReport = ref(false)
 const showOutlier = ref(false)
 const showPreview = ref(false)
+const dataVisualize = ref(false)
+
+const outlierView = ref(false)
 const uploadRef = ref(null)
 const generateExternal = ref(false)
 const tasksToUpdateOnPage = ref([])
-const rawData = ref(false)
-const contaminationNum = ref(5)
 const outlierLog = ref(false)
 const outlierError = ref('')
 const windowWidth = ref(window.innerWidth)
@@ -784,7 +1239,7 @@ const isWideWindow = computed(() => windowWidth.value >= 1024)
 let checkOutlierInterval = null
 
 const getPreview = ref(false)
-const getDownlaod = ref(false)
+const getDownload = ref(false)
 const getStop = ref(false)
 const getCancel = ref(false)
 const getResume = ref(false)
@@ -810,17 +1265,324 @@ const tip = computed(() => {
   }
 })
 
-// const colorCustom = (percent) => {
-//   if (percent >= 100) {
-//     return 'background-color: rgba(162, 165, 166,0.2)'
-//   } else if (percent == -1) {
-//     return 'background-color: rgba(250, 33, 25, 0.3)'
-//   } else if (percent == 0) {
-//     return 'background-color: rgba(162, 165, 166,0.3)'
-//   } else {
-//     return 'background-color: rgba(162, 165, 166,0.2)'
-//   }
+let htmlTemplate = ''
+
+const generateStatInfo = async () => {
+  const response = await fetch('/report.html')
+  htmlTemplate = await response.text()
+  if (!htmlTemplate) {
+    console.error('HTML template not loaded yet.')
+    return
+  }
+
+  const data = processInfo.value.dataview.data
+  // const data = [
+  //         { file: "file1.jpg", background_deviation: 10, background_grayness: 5, background_deviation1: 10, background_grayness1: 5,background_deviation2: 10, background_grayness2: 5,background_deviation3: 10, background_grayness3: 5, smile:false,group:'11'},
+  //         { file: "file2.jpg", background_deviation: 20, background_grayness: 10,background_deviation1: 10, background_grayness1: 5,background_deviation2: 10, background_grayness2: 5,background_deviation3: 10, background_grayness3: 5 ,smile:false,group:'121'},
+  //         { file: "file3.jpg", background_deviation: 30, background_grayness: 15 ,background_deviation1: 10, background_grayness1: 5,background_deviation2: 10, background_grayness2: 5,background_deviation3: 10, background_grayness3: 5,smile:true,group:'11'},
+  //         { file: "file1.jpg", background_deviation: 10, background_grayness: 5 ,background_deviation1: 10, background_grayness1: 5,background_deviation2: 10, background_grayness2: 5,background_deviation3: 10, background_grayness3: 5,smile:false,group:'131'},
+  //         { file: "file2.jpg", background_deviation: 20, background_grayness: 10 ,background_deviation1: 10, background_grayness1: 5,background_deviation2: 10, background_grayness2: 5,background_deviation3: 10, background_grayness3: 5,smile:false,group:'121'},
+  //         { file: "file3.jpg", background_deviation: 30, background_grayness: 15 ,background_deviation1: 10, background_grayness1: 5,background_deviation2: 10, background_grayness2: 5,background_deviation3: 10, background_grayness3: 5,smile:true,group:'11'}
+  // ];
+
+  // Convert `statData` to a JSON string and inject it
+  const jsonData = JSON.stringify(data, null, 2) // Pretty formatted JSON
+  const title = 'Data Report'
+  htmlTemplate = htmlTemplate.replace('data=tempData', 'data=' + jsonData)
+
+  htmlTemplate = htmlTemplate.replace(/{{title}}/g, title)
+
+  const blob = new Blob([htmlTemplate], { type: 'text/html' })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  // link.href = "/test.html"; // Path from public/ folder
+  link.download = 'data_report.html'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(link.href)
+  const pdfWindow = window.open()
+  pdfWindow.document.write(htmlTemplate)
+  pdfWindow.document.close()
+}
+
+const handleDownloadEvent = (selectedRow) => {
+  // Handle the data received from the child component
+  console.log('Downloaded data:', selectedRow)
+  if (showPreview.value) {
+    const filteredData = selectedRow
+      .filter((index) => index >= 0 && index < processInfo.value.dataview.data.length)
+      .map((index) => processInfo.value.dataview.data[index])
+
+    downloadCsv(filteredData)
+  } else {
+    const filteredOutlier = selectedRow
+      .filter((index) => index >= 0 && index < processInfo.value.dataview.outlier.length)
+      .map((index) => processInfo.value.dataview.outlier[index])
+
+    downloadOutlier(filteredOutlier)
+  }
+}
+
+const handleRerunEvent = async (selectedRow) => {
+  // selectedRow is a list of indices, e.g., [2,3,4]
+  const selectedData = selectedRow
+    .filter((index) => index >= 0 && index < processInfo.value.dataview.data.length)
+    .map((index) => processInfo.value.dataview.data[index].file)
+  console.log('Rerun data:', selectedData)
+
+  const url = `${API.api}/scan/local/${processInfo.value.process.selectedItems[0].collection}?modality=${processInfo.value.process.selectedItems[0].mode}`
+  try {
+    const requestBody = {
+      input: selectedData
+    }
+    const data = await API.authFetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    })
+    if (data) {
+      showPreview.value = false
+      console.log('Rerun data:', data)
+      notification.success({
+        message: 'Success',
+        description: 'Task rerun successfully.'
+      })
+      processInfo.value.process.selectedItems[0].status = 1
+      // await updateTaskCollection(processInfo.value.process.selectedItems)
+      const checkTaskStatus1 = setInterval(async () => {
+        // console.log('check task status...')
+        tasksToUpdateOnPage.value = processInfo.value.process.taskStatus.filter(
+          (item) => item.status == 1
+        )
+        if (tasksToUpdateOnPage.value.length > 0) {
+          const controller = new AbortController()
+          const signal = controller.signal
+          try {
+            // Race between the getTaskETA function and a timeout of 5 seconds
+            await Promise.race([
+              getTaskETA(tasksToUpdateOnPage.value, signal),
+              new Promise((_, reject) =>
+                setTimeout(() => {
+                  controller.abort() // Abort the request after 5 seconds
+                  reject(new Error('Request timed out'))
+                }, 5000)
+              )
+            ])
+          } catch (error) {
+            console.error(error.message) // Logs "Request timed out" if the request takes longer than 5 seconds
+          }
+          // await getTaskETA(tasksToUpdateOnPage.value)
+        } else {
+          clearInterval(checkTaskStatus1)
+          processInfo.value.process.timer = -1
+          processInfo.value.process.timeRecord = 0
+        }
+      }, 5000)
+      // const taskRerun = processInfo.value.process.selectedItems
+      // const controller = new AbortController()
+      // const signal = controller.signal
+      // getTaskETA(taskRerun, signal)
+    }
+  } catch (error) {
+    console.error('Error:', error)
+    notification.error({
+      message: 'Error',
+      description: 'Failed to rerun the task.'
+    })
+  }
+}
+
+const downloadPlots = () => {
+  if (showPreview.value) {
+    // genearateDataPlots()
+    generateStatInfo()
+  } else {
+    // genearateOutlierPlots()
+    generateOutlierStatInfo()
+  }
+}
+
+// const genearateDataPlots = () => {
+//   const allColumns =
+//     processInfo.value.dataview.dataMenus?.filter(
+//       (item) => item.column !== 'index' && item.column !== 'file'
+//     ) || []
+//   // console.log(allColumns)
+//   const imageUrls = []
+
+//   allColumns.forEach(async (column, index) => {
+//     const columnKey = column.column
+//     const columnData = processInfo.value.dataview.data.map((item) => item[columnKey])
+//     // console.log(columnData)
+//     // Inject graphDiv to page and make it invisible
+//     const graphDiv1 = document.createElement('div')
+//     graphDiv1.id = 'myDiv' + index
+//     document.body.appendChild(graphDiv1)
+
+//     // Draw plot to graphDiv
+//     if (column.type == 'number') {
+//       const graphDiv2 = document.createElement('div')
+//       graphDiv2.id = 'myDiv_' + index
+//       document.body.appendChild(graphDiv2)
+//       await drawHist(columnData, columnKey, index)
+//       await drawBox(columnData, columnKey, '_' + index)
+//       const dataUrl2 = await Plotly.toImage(graphDiv2, { format: 'svg', width: 800, height: 600 })
+
+//       imageUrls.push(dataUrl2)
+//       document.body.removeChild(graphDiv2)
+//     } else {
+//       await drawBar(columnData, columnKey, index)
+//     }
+
+//     // Convert graphDiv to dataUrl
+//     const dataUrl1 = await Plotly.toImage(graphDiv1, { format: 'svg', width: 800, height: 600 })
+
+//     imageUrls.push(dataUrl1)
+
+//     // Remove the graphDiv from the document
+//     document.body.removeChild(graphDiv1)
+
+//     // If all images are generated, create the HTML page
+//     if (index == allColumns.length - 1) {
+//       const htmlContent = `
+//       <html>
+//         <head>
+//           <title>Generated Data Images</title>
+//         </head>
+//         <body>
+
+//           <h1>Data Images</h1>
+//           ${imageUrls.map((url, i) => `<img src="${url}" alt="Image ${i + 1}" />`).join('')}
+//         </body>
+//       </html>
+//       `
+//       const blob = new Blob([htmlContent], { type: 'text/html' })
+//       const link = document.createElement('a')
+//       link.href = URL.createObjectURL(blob)
+//       link.download = 'generated_data_images.html'
+//       document.body.appendChild(link)
+//       link.click()
+//       document.body.removeChild(link)
+
+//       // Open new tab & Convert HTML to PDF
+//       const pdfWindow = window.open()
+//       pdfWindow.document.write(htmlContent)
+//       pdfWindow.document.close()
+//       pdfWindow.print()
+//     }
+//   })
 // }
+
+const dotSize = ref(12)
+const generateOutlierStatInfo = async () => {
+  const response = await fetch('/outlier.html')
+  htmlTemplate = await response.text()
+  if (!htmlTemplate) {
+    console.error('HTML template not loaded yet.')
+    return
+  }
+
+  const outlier = processInfo.value.dataview.outlier
+  const restData = processInfo.value.dataview.restData
+
+  // Convert `statData` to a JSON string and inject it
+  const jsonData1 = JSON.stringify(outlier, null, 2) // Pretty formatted JSON
+  const jsonData2 = JSON.stringify(restData, null, 2) // Pretty formatted JSON
+  const jsonData4 = JSON.stringify(processInfo.value.dataview.outlierHeatmap, null, 2) // Pretty formatted JSON
+  const jsonData3 = JSON.stringify(processInfo.value.dataview.threshold, null, 2) // Pretty formatted JSON
+  const title = 'Outlier Report'
+  htmlTemplate = htmlTemplate.replace('outlier=tempOutlier', 'outlier=' + jsonData1)
+  htmlTemplate = htmlTemplate.replace('normal=tempRestData', 'normal=' + jsonData2)
+  htmlTemplate = htmlTemplate.replace('threshold=5', 'threshold=' + jsonData3)
+  htmlTemplate = htmlTemplate.replace('outlierHeatmap=[]', 'outlierHeatmap=' + jsonData4)
+  htmlTemplate = htmlTemplate.replace(/{{title}}/g, title)
+
+  const blob = new Blob([htmlTemplate], { type: 'text/html' })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  // link.href = "/test.html"; // Path from public/ folder
+  link.download = 'outlier_report.html'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(link.href)
+  const pdfWindow = window.open()
+  pdfWindow.document.write(htmlTemplate)
+  pdfWindow.document.close()
+}
+// const genearateOutlierPlots = () => {
+//   const allColumns = processInfo.value.dataview.outlierMenus.filter(
+//     (item) => item.column !== 'index' && item.column !== 'file' && item.column !== 'data_reduced'
+//   )
+//   console.log(allColumns)
+//   const imageUrls = []
+
+//   allColumns.forEach(async (column, index) => {
+//     // Inject graphDiv to page and make it invisible
+//     const graphDiv = document.createElement('div')
+//     graphDiv.id = 'myDiv' + index
+//     document.body.appendChild(graphDiv)
+//     // Draw plot to graphDiv
+//     await drawOutlierHist(processInfo, column.column, index)
+//     // Convert graphDiv to dataUrl
+//     const dataUrl = await Plotly.toImage(graphDiv, { format: 'svg', width: 800, height: 600 })
+//     // console.log('Generated image URL:', dataUrl)
+//     imageUrls.push(dataUrl)
+//     // Remove the graphDiv from the document
+//     document.body.removeChild(graphDiv)
+
+//     // If all histograms are generated, draw the scatter plot
+//     if (index === allColumns.length - 1) {
+//       // console.log('drea------------')
+//       const scatterDiv = document.createElement('div')
+//       scatterDiv.id = 'myDiv' + 'scatter'
+//       document.body.appendChild(scatterDiv)
+
+//       await drawScatter(processInfo, dotSize, 'scatter')
+//       const scatterUrl = await Plotly.toImage(scatterDiv, {
+//         format: 'png',
+//         width: 800,
+//         height: 600
+//       })
+//       // console.log('Generated scatter image URL:', scatterUrl)
+//       imageUrls.push(scatterUrl)
+//       document.body.removeChild(scatterDiv)
+//     }
+
+//     // If all images are generated, create the HTML page
+//     if (imageUrls.length === allColumns.length + 1) {
+//       const htmlContent = `
+//       <html>
+//         <head>
+//           <title>Generated Outlier Images</title>
+//         </head>
+//         <body>
+//           <h1>Outlier Images</h1>
+//           ${imageUrls.map((url, i) => `<img src="${url}" alt="Image ${i + 1}" />`).join('')}
+//         </body>
+//       </html>
+//       `
+//       const blob = new Blob([htmlContent], { type: 'text/html' })
+//       const link = document.createElement('a')
+//       link.href = URL.createObjectURL(blob)
+//       link.download = 'generated_outlier_images.html'
+//       document.body.appendChild(link)
+//       link.click()
+//       document.body.removeChild(link)
+
+//       // Open new tab & Convert HTML to PDF
+//       const pdfWindow = window.open()
+//       pdfWindow.document.write(htmlContent)
+//       pdfWindow.document.close()
+//       pdfWindow.print()
+//     }
+//   })
+// }
+
+const handleSwitchEvent = (rawData) => {
+  checkOutlier(processInfo.value.process.selectedItems[0].collection, rawData, false)
+}
 
 const detectorSelect = ref<SelectProps['options']>([
   {
@@ -1363,62 +2125,87 @@ const columnSelect = ref<CascaderProps['options']>([
 ])
 
 const openNotificationWithIcon = (type: string, error = '') => {
-  if (type === 'stop') {
-    notification['success']({
-      message: 'Stop Task',
-      description: 'Stop current running task successful.',
-      placement: 'top',
-      duration: 2
-    })
-  } else if (type === 'cancel') {
-    notification['success']({
-      message: 'Cancel Task',
-      description: 'Cancel current running task successful.',
-      placement: 'top',
-      duration: 2
-    })
-  } else if (type === 'resume') {
-    notification['success']({
-      message: 'Resume Task',
-      description: 'Resume selected task successful.',
-      placement: 'top',
-      duration: 2
-    })
-  } else if (type === 'delete') {
-    notification['success']({
-      message: 'Delete Item',
-      description: 'Delete selected item successful.',
-      placement: 'top',
-      duration: 1
-    })
-  } else if (type === 'error') {
-    notification['error']({
-      message: 'Action Failed',
-      description: 'Current operation failed. Please check your input and try again.',
-      placement: 'top',
-      duration: 3
-    })
-  } else if (type == 'csverror') {
-    notification['error']({
-      message: 'CSV Syntax Error',
-      description: 'Invalid delimiter found. Only commas are allowed.',
-      placement: 'top',
-      duration: 3
-    })
-  } else if (type == 'reportError') {
-    notification['error']({
-      message: 'Failed to generate report',
-      description: 'Invalid/Empty data source',
-      placement: 'top',
-      duration: 3
-    })
-  } else if (type === 'taskError') {
-    notification['error']({
-      message: 'Task Failed',
-      description: error || 'Task failed. Please check your input and try again.',
-      placement: 'top',
-      duration: 5
-    })
+  switch (type) {
+    case 'stop':
+      notification['success']({
+        message: 'Task Stopped',
+        description: 'The current running task has been stopped successfully.',
+        placement: 'top',
+        duration: 2
+      })
+      break
+
+    case 'cancel':
+      notification['success']({
+        message: 'Task Canceled',
+        description: 'The current running task has been canceled successfully.',
+        placement: 'top',
+        duration: 2
+      })
+      break
+
+    case 'resume':
+      notification['success']({
+        message: 'Task Resumed',
+        description: 'The selected task has been resumed successfully.',
+        placement: 'top',
+        duration: 2
+      })
+      break
+
+    case 'delete':
+      notification['success']({
+        message: 'Item Deleted',
+        description: 'The selected item has been deleted successfully.',
+        placement: 'top',
+        duration: 1
+      })
+      break
+
+    case 'error':
+      notification['error']({
+        message: 'Action Failed',
+        description: 'The operation failed. Please check your input and try again.',
+        placement: 'top',
+        duration: 3
+      })
+      break
+
+    case 'csverror':
+      notification['error']({
+        message: 'CSV Syntax Error',
+        description: 'Invalid delimiter found. Only commas are allowed.',
+        placement: 'top',
+        duration: 3
+      })
+      break
+
+    case 'reportError':
+      notification['error']({
+        message: 'Report Generation Failed',
+        description: 'The data source is invalid or empty.',
+        placement: 'top',
+        duration: 3
+      })
+      break
+
+    case 'taskError':
+      notification['error']({
+        message: 'Task Failed',
+        description: error || 'The task failed. Please check your input and try again.',
+        placement: 'top',
+        duration: 5
+      })
+      break
+
+    default:
+      notification['info']({
+        message: 'Notification',
+        description: 'An unknown notification type was triggered.',
+        placement: 'top',
+        duration: 2
+      })
+      break
   }
 }
 
@@ -1428,18 +2215,8 @@ const selectTask = (e, item) => {
   csvdata.value = []
   csvlog.value = []
   showPreview.value = false
-  getDownlaod.value = false
-  // const selectedItem = {
-  //   tid: item.tid,
-  //   id: item?.collection,
-  //   modality: item.mode,
-  //   engine: item.engine,
-  //   num: item.num,
-  //   total: item.total,
-  //   input: item.input,
-  //   elaspe: item.elapse,
-  //   status: item.status
-  // }
+  getDownload.value = false
+
   if (e.target.checked) {
     processInfo.value.process.selectedItems.push(item)
     processInfo.value.outlier.columns = []
@@ -1451,15 +2228,6 @@ const selectTask = (e, item) => {
   }
 }
 
-// const scrollToBottom = () => {
-//   // Scroll to the bottom of the page
-//   setTimeout(() => {
-//     const bottomAnchor = document.getElementById('bottom-anchor')
-//     if (bottomAnchor) {
-//       bottomAnchor.scrollIntoView({ behavior: 'smooth' })
-//     }
-//   }, 100)
-// }
 const scrollToBottom = () => {
   // Scroll to the bottom of the current page
   setTimeout(() => {
@@ -1687,7 +2455,7 @@ const getReport = () => {
   csvdata.value = []
   csvlog.value = []
   showPreview.value = false
-  getDownlaod.value = false
+  getDownload.value = false
   scrollToBottom()
   if (processInfo.value.process.selectedExternal) {
     generateExternal.value = true
@@ -1718,6 +2486,7 @@ const checkModeTab = () => {
 
 //add selected item to generating csv
 const getCsv = async (type) => {
+  processInfo.value.dataview.loadingData = true
   showOutlier.value = false
   showReport.value = false
   let limit = ''
@@ -1727,7 +2496,7 @@ const getCsv = async (type) => {
     scrollToBottom()
     // limit = '&limit=50'
   } else {
-    getDownlaod.value = true
+    getDownload.value = true
   }
   for (const item of processInfo.value.process.selectedItems) {
     const url = `${API.api}/scan/${item.collection}/profiles?skip=0${limit}`
@@ -1738,7 +2507,10 @@ const getCsv = async (type) => {
       })
       if (data) {
         if (type == 'preview') {
-          // console.log(data)
+          console.log(data)
+          processInfo.value.process.result = data
+          processInfo.value.dataview.loadingData = false
+          // console.log(processInfo.value.process.result)
           csvdata.value = data
             .filter((item) =>
               item.log ? Object.values(item).length > 2 : Object.values(item).length > 1
@@ -1755,7 +2527,7 @@ const getCsv = async (type) => {
           }
           scrollToBottom()
         } else {
-          getDownlaod.value = false
+          getDownload.value = false
           downloadCsv(data)
         }
       }
@@ -1841,23 +2613,25 @@ const getOutlier = async () => {
   showPreview.value = false
   csvdata.value = []
   csvlog.value = []
-  getDownlaod.value = false
+  getDownload.value = false
   scrollToBottom()
   await checkOutlierLog(processInfo.value.process.selectedItems[0].collection)
 }
 
 const checkOutlierLog = async (id) => {
+  processInfo.value.dataview.loadingOutlier = true
   processStatus.updateStatus('outlier', 1)
   const url = `${API.api}/task/logs/outlier`
   try {
-    const data = await API.authFetch(url, {
+    const data1 = await API.authFetch(url, {
       method: 'GET',
       headers: { accept: 'application/json' }
     })
-    if (data) {
-      const outliers = data.filter((item) => item?.collection == id)
-      if (outliers.length > 0) {
-        const outlier = outliers[0]
+    if (data1) {
+      const outliersLog = data1.filter((item) => item?.collection == id)
+      if (outliersLog.length > 0) {
+        const outlier = outliersLog[0]
+        processInfo.value.outlier.contamination = outlier.options.contamination * 100
         if (outlier.status == 2) {
           // console.log(outlier)
           const url2 = `${API.api}/scan/${id}/outliers`
@@ -1866,16 +2640,34 @@ const checkOutlierLog = async (id) => {
               method: 'GET',
               headers: { accept: 'application/json' }
             })
-            outlierData.value = data
+            processInfo.value.dataview.loadingOutlier = false
             outlierLog.value = true
             processStatus.updateStatus('outlier', 0)
             if (data.length > 0) {
-              processStatus.updateStatus('outlier', 2)
-              const allHeaders = new Set() // Use a Set to avoid duplicates
-              data.forEach((row) => {
-                Object.keys(row).forEach((key) => allHeaders.add(key))
-              })
-              outlierHeaders.value = Array.from(allHeaders) // Convert Set to Array for headers
+              const outlierHeatmap = data[0].Z
+              const threshold = data[1].Z
+              const outliers = data
+                .filter((item) => item.label === 1)
+                .map(({ label, Z, ...rest }) => rest)
+              const inliers = data
+                .filter((item) => item.label === 0)
+                .map(({ label, Z, ...rest }) => rest)
+              outlierData.value = outliers
+              if (outliers.length > 0) {
+                outlierView.value = true
+                processInfo.value.dataview.outlier = outliers
+                processInfo.value.dataview.restData = inliers
+                processInfo.value.dataview.outlierHeatmap = outlierHeatmap
+                processInfo.value.dataview.threshold = threshold
+                processStatus.updateStatus('outlier', 2)
+                const allHeaders = new Set() // Use a Set to avoid duplicates
+                data.forEach((row) => {
+                  Object.keys(row).forEach((key) => allHeaders.add(key))
+                })
+                outlierHeaders.value = Array.from(allHeaders) // Convert Set to Array for headers
+              }
+            } else {
+              outlierData.value = []
             }
           } catch (error) {
             console.error('retrive outlier error', error)
@@ -2027,11 +2819,16 @@ const getTaskETA = async (tasksToUpdate, signal) => {
         console.log('Status not exist')
         // If the task status can not be found, finish too fast
         console.error('Error getting task status:', error)
-        await checkTaskLogAfterError(item)
+        //avoid request finish too fast, while the update on database not finished
+        setTimeout(async () => {
+          await checkTaskLogAfterError(item)
+        }, 2000)
       }
     } else {
       console.log('Ray not exist')
-      await checkTaskLogAfterError(item)
+      setTimeout(async () => {
+        await checkTaskLogAfterError(item)
+      }, 2000)
     }
   }
 }
@@ -2126,6 +2923,7 @@ const updateTaskCollection = async (tasksToUpdate) => {
         if (data) {
           item.collection = data?.collection
           item.modified = data.modified
+          item.status = data.status
           // console.log(item.modified)
           item.elapse = data.elapse
         }
@@ -2187,11 +2985,11 @@ const startOutlierTask = async () => {
     } else {
       const options = item[0]
       console.log(options)
-      if (options.includes('Face')) {
-        if (options.includes('BQAT')) {
+      if (options.includes('face')) {
+        if (options.includes('bqat')) {
           optionColumns.push('confidence', 'ipd', 'yaw_degree', 'pitch_degree', 'roll_degree')
         }
-        if (options.includes('OFIQ')) {
+        if (options.includes('ofiq')) {
           optionColumns.push(
             'quality',
             'unified_quality_score_scalar',
@@ -2224,7 +3022,7 @@ const startOutlierTask = async () => {
             'no_head_coverings_scalar'
           )
         }
-        if (options.includes('BIQT')) {
+        if (options.includes('biqt')) {
           optionColumns.push(
             'background_deviation',
             'background_grayness',
@@ -2275,7 +3073,8 @@ const startOutlierTask = async () => {
             'opencv_right_eye_y'
           )
         }
-      } else if (options == 'Fingerprint') {
+        // console.log(optionColumns)
+      } else if (options == 'fingerprint') {
         optionColumns.push(
           'NFIQ2',
           'UniformImage',
@@ -2283,7 +3082,7 @@ const startOutlierTask = async () => {
           'SufficientFingerprintForeground',
           'EdgeStd'
         )
-      } else if (options == 'Iris') {
+      } else if (options == 'iris') {
         optionColumns.push(
           'iso_overall_quality',
           'iso_sharpness',
@@ -2292,6 +3091,7 @@ const startOutlierTask = async () => {
           'iso_iris_pupil_concentricity'
         )
       }
+      console.log(optionColumns)
     }
   })
 
@@ -2306,7 +3106,7 @@ const startOutlierTask = async () => {
       body: JSON.stringify({
         detector: processInfo.value.outlier.detector,
         columns: optionColumns,
-        contamination: contaminationNum.value / 100
+        contamination: processInfo.value.outlier.contamination / 100
       })
     })
     if (temp) {
@@ -2327,7 +3127,24 @@ const startOutlierTask = async () => {
   }
 }
 
+function flattenArrayOfObjects(dataArray) {
+  return dataArray.map((obj) => flattenObject(obj))
+}
+
+function flattenObject(obj, parentKey = '', result = {}) {
+  for (const [key, value] of Object.entries(obj)) {
+    const newKey = parentKey ? `${parentKey}.${key}` : key
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      flattenObject(value, newKey, result)
+    } else {
+      result[newKey] = value
+    }
+  }
+  return result
+}
+
 const checkOutlier = async (id, withData = false, download = false) => {
+  processInfo.value.dataview.loadingOutlier = true
   processStatus.updateStatus('outlier', 1)
   processInfo.value.outlier.iconLoading = true
   const url2 = `${API.api}/scan/${id}/outliers?with_data=${withData}`
@@ -2338,19 +3155,28 @@ const checkOutlier = async (id, withData = false, download = false) => {
     })
     if (data) {
       processStatus.updateStatus('outlier', 2)
+      console.log('outlier data:', data)
       // scrollToBottom()
+      const outliers = data.filter((item) => item.label === 1).map(({ label, Z, ...rest }) => rest)
+      const inliers = data.filter((item) => item.label === 0).map(({ label, Z, ...rest }) => rest)
+      const outlierHeatmap = data[0].Z
+      const threshold = data[1].Z
       processInfo.value.outlier.id = ''
       processInfo.value.outlier.iconLoading = false
+      processInfo.value.dataview.loadingOutlier = false
+      outlierData.value = outliers
+      processInfo.value.dataview.outlier = flattenArrayOfObjects(outliers)
+      processInfo.value.dataview.restData = flattenArrayOfObjects(inliers)
+      processInfo.value.dataview.outlierHeatmap = outlierHeatmap
+      processInfo.value.dataview.threshold = threshold
       if (download) {
-        downloadOutlier(data)
+        downloadOutlier(outliers)
       } else {
         clearInterval(checkOutlierInterval)
-        if (data != null) {
-          outlierData.value = data
-        }
-        if (data.length > 0) {
+        if (outliers.length > 0) {
+          outlierView.value = true
           const allHeaders = new Set() // Use a Set to avoid duplicates
-          data.forEach((row) => {
+          outliers.forEach((row) => {
             Object.keys(row).forEach((key) => allHeaders.add(key))
           })
           outlierHeaders.value = Array.from(allHeaders) // Convert Set to Array for headers
@@ -2383,8 +3209,7 @@ const getOutlierStatus = async (tid) => {
         method: 'GET',
         headers: { accept: 'application/json' }
       })
-      if (data) {
-        console.log(data[0])
+      if (data?.length > 0) {
         if (data[0]?.status == 3) {
           processInfo.value.outlier.iconLoading = false
           outlierError.value = data[0].logs[0]
@@ -2392,6 +3217,11 @@ const getOutlierStatus = async (tid) => {
         } else {
           checkOutlier(processInfo.value.process.selectedItems[0].collection, false, false)
         }
+      } else {
+        outlierLog.value = true
+        outlierData.value = []
+        processInfo.value.outlier.iconLoading = false
+        processStatus.updateStatus('outlier', 2)
       }
     } catch (error) {
       console.error(error)
@@ -2568,69 +3398,68 @@ const generateReport = async () => {
   checkModeTab()
 }
 
-const handleGoToImage = async (item: string) => {
-  window.open(API.api + '/warehouse/' + item, '_blank')
-}
+// const handleGoToImage = async (item: string) => {
+//   window.open(API.api + '/warehouse/' + item, '_blank')
+// }
 
 // watch(
-  //   () => API.testTimer,
-  //   async (value) => {
-    //     if (value % (60 * 60 * 5) === 0 && value !== 0) {
-      //       console.log('5 hours timeout----Stop task')
-      //       // Find the task with status == 1 (active task)
-      //       const activeTask = processInfo.value.process.taskStatus.find((item) => item.status === 1)
-      
-      //       if (activeTask) {
-        //         const tid = activeTask.tid
-        //         await stopTask(tid)
-        //         setTimeout(
-          //           async () => {
-            //             console.log('3 mins timeout----Resume task')
-            //             await resumeTask(tid)
-            //           },
-            //           1000 * 60 * 3
-            //         )
-            //       } else {
-              //         console.warn('No active task found to stop.')
-              //       }
-              //     }
-              //   }
-              // )
+//   () => API.testTimer,
+//   async (value) => {
+//     if (value % (60 * 60 * 5) === 0 && value !== 0) {
+//       console.log('5 hours timeout----Stop task')
+//       // Find the task with status == 1 (active task)
+//       const activeTask = processInfo.value.process.taskStatus.find((item) => item.status === 1)
 
-function getQualityMetricSpec(processInfo: object) {
-  let taskInfo = processInfo.process.selectedItems[0]
+//       if (activeTask) {
+//         const tid = activeTask.tid
+//         await stopTask(tid)
+//         setTimeout(
+//           async () => {
+//             console.log('3 mins timeout----Resume task')
+//             await resumeTask(tid)
+//           },
+//           1000 * 60 * 3
+//         )
+//       } else {
+//         console.warn('No active task found to stop.')
+//       }
+//     }
+//   }
+// )
+
+function getQualityMetricSpec() {
+  let taskInfo = processInfo.value.process.selectedItems[0]
   switch (taskInfo.mode) {
     case 'face':
       switch (taskInfo.engine) {
         case 'bqat':
-          return processInfo.outlier.description['face-bqat']
+          return processInfo.value.outlier.description['face-bqat']
         case 'ofiq':
-          return processInfo.outlier.description['face-ofiq']
+          return processInfo.value.outlier.description['face-ofiq']
         case 'biqt':
-          return processInfo.outlier.description['face-biqt']
+          return processInfo.value.outlier.description['face-biqt']
         case 'fusion':
           let code = taskInfo.options?.fusion
           let spec = {}
           if (code & 4) {
-            spec = { ...spec, ...processInfo.outlier.description['face-bqat'] }
+            spec = { ...spec, ...processInfo.value.outlier.description['face-bqat'] }
           }
           if (code & 2) {
-            spec = { ...spec, ...processInfo.outlier.description['face-ofiq'] }
+            spec = { ...spec, ...processInfo.value.outlier.description['face-ofiq'] }
           }
           if (code & 1) {
-            spec = { ...spec, ...processInfo.outlier.description['face-biqt'] }
+            spec = { ...spec, ...processInfo.value.outlier.description['face-biqt'] }
           }
           return spec
         default:
           return {}
       }
     case 'fingerprint':
-      return processInfo.outlier.description['fingerprint']
+      return processInfo.value.outlier.description['fingerprint']
     case 'iris':
-      return processInfo.outlier.description['iris']
+      return processInfo.value.outlier.description['iris']
   }
 }
-  
 
 function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1)
@@ -2650,6 +3479,7 @@ function convertSecondsToHMS(seconds: number) {
   const secs = seconds % 60
   return `${String(hours).padStart(2, '0')}h${String(minutes).padStart(2, '0')}m${String(secs).padStart(2, '0')}s`
 }
+
 function formatDate(date) {
   const formattedTimestamp = date.slice(0, 23) + 'Z'
   const formated = date
@@ -2657,9 +3487,78 @@ function formatDate(date) {
     : new Date().toLocaleString(undefined, { hour12: false })
   return formated
 }
+
+const getInfo = async (item) => {
+  spinInfo.value = true
+  const url = `${API.api}/data/archive/${item}/modality`
+  try {
+    const data2 = await API.authFetch(url, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json', accept: 'application/json' },
+      mode: 'cors'
+    })
+    const { total, sample, ...rest } = data2
+    const dataInfo = {
+      Num: total,
+      Modal: rest
+    }
+    // console.log(dataInfo)
+    spinInfo.value = false
+    const newFolderStatus = {
+      [item]: {
+        empty: dataInfo.Num > 0 ? false : true,
+        num: dataInfo.Num,
+        modal: Object.keys(dataInfo.Modal),
+        duplicate: 'false'
+      }
+    }
+
+    processInfo.value.preprocess.folderInfo = {
+      ...processInfo.value.preprocess.folderInfo,
+      ...newFolderStatus
+    }
+    console.log(processInfo.value.preprocess.folderInfo)
+    openReportInfo(item)
+  } catch (error) {
+    spinInfo.value = false
+    console.log(error.message)
+    openNotificationWithIcon('error', error.message)
+    console.error('Error getting folder info:', error)
+  }
+}
+
+const openReportInfo = (item) => {
+  const { duplicate, empty, ...data } = processInfo.value.preprocess.folderInfo[item]
+  Modal.info({
+    title: 'Folder Info',
+    content: h('div', {}, [h('p', 'Modal: ' + JSON.stringify(data.modal))]),
+    closable: true,
+    centered: true
+  })
+}
+
+const spinInfo = ref(false)
 </script>
 
 <style>
+.full-modal {
+  .ant-modal {
+    top: 0vh;
+    padding-top: 2vh;
+    padding-bottom: 2vh;
+    margin: 5;
+  }
+  .ant-modal-content {
+    display: flex;
+    flex-direction: column;
+    height: calc(96vh);
+  }
+  .ant-modal-body {
+    flex: 1;
+    /* align-content: center; */
+  }
+}
+
 .popupClass {
   width: 50%;
   max-width: 1000px;

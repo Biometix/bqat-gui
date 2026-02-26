@@ -19,33 +19,35 @@
           <a-card hoverable>
             <h2><span class="bi bi-folder2-open"> </span> Select Input Folder:</h2>
             <br />
+
             <h3>Import folder to the backend:</h3>
             <a-collapse v-model:activeKey="activeKey">
               <a-collapse-panel key="1" header="Import zip">
-                <a-spin :spinning="showUploadSpinner">
-                  <a-flex justify="flex-start" horizontal>
-                    <a-upload-dragger
-                      style="width: 100%; min-width: 400px"
-                      name="file"
-                      :showUploadList="false"
-                      accept=".zip,.tar,.gz"
-                      :action="API.api + '/dataset'"
-                      :withCredentials="true"
-                      @change="uploadZip"
-                      @drop="dropZip"
-                      >Select zip file (Click or Drag here)</a-upload-dragger
-                    >
-                  </a-flex>
-                </a-spin>
+                <!-- Force rerender the uploader for theme update -->
+                <div v-if="showUploader">
+                  <Dashboard
+                    id="localUploader"
+                    :uppy="uppy1"
+                    :props="{
+                      theme: API.currentTheme,
+                      showProgressDetails: true,
+                      proudlyDisplayPoweredByUppy: false,
+                      note: 'Any files, folder or Zip file Less than 2 GB.',
+                      width: '100%',
+                      height: '350px',
+                      doneButtonHandler: doneButtonHandler
+                    }"
+                  />
+                </div>
               </a-collapse-panel>
             </a-collapse>
             <a-divider />
             <h3>Select folder from the backend:</h3>
             <a-flex horizontal justify="start" align="center">
+              <!-- @select="handleFiles" -->
               <a-tree-select
                 size="large"
                 v-model:value="scanInfo.scan.folderPath"
-                @select="handleFiles"
                 show-search
                 style="width: 80%; margin-right: 10px"
                 :height="233"
@@ -153,12 +155,12 @@
             </h3>
           </a-card>
 
-          <a-card hoverable>
-            <!-- Preprocess Image Section -->
+          <!-- <a-card hoverable>
+
             <a-collapse :bordered="false" style="padding: 5px">
-              <!-- upload section -->
+
               <a-collapse-panel header="Preprocess" class="customStyle1">
-                <!-- Resize Section -->
+
                 <a-spin
                   size="large"
                   :indicator="indicator"
@@ -207,7 +209,6 @@
                     </a-flex>
                   </a-card>
 
-                  <!-- Output Format Section -->
                   <a-card hoverable>
                     <a-flex vertical gap="middle">
                       <h2 style="margin-block: 10px">
@@ -256,7 +257,7 @@
                     </a-flex>
                   </a-card>
                 </a-spin>
-                <!-- Submit Section -->
+
                 <a-row justify="center" gutter="40" style="margin-block: 0rem; margin-top: 1rem">
                   <a-col :span="12">
                     <a-button
@@ -299,7 +300,7 @@
                   >
                 </a-row>
 
-                <!-- Result section -->
+
                 <a-alert
                   v-if="outputPath"
                   message="Preporcess Finished"
@@ -316,7 +317,7 @@
               </a-collapse-panel>
               <p></p>
             </a-collapse>
-          </a-card>
+          </a-card> -->
 
           <!-- Modality section  -->
           <a-card hoverable>
@@ -395,46 +396,36 @@
           <!-- Upload Section -->
           <a-card hoverable>
             <a-flex vertical gap="middle">
-              <h2><span class="bi bi-cloud-arrow-up"></span> Upload Files:</h2>
-              <h3>The files uploaded won't be saved.</h3>
+              <h2><span class="bi bi-cloud-arrow-up"></span> Select Files:</h2>
+              <h3>The files selected won't be saved to server.</h3>
               <a-collapse v-model:activeKey="scanInfo.scan.activeKeys" :bordered="false">
                 <!-- upload section -->
                 <a-collapse-panel
                   :key="3"
-                  :header="'Uploaded: ' + scanInfo.scan.fileList.length"
+                  :header="'Selected: ' + scanInfo.scan.fileList.length"
                   class="customStyle1"
                 >
-                  <!-- Note: :max-count="scanInfo.scan.limit" not work for directory -->
-                  <a-upload-dragger
-                    name="file"
-                    style="margin-top: 20px"
-                    directory
-                    @change="handleChange"
-                    @drop="handleDrop"
-                    :before-upload="beforeUpload"
-                    :disabled="scanInfo.scan.disableUploader || scanInfo.scan.inputType.length == 0"
-                    :showUploadList="false"
-                  >
-                    <p class="ant-upload-drag-icon">
-                      <inbox-outlined></inbox-outlined>
-                    </p>
-                    <p class="ant-upload-text">
-                      Click here, or drag a folder here to upload the samples/ Maximum of a 1000
-                      files.
-                    </p>
-                    <p class="ant-upload-hint">
-                      Please do not leave the current page when uploading the directory.
-                    </p>
-                  </a-upload-dragger>
-
-                  <a-progress
-                    style="width: 100%; margin-top: 2rem"
-                    :percent="scanInfo.scan.percent"
-                  />
+                  <div v-if="showUploader">
+                    <Dashboard
+                      id="remoteUploader"
+                      :uppy="uppy2"
+                      :props="{
+                        fileManagerSelectionType: 'both',
+                        singleFileFullScreen: false,
+                        hideUploadButton: true,
+                        theme: API.currentTheme,
+                        showProgressDetails: true,
+                        proudlyDisplayPoweredByUppy: false,
+                        note: 'Select less than 1000 files each time: [' + validFormat + ']',
+                        width: '100%',
+                        height: '400px'
+                      }"
+                    />
+                  </div>
                 </a-collapse-panel>
                 <p></p>
               </a-collapse>
-              <a-flex gap="middle" vertical>
+              <!-- <a-flex gap="middle" vertical>
                 <h3>File Types:</h3>
                 <a-select
                   v-model:value="scanInfo.scan.inputType"
@@ -461,21 +452,21 @@
                   <li>To match filenames which end with "left": [*left]</li>
                   <li>To match filenames which contain "sample": [*sample*]</li>
                 </ul>
-              </a-flex>
+              </a-flex> -->
             </a-flex>
           </a-card>
 
-          <a-card hoverable>
+          <!-- <a-card hoverable>
             <h3>
-              Input file count:
+              File to submit count:
               <span style="font-weight: bold">{{ scanInfo.scan.validFileList.length }}</span>
             </h3>
-          </a-card>
+          </a-card> -->
 
           <!-- Preview Section -->
-          <a-card hoverable>
+          <!-- <a-card hoverable>
             <a-flex vertical gap="middle">
-              <h2><span class="bi bi-card-image"></span> Uploaded Files:</h2>
+              <h2><span class="bi bi-card-image"></span> Selected Files:</h2>
               <h3>
                 File types:
                 {{
@@ -513,7 +504,7 @@
                     >
                       <template #cover>
                         <a-tooltip :title="item.name.toUpperCase()">
-                          <div v-if="item.name.includes('.wsq') || item.name.includes('.jp2')">
+                          <div v-if="item.name.endsWith('.wsq') || item.name.endsWith('.jp2')">
                             <img
                               v-if="
                                 scanInfo.scan.converted &&
@@ -533,14 +524,14 @@
                           <div v-else-if="item.type.includes('audio')" class="smallCard">
                             <vue-sound
                               :show-download="false"
-                              :file="fileUrl(item.originFileObj)"
+                              :file="fileUrl(item.data)"
                               :alt="'🔉' + item.name"
                               :style="previewStyle"
                             />
                           </div>
                           <div v-else>
                             <img
-                              :src="fileUrl(item.originFileObj)"
+                              :src="fileUrl(item.data)"
                               :alt="'🖼️' + item.name"
                               :style="previewStyle"
                             />
@@ -560,7 +551,7 @@
                     >
                       <template #cover>
                         <a-tooltip :title="item1.name">
-                          <div v-if="item1.name.includes('.wsq') || item1.name.includes('.jp2')">
+                          <div v-if="item1.name.endsWith('.wsq') || item1.name.endsWith('.jp2')">
                             <img
                               v-if="
                                 scanInfo.scan.converted &&
@@ -582,14 +573,14 @@
                           >
                             <vue-sound
                               :show-download="false"
-                              :file="fileUrl(item1.originFileObj)"
+                              :file="fileUrl(item1.data)"
                               :alt="'🔉' + item1.name"
                               :style="previewStyle"
                             />
                           </div>
                           <div v-else>
                             <img
-                              :src="fileUrl(item1.originFileObj)"
+                              :src="fileUrl(item1.data)"
                               :alt="'🖼️' + item1.name"
                               :style="previewStyle"
                             />
@@ -599,11 +590,10 @@
                     </a-card>
                   </div>
                 </a-collapse-panel>
-                <!-- the build-in style of this component affect customise style. have to add one more tag to mkae it looks right -->
                 <p></p>
               </a-collapse>
             </a-flex>
-          </a-card>
+          </a-card> -->
 
           <!-- Modality Section  -->
           <a-card hoverable>
@@ -674,95 +664,34 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, h } from 'vue'
 import { useStatus, useInfo, useApi } from '../stores/dataStore.js'
-import { InboxOutlined } from '@ant-design/icons-vue'
-import { message, Cascader } from 'ant-design-vue'
-import type { UploadChangeParam, UploadProps } from 'ant-design-vue'
+import { message } from 'ant-design-vue'
 import { onBeforeRouteLeave, useRouter } from 'vue-router'
-import type { CascaderProps } from 'ant-design-vue'
-import { h } from 'vue'
 import {
   SyncOutlined,
   CheckCircleTwoTone,
   CloseCircleTwoTone,
   ReloadOutlined
 } from '@ant-design/icons-vue'
-import mime from 'mime'
 import { notification } from 'ant-design-vue'
-import { VueSound } from 'vue-sound'
 import { getFusionCode, parseFusionCode } from '../components/utils.ts'
 
-const openNotificationWithIcon = (type: string) => {
-  if (type === 'stop') {
-    notification['success']({
-      message: 'Stop Task',
-      description: 'Stop current running task successful.',
-      placement: 'top'
-    })
-  } else if (type === 'delete') {
-    notification['success']({
-      message: 'Delete Item',
-      description: 'Delete selected item successful.',
-      placement: 'top'
-    })
-  } else if (type === 'error') {
-    notification['error']({
-      message: 'Action Failed',
-      description: 'Current operation failed. Please check your input and try again.',
-      placement: 'top'
-    })
-  } else if (type === 'upload') {
-    notification['success']({
-      message: 'Upload Zip Folder To Server',
-      description: 'Upload zip folder to server successful.',
-      placement: 'top'
-    })
-  } else if (type === 'input') {
-    notification['success']({
-      message: 'Reload Input Directory',
-      description: 'Reload input directory successful.',
-      placement: 'top'
-    })
-  } else if (type === 'notZip') {
-    notification['error']({
-      message: 'Dropped File Is Not Zip File',
-      description: 'Please select Zip file.',
-      placement: 'top'
-    })
-  }
-}
-let checkInternalStatus = null
+import { Dashboard } from '@uppy/vue'
+import Uppy from '@uppy/core'
+import XHRUpload from '@uppy/xhr-upload'
+import GoldenRetriever from '@uppy/golden-retriever'
+import Compressor from '@uppy/compressor'
+import JSZip from 'jszip'
 
-const activeKey = ref(['0'])
-
-const preprocessStatus = useStatus()
-//0:not started / 1:ongoing / 2:finished /-1:failed
-const preprocessInfo = ref(useInfo())
-
-const outputPath = ref('')
-
-const eta = ref(-1)
+import '@uppy/core/dist/style.css'
+import '@uppy/dashboard/dist/style.css'
+import '@uppy/image-editor/dist/style.css'
+import '@uppy/informer/dist/style.min.css'
 
 const scanStatus = useStatus()
 const API = useApi()
-
-const scanInfo = ref(useInfo())
-const router = useRouter()
-const showError = ref(false)
-const errorMessage = ref('')
-const submittedScan = ref(false)
-
-const indicator = h(SyncOutlined, {
-  style: {
-    fontSize: '50px',
-    fontWeight: 'bold',
-    marginLeft: '-25px',
-    marginTop: '-40px'
-  },
-  spin: true
-})
-
+const Server_URL = API.api + '/data/archive'
 const typeOptions = [
   {
     label: 'PNG',
@@ -793,6 +722,376 @@ const typeOptions = [
     value: 'WAV'
   }
 ]
+
+const uppy1 = new Uppy({
+  // debug: true,
+  autoProceed: false,
+  restrictions: {
+    maxFileSize: 2 * 1024 * 1024 * 1024 // 2GB limit
+    // allowedFileTypes: ['.zip', '.tar', '.gz']
+  }
+})
+  .use(XHRUpload, {
+    method: 'POST',
+    endpoint: Server_URL,
+    // chunkSize: 10 * 1024 * 1024,
+    fieldName: 'files',
+    withCredentials: true,
+    limit: 6
+  })
+  // .use(ThumbnailGenerator)
+  .use(Compressor)
+  .use(GoldenRetriever)
+  .on('complete', async (result) => {
+    uploadRemote.value = false
+    if (result.successful.length > 0) {
+      if (result.failed.length > 0) {
+        console.log('failed files:', result.failed)
+        const errorMessage =
+          (result.failed[0]?.response as XMLHttpRequest)?.responseText || 'Upload failed'
+
+        openNotificationWithIcon('error', errorMessage)
+      } else {
+        console.log('successful files:', result.successful)
+        openNotificationWithIcon('upload')
+        doneButtonHandler()
+        await checkInputFolder()
+        const item = String(result.successful[0]?.response?.body['Archive Uploaded'] || '')
+        const itemPath = 'data/' + item.replace(/\.[^/.]+$/, '')
+        console.log(item, API.inputFolder, API.inputTree, itemPath)
+        // preprocessInfo.value.preprocess.folderPath = itemPath
+        scanInfo.value.scan.folderPath = itemPath
+      }
+    } else {
+      console.log('failed files:', result.failed)
+      const errorMessage =
+        (result.failed[0]?.response as XMLHttpRequest)?.responseText || 'Upload failed'
+
+      openNotificationWithIcon('error', errorMessage)
+    }
+  })
+
+const prepareFiles = async (filesID) => {
+  console.log('prepareFiles', filesID)
+  const files = uppy1.getFiles()
+  // console.log('prepareFiles', files)
+  const hasNonZipFile = files.some((file) => !file.name.endsWith('.zip'))
+  if (hasNonZipFile) {
+    await zipFiles(files)
+    return Promise.reject()
+  } else {
+    return Promise.resolve()
+  }
+}
+
+uppy1.addPreProcessor(prepareFiles)
+
+function zipFiles(files) {
+  const nonZip = files.filter((file) => !file.name.endsWith('.zip'))
+  const zipFiles = files.filter((file) => file.name.endsWith('.zip'))
+  const zip = new JSZip()
+  const zipFileName = nonZip[0].meta.relativePath
+    ? nonZip[0].meta.relativePath.split('/')[0] + '.zip'
+    : nonZip[0].name.split('.')[0] + '_folder.zip'
+  uppy1.info('zipping into folder', 'info')
+
+  for (const file of nonZip) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const data = e.target.result
+      const layer = file.meta.relativePath ? file.meta.relativePath.split(file.name)[0] : '/'
+      zip.folder(layer).file(file.name, data)
+      if (file === nonZip[nonZip.length - 1]) {
+        zip.generateAsync({ type: 'blob' }).then((zipBlob) => {
+          const zipFile = new File([zipBlob], zipFileName, {
+            type: 'application/zip',
+            lastModified: Date.now()
+          })
+          console.log(zipFile)
+          uppy1.clear()
+          uppy1.addFile({
+            name: zipFileName,
+            type: 'application/zip',
+            data: zipFile
+          })
+
+          zipFiles.forEach((file) => {
+            uppy1.addFile({
+              name: file.name,
+              type: file.type,
+              data: file.data
+            })
+          })
+          uppy1.info('uploading zipped file', 'info')
+          uppy1.upload()
+        })
+      }
+    }
+    reader.readAsArrayBuffer(file.data)
+  }
+}
+
+const validFormat = ['.jpg', '.jpeg', '.png', '.bmp', '.wsq', '.jp2', '.wav', '.webp']
+const uppy2 = new Uppy({
+  // debug: true,
+  autoProceed: true,
+  restrictions: {
+    allowedFileTypes: validFormat
+  },
+  onBeforeFileAdded: (currentFile, files) => {
+    const extension = currentFile.name.split('.').pop().toLowerCase()
+    if (extension === 'jp2' || extension === 'wsq') {
+      console.log('File converting...:', currentFile)
+      // Prevent Uppy from adding the original file
+      setTimeout(async () => {
+        console.log('Processing:', currentFile.name)
+        const res = await convertToBase64(currentFile.data)
+        const base64 = await convertImageBackend(res)
+        const newFile = base64ToBlob(base64)
+
+        // Create a new file object
+        const convertedFile = {
+          name: currentFile.name.replace(/\.\w+$/, '(converted).jpeg'),
+          type: newFile.type,
+          data: newFile
+        }
+
+        // Add the converted file to Uppy
+        uppy2.addFile({
+          ...convertedFile,
+          preview: URL.createObjectURL(newFile) // Set preview
+        })
+
+        console.log('Converted file added:', convertedFile.name)
+      }, 0) // Run asynchronously after preventing the file
+
+      return false // Block the original file
+    } else {
+      scanInfo.value.scan.fileList = [...scanInfo.value.scan.fileList, currentFile]
+    }
+    return true // Allow other files
+  }
+})
+  .use(Compressor)
+  .on('complete', async (result) => {
+    uploadRemote.value = true
+    if (result.successful.length > 0) {
+      if (result.failed.length > 0) {
+        console.log('failed files:', result.failed)
+        const errorMessage =
+          (result.failed[0]?.response as XMLHttpRequest)?.responseText || 'Upload failed'
+
+        openNotificationWithIcon('error', errorMessage)
+      } else {
+        console.log('successful files:', result.successful)
+        scanStatus.updateStatus('scan', 2)
+        scanInfo.value.scan.validFileList = scanInfo.value.scan.fileList
+      }
+    } else {
+      console.log('failed files:', result.failed)
+      const errorMessage =
+        (result.failed[0]?.response as XMLHttpRequest)?.responseText || 'Upload failed'
+
+      openNotificationWithIcon('error', errorMessage)
+    }
+  })
+  .on('cancel-all', async () => {
+    scanInfo.value.scan.fileList = []
+    scanInfo.value.scan.validFileList = []
+  })
+
+// const MAX_ZIP_SIZE = 1 * 1024 * 1024 * 1024
+// async function zipFiles(files) {
+//   const zip = new JSZip()
+
+//   for (const file of files) {
+//     zip.file(file.name, file)
+//   }
+
+//   // Generate ZIP file
+//   const blob = await zip.generateAsync({ type: 'blob' })
+//   return blob
+// }
+
+function base64ToBlob(base64, mimeType = 'image/jpeg') {
+  const byteCharacters = atob(base64.split(',')[1]) // Decode Base64 (ignore header)
+  const byteNumbers = new Array(byteCharacters.length)
+
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i)
+  }
+
+  const byteArray = new Uint8Array(byteNumbers)
+  return new Blob([byteArray], { type: mimeType })
+}
+
+const convertImageBackend = async (file) => {
+  const requestBody = {
+    file: file,
+    format: 'jpeg'
+  }
+  const url = API.api + '/convert'
+  try {
+    const data = await API.authFetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    })
+    if (data) {
+      scanInfo.value.scan.converted.push({ name: name, data: data })
+      return data
+    }
+  } catch (error) {
+    console.error('Failed to convert Image')
+    return file
+  }
+}
+
+//Get whether it is scolling to the bottom of the file list
+const handleScroll = (e) => {
+  const container = e.target
+  if (container.scrollHeight - container.scrollTop === container.clientHeight && !loading.value) {
+    loadMoreFiles()
+    // console.log('loading------')
+  }
+}
+
+//To lazy load more files when scrolling to the bottom of the file list
+const loadMoreFiles = () => {
+  if (loading.value) return // Prevent multiple requests
+  loading.value = true
+  setTimeout(() => {
+    loadedFiles.value += 100
+    loading.value = false
+  }, 100)
+}
+
+const doneButtonHandler = () => {
+  activeKey.value = ['0']
+  //Keep previous record
+  uppy1.clear()
+}
+
+const showUploader = ref(true)
+watch(
+  () => API.currentTheme,
+  (newTheme) => {
+    console.log('Theme changed to:', newTheme)
+    showUploader.value = false
+    setTimeout(() => {
+      showUploader.value = true
+      // initializeUppy()
+    }, 300)
+  }
+)
+
+const openNotificationWithIcon = (type: string, error = '') => {
+  if (type === 'stop') {
+    notification['success']({
+      message: 'Task Stopped',
+      description: 'The current running task has been stopped successfully.',
+      placement: 'top'
+    })
+  } else if (type === 'delete') {
+    notification['success']({
+      message: 'Item Deleted',
+      description: 'The selected item has been deleted successfully.',
+      placement: 'top'
+    })
+  } else if (type === 'error') {
+    notification['error']({
+      message: 'Action Failed',
+      description: error,
+      placement: 'top'
+    })
+  } else if (type === 'upload') {
+    notification['success']({
+      message: 'Zip Folder Uploaded',
+      description: 'The zip folder has been uploaded to the server successfully.',
+      placement: 'top'
+    })
+  } else if (type === 'input') {
+    notification['success']({
+      message: 'Input Directory Reloaded',
+      description: 'The input directory has been reloaded successfully.',
+      placement: 'top'
+    })
+  } else if (type === 'notZip') {
+    notification['error']({
+      message: 'Invalid File Type',
+      description: 'The dropped file is not a zip file. Please select a valid zip file.',
+      placement: 'top'
+    })
+  } else if (type == 'loadSuccess') {
+    notification['success']({
+      message: 'loaded Successful',
+      description: 'Selected document(s) have been loaded successfully.',
+      placement: 'top',
+      duration: 3
+    })
+  }
+}
+
+let checkInternalStatus = null
+
+const activeKey = ref(['0'])
+
+const preprocessStatus = useStatus()
+//0:not started / 1:ongoing / 2:finished /-1:failed
+const preprocessInfo = ref(useInfo())
+
+const outputPath = ref('')
+
+const eta = ref(-1)
+
+const scanInfo = ref(useInfo())
+const router = useRouter()
+const showError = ref(false)
+const errorMessage = ref('')
+const submittedScan = ref(false)
+
+const indicator = h(SyncOutlined, {
+  style: {
+    fontSize: '50px',
+    fontWeight: 'bold',
+    marginLeft: '-25px',
+    marginTop: '-40px'
+  },
+  spin: true
+})
+
+// const typeOptions = [
+//   {
+//     label: 'PNG',
+//     value: 'PNG'
+//   },
+//   {
+//     label: 'JPG',
+//     value: 'JPG'
+//   },
+//   {
+//     label: 'JPEG',
+//     value: 'JPEG'
+//   },
+//   {
+//     label: 'JP2',
+//     value: 'JP2'
+//   },
+//   {
+//     label: 'WSQ',
+//     value: 'WSQ'
+//   },
+//   {
+//     label: 'BMP',
+//     value: 'BMP'
+//   },
+//   {
+//     label: 'WAV',
+//     value: 'WAV'
+//   }
+// ]
 
 const mimeTypeToFormat = {
   'image/png': 'PNG',
@@ -855,75 +1154,10 @@ const modalityOptions = computed(() => {
     ]
   }
 })
-// const cascadeModalityOptions = ref<CascaderProps['options']>([
-//   {
-//     disabled: false,
-//     value: 'face-bqat',
-//     label: 'Face (BQAT)'
-//   },
-//   {
-//     disabled: false,
-//     value: 'face-ofiq',
-//     label: 'Face (OFIQ)'
-//   },
-//   {
-//     disabled: false,
-//     value: 'face-biqt',
-//     label: 'Face (BIQT)'
-//   },
-//   {
-//     disabled: true,
-//     value: 'fingerprint',
-//     label: 'Fingerprint'
-//   },
-//   {
-//     disabled: true,
-//     value: 'iris',
-//     label: 'Iris'
-//   },
-//   {
-//     disabled: true,
-//     value: 'speech',
-//     label: 'Voice'
-//   }
-// ])
-
-// const updateModality = (selectedValues) => {
-//   const faceType = selectedValues.filter((item) => item.includes('face')).length > 0 ? true : false
-//   // console.log(selectedValues, faceType)
-//   if (faceType) {
-//     console.log('select face engines')
-//     cascadeModalityOptions.value.filter((item) =>
-//       item.value.toString().includes('face') ? (item.disabled = false) : (item.disabled = true)
-//     )
-//   } else {
-//     console.log('select other engines')
-//     cascadeModalityOptions.value.filter((item) => (item.disabled = false))
-//     if (selectedValues.length > 0) {
-//       console.log(cascadeModalityOptions.value)
-//       cascadeModalityOptions.value.map((item) =>
-//         item.value !== selectedValues[0] ? (item.disabled = true) : (item.disabled = false)
-//       )
-//     }
-//   }
-//   scanInfo.value.scan.modality = selectedValues
-// }
 
 const handleGoToFolder = async (item) => {
   const linkToFolder = API.api + '/warehouse/' + item + '/'
   window.open(linkToFolder, '_blank')
-  // const linkToFolder = `${API.api}/warehouse/${item}/`
-  // const response = await API.authFetch(linkToFolder, {
-  //   method: 'GET',
-  // })
-
-  // const resultHTML = await response.text()
-  //     // Create a new Blob with the HTML content
-  //     const blob = new Blob([resultHTML], { type: 'text/html' });
-  //   const blobUrl = URL.createObjectURL(blob); // Create a URL for the Blob
-
-  //   // Open the Blob URL in a new tab
-  //   window.open(blobUrl, '_blank');
 }
 
 //Note: do not claim two value in one const
@@ -937,9 +1171,9 @@ const previewStyle = ref(
   })
 )
 
-const handleFiles = (event) => {
-  preprocessInfo.value.preprocess.folderPath = event
-}
+// const handleFiles = (event) => {
+//   preprocessInfo.value.preprocess.folderPath = event
+// }
 
 const loadInputFolder = ref(true)
 const requestFolder = ref(false)
@@ -1007,6 +1241,7 @@ const debouncedSearch = (event) => {
     }
   }, debounceDelay)
 }
+
 watch(
   () => scanInfo.value.scan.inputType,
   async () => {
@@ -1022,40 +1257,14 @@ watch(
   }
 )
 
-// watch(
-//   () => API.inputFolder,
-//   (newVal) => {
-//     if (newVal.length > 0 && scanInfo.value.scan.folderPath) {
-//       const item = newVal.filter((item) => item.dir == scanInfo.value.scan.folderPath)[0]
-//       const count = item ? item.count : 0
-//       // console.log(count)
-//       scanInfo.value.scan.length = count
-//       preprocessInfo.value.preprocess.length = count
-//     }
-//   }
-// )
-
 watch(
   () => scanInfo.value.scan.folderPath,
   async (newVal, oldVal) => {
     if (!newVal) {
       scanInfo.value.scan.length = 0
-      preprocessInfo.value.preprocess.length = 0
+      // preprocessInfo.value.preprocess.length = 0
     } else {
       await refreshMetadata()
-    }
-  }
-)
-
-watch(
-  () => scanInfo.value.scan.validFileList,
-  (newVal) => {
-    if (newVal.length > 0) {
-      scanInfo.value.scan.disableUploader = true
-      scanInfo.value.scan.activeKeys = [4]
-    } else {
-      scanInfo.value.scan.disableUploader = false
-      scanInfo.value.scan.activeKeys = [3]
     }
   }
 )
@@ -1074,40 +1283,94 @@ const refreshMetadata = async () => {
   }
 }
 
-watch(
-  () => scanStatus.scan,
-  (val) => {
-    if (val == 2 && uploadRemote.value) {
-      message.success(`All scan files uploaded successfully.`)
-      scanInfo.value.scan.percent = 100
-    }
-  }
-)
-const count = ref(0)
-const drop = ref(false)
-const handleChange = async (info: UploadChangeParam) => {
-  if (
-    !drop.value &&
-    info.file.name == info.fileList[info.fileList.length - 1].name &&
-    info.fileList.length == scanInfo.value.scan.validFileList.length
-  ) {
-    scanInfo.value.scan.percent == 100
-    console.log('Select finished')
-    scanStatus.updateStatus('scan', 2)
-  }
-}
-const handleDrop = (e) => {
-  console.log(e)
-  drop.value = true
-  setTimeout(() => {
-    if (scanInfo.value.scan.fileList.length == scanInfo.value.scan.validFileList.length) {
-      scanInfo.value.scan.percent == 100
-      console.log('Drop finished')
-      scanStatus.updateStatus('scan', 2)
-    }
-    drop.value = false
-  }, 10000)
-}
+// watch(
+//   () => scanStatus.scan,
+//   (val) => {
+//     if (val == 2 && uploadRemote.value) {
+//       message.success(`All scan files uploaded successfully.`)
+//       scanInfo.value.scan.percent = 100
+//     }
+//   }
+// )
+// const count = ref(0)
+// const drop = ref(false)
+// const handleChange = async (info: UploadChangeParam) => {
+//   if (
+//     !drop.value &&
+//     info.file.name == info.fileList[info.fileList.length - 1].name &&
+//     info.fileList.length == scanInfo.value.scan.validFileList.length
+//   ) {
+//     scanInfo.value.scan.percent == 100
+//     console.log('Select finished')
+//     scanStatus.updateStatus('scan', 2)
+//   }
+// }
+// const handleDrop = (e) => {
+//   console.log(e)
+//   drop.value = true
+//   setTimeout(() => {
+//     if (scanInfo.value.scan.fileList.length == scanInfo.value.scan.validFileList.length) {
+//       scanInfo.value.scan.percent == 100
+//       console.log('Drop finished')
+//       scanStatus.updateStatus('scan', 2)
+//     }
+//     drop.value = false
+//   }, 10000)
+// }
+//get type & convertImageBackend
+// const beforeUpload: UploadProps['beforeUpload'] = async (file) => {
+//   uploadRemote.value = true
+//   if (count.value == 0) {
+//     // console.log('scanning on going-------')
+//     scanStatus.updateStatus('scan', 1)
+//   }
+//   count.value = count.value + 1
+//   if (scanInfo.value.scan.percent < 95 && !typeInvalid.value) {
+//     scanInfo.value.scan.percent += 1
+//   }
+
+//   let type = file.type
+//     ? file.type
+//     : mime.getType(file.name)
+//       ? mime.getType(file.name)
+//       : file.name.split('.')[1]
+
+//   const format = mimeTypeToFormat[type]
+
+//   if (format) {
+//     let newfile = {
+//       name: file.name,
+//       type: type,
+//       originFileObj: file
+//     }
+//     const index = scanInfo.value.scan.fileList.findIndex((item) => item.name === file.name)
+
+//     // Check if the file name already exists in the list
+//     if (index === -1) {
+//       // If the file name doesn't exist, add it directly
+//       scanInfo.value.scan.fileList = [...(scanInfo.value.scan.fileList || []), newfile]
+//     } else {
+//       // If the file name exists, append the counter to make it unique
+//       newfile.name = file.name.split('.')[0] + '(1).' + format.toLowerCase()
+//       scanInfo.value.scan.fileList = [...(scanInfo.value.scan.fileList || []), newfile]
+//     }
+//     if (format == 'WSQ' || format == 'JP2') {
+//       setTimeout(() => {
+//         scanInfo.value.scan.percent = 100
+//         scanStatus.updateStatus('scan', 2)
+//         scanInfo.value.scan.validFileList = scanInfo.value.scan.fileList
+//       }, 5000)
+//       const res = await convertToBase64(file)
+//       convertImageBackend(res, file.name)
+//     } else {
+//       scanInfo.value.scan.validFileList = scanInfo.value.scan.fileList
+//     }
+//   } else {
+//     typeInvalid.value = true
+//     message.error(`${file.name} is not a valid file type`)
+//   }
+//   return false
+// }
 
 const validatePatterns = (name, pattern) => {
   if (pattern.startsWith('*') && pattern.endsWith('*')) {
@@ -1138,61 +1401,6 @@ const validateFile = (file) => {
   return true
 }
 
-//get type & convertImageBackend
-const beforeUpload: UploadProps['beforeUpload'] = async (file) => {
-  uploadRemote.value = true
-  if (count.value == 0) {
-    // console.log('scanning on going-------')
-    scanStatus.updateStatus('scan', 1)
-  }
-  count.value = count.value + 1
-  if (scanInfo.value.scan.percent < 95 && !typeInvalid.value) {
-    scanInfo.value.scan.percent += 1
-  }
-
-  let type = file.type
-    ? file.type
-    : mime.getType(file.name)
-      ? mime.getType(file.name)
-      : file.name.split('.')[1]
-
-  const format = mimeTypeToFormat[type]
-
-  if (format) {
-    let newfile = {
-      name: file.name,
-      type: type,
-      originFileObj: file
-    }
-    const index = scanInfo.value.scan.fileList.findIndex((item) => item.name === file.name)
-
-    // Check if the file name already exists in the list
-    if (index === -1) {
-      // If the file name doesn't exist, add it directly
-      scanInfo.value.scan.fileList = [...(scanInfo.value.scan.fileList || []), newfile]
-    } else {
-      // If the file name exists, append the counter to make it unique
-      newfile.name = file.name.split('.')[0] + '(1).' + format.toLowerCase()
-      scanInfo.value.scan.fileList = [...(scanInfo.value.scan.fileList || []), newfile]
-    }
-    if (format == 'WSQ' || format == 'JP2') {
-      setTimeout(() => {
-        scanInfo.value.scan.percent = 100
-        scanStatus.updateStatus('scan', 2)
-        scanInfo.value.scan.validFileList = scanInfo.value.scan.fileList
-      }, 5000)
-      const res = await convertToBase64(file)
-      convertImageBackend(res, file.name)
-    } else {
-      scanInfo.value.scan.validFileList = scanInfo.value.scan.fileList
-    }
-  } else {
-    typeInvalid.value = true
-    message.error(`${file.name} is not a valid file type`)
-  }
-  return false
-}
-
 const convertToBase64 = async (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -1217,60 +1425,20 @@ const convertToBase64 = async (file) => {
   })
 }
 
-const convertImageBackend = async (file, name) => {
-  const requestBody = {
-    file: file,
-    format: 'webp'
-  }
-  const url = API.api + '/convert'
-  try {
-    const data = await API.authFetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestBody)
-    })
-    if (data) {
-      scanInfo.value.scan.converted.push({ name: name, data: data })
-    }
-  } catch (error) {
-    console.error('Failed to convert Image')
-  }
-}
-
-//Get whether it is scolling to the bottom of the file list
-const handleScroll = (e) => {
-  const container = e.target
-  if (container.scrollHeight - container.scrollTop === container.clientHeight && !loading.value) {
-    loadMoreFiles()
-    // console.log('loading------')
-  }
-}
-
-//To lazy load more files when scrolling to the bottom of the file list
-const loadMoreFiles = () => {
-  if (loading.value) return // Prevent multiple requests
-  loading.value = true
-  setTimeout(() => {
-    loadedFiles.value += 100
-    loading.value = false
-  }, 100)
-}
-
 //Clear curent page, set status back to unscan, clear fileList
 const clearScan = () => {
   const temp = scanInfo.value.scan.tabKey
   const model = scanInfo.value.scan.modality
   const engine = scanInfo.value.scan.engine
   scanInfo.value.initialiseScan()
+  uppy1.cancelAll()
+  uppy2.cancelAll()
   scanInfo.value.scan.tabKey = temp
   scanInfo.value.scan.modality = model
   scanInfo.value.scan.engine = engine
   scanStatus.updateStatus('scan', 0)
-  loadedFiles.value = 100
   submittedScan.value = false
-  drop.value = false
+
   console.log('Clear Scan')
 }
 
@@ -1299,7 +1467,7 @@ const submitScan1 = async () => {
   submittedScan.value = true
   const formData = new FormData()
   scanInfo.value.scan.validFileList.forEach((file) => {
-    formData.append(`files`, file.originFileObj, file.name)
+    formData.append(`files`, file.data, file.name)
   })
   let modality = scanInfo.value.scan.modality
   let engine =
@@ -1462,12 +1630,14 @@ const submitScan2 = async () => {
   }
 }
 
-//prevent leave page when uploading files
+// //prevent leave page when uploading files
 onBeforeRouteLeave((to, from, next) => {
   if (scanStatus.scan == 1) {
     message.warning(`files are uploading, please do not leave current page.`)
     next(false)
   } else {
+    scanInfo.value.scan.fileList = []
+    scanInfo.value.scan.validFileList = []
     next()
   }
 })
@@ -1479,219 +1649,153 @@ onMounted(async () => {
 })
 
 // Preprocess
-const updateSelect = (item) => {
-  preprocessInfo.value.preprocess.selectedRadio = item
-}
+// const updateSelect = (item) => {
+//   preprocessInfo.value.preprocess.selectedRadio = item
+// }
 
-const submittedStop = ref(false)
-const clearTask = async () => {
-  submittedStop.value = true
-  // const url = `${API.api}/task/cancel/${preprocessInfo.value.preprocess.id}?type=preprocessing`
-  const url = `${API.api}/task/cancel`
-  try {
-    const data = await API.authFetch(url, {
-      method: 'POST',
-      headers: { accept: 'application/json' }
-    })
-      clearInterval(checkInternalStatus)
-      preprocessInfo.value.preprocess.progress = false
-      preprocessStatus.updateStatus('preprocess', 2)
-      preprocessInfo.value.preprocess.id = ''
-      eta.value = -1
-      submittedStop.value = false
-      openNotificationWithIcon('stop')
-    
-  } catch (error) {
-    openNotificationWithIcon('error')
-    console.error('Error cancel task:', error)
-  }
-}
-const dropZip = (e) => {
-  e.preventDefault() // Prevent default behavior (e.g., opening the file)
-  // Access the dragged files
-  const file = e.dataTransfer.files[0]
-
-  if (file.name.includes('.zip') || file.type == 'application/zip') {
-  } else {
-    openNotificationWithIcon('notZip')
-  }
-}
-
-const showUploadSpinner = ref(false)
-const uploadZip = async (e) => {
-  uploadRemote.value = false
-  if (e.file.status == 'uploading') {
-    showUploadSpinner.value = true
-  }
-  if (e.file.status !== 'uploading') {
-    const res = await e.file.response
-    showUploadSpinner.value = false
-    if (res.detail) {
-      console.log(res)
-      openNotificationWithIcon('error')
-    }
-    if (res.message) {
-      openNotificationWithIcon('upload')
-      const startIndex = res.message.indexOf('data/')
-      preprocessInfo.value.preprocess.folderPath = res.message.substring(startIndex)
-      scanInfo.value.scan.folderPath = res.message.substring(startIndex)
-      await checkInputFolder()
-    }
-  }
-}
+// const submittedStop = ref(false)
+// const clearTask = async () => {
+//   submittedStop.value = true
+//   // const url = `${API.api}/task/cancel/${preprocessInfo.value.preprocess.id}?type=preprocessing`
+//   const url = `${API.api}/task/cancel`
+//   try {
+//     const data = await API.authFetch(url, {
+//       method: 'POST',
+//       headers: { accept: 'application/json' }
+//     })
+//     clearInterval(checkInternalStatus)
+//     preprocessInfo.value.preprocess.progress = false
+//     preprocessStatus.updateStatus('preprocess', 2)
+//     preprocessInfo.value.preprocess.id = ''
+//     eta.value = -1
+//     submittedStop.value = false
+//     openNotificationWithIcon('stop')
+//   } catch (error) {
+//     openNotificationWithIcon('error')
+//     console.error('Error cancel task:', error)
+//   }
+// }
 
 //submit the preprocess task, update status & taskIDs, start a new process timer, redirect to process page
-const submitPreprocess = async () => {
-  const requestBody = {
-    source: preprocessInfo.value.preprocess.folderPath,
-    options: {
-      convert: preprocessInfo.value.preprocess.type
-        ? preprocessInfo.value.preprocess.type.toLowerCase()
-        : null,
-      mode: preprocessInfo.value.preprocess.color
-        ? preprocessInfo.value.preprocess.color.toLowerCase()
-        : null,
-      scale:
-        preprocessInfo.value.preprocess.selectedRadio == 'ratio'
-          ? preprocessInfo.value.preprocess.ratio / 100
-          : null,
-      resize:
-        preprocessInfo.value.preprocess.selectedRadio == 'size'
-          ? preprocessInfo.value.preprocess.size
-          : null,
-      pattern: scanInfo.value.scan.name ? scanInfo.value.scan.name : null
-    },
-    input_format: scanInfo.value.scan.inputType.map((type) => type.toLowerCase()),
-    status: 0
-  }
-  const url = `${API.api}/scan/preprocessing`
-  try {
-    const data = await API.authFetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
-    })
-    // if (!response.ok) {
-    //   const res = await response.json()
-    //   errorMessage.value = res.detail[0].msg
-    //   showError.value = true
-    //   throw new Error('Failed to submit preprocessing task')
-    // }
-    // const data = await response.json()
-    if (data) {
-      console.log(data)
-      preprocessStatus.updateStatus('preprocess', 1)
-      preprocessInfo.value.preprocess.progress = true
-      preprocessInfo.value.preprocess.id = data['Preprocessing task in progress']
-      eta.value = -1
-      checkInternalStatus = setInterval(async () => {
-        if (preprocessInfo.value.preprocess.id != '' && preprocessStatus.preprocess == 1) {
-          // Note: if the task propcessing fast, can not get ETA
-          getETA(preprocessInfo.value.preprocess.id)
-          if (eta.value <= 0 || eta.value == null) {
-            checkPreprocess()
-          }
-        } else {
-          clearInterval(checkInternalStatus)
-        }
-      }, 1000)
-    }
-  } catch (error) {
-    errorMessage.value = error.detail[0].msg
-    showError.value = true
-    console.error('Error submitting preprocessing task:', error)
-  }
-}
+// const submitPreprocess = async () => {
+//   const requestBody = {
+//     source: preprocessInfo.value.preprocess.folderPath,
+//     options: {
+//       convert: preprocessInfo.value.preprocess.type
+//         ? preprocessInfo.value.preprocess.type.toLowerCase()
+//         : null,
+//       mode: preprocessInfo.value.preprocess.color
+//         ? preprocessInfo.value.preprocess.color.toLowerCase()
+//         : null,
+//       scale:
+//         preprocessInfo.value.preprocess.selectedRadio == 'ratio'
+//           ? preprocessInfo.value.preprocess.ratio / 100
+//           : null,
+//       resize:
+//         preprocessInfo.value.preprocess.selectedRadio == 'size'
+//           ? preprocessInfo.value.preprocess.size
+//           : null,
+//       pattern: scanInfo.value.scan.name ? scanInfo.value.scan.name : null
+//     },
+//     input_format: scanInfo.value.scan.inputType.map((type) => type.toLowerCase()),
+//     status: 0
+//   }
+//   const url = `${API.api}/scan/preprocessing`
+//   try {
+//     const data = await API.authFetch(url, {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify(requestBody)
+//     })
+//     // if (!response.ok) {
+//     //   const res = await response.json()
+//     //   errorMessage.value = res.detail[0].msg
+//     //   showError.value = true
+//     //   throw new Error('Failed to submit preprocessing task')
+//     // }
+//     // const data = await response.json()
+//     if (data) {
+//       console.log(data)
+//       preprocessStatus.updateStatus('preprocess', 1)
+//       preprocessInfo.value.preprocess.progress = true
+//       preprocessInfo.value.preprocess.id = data['Preprocessing task in progress']
+//       eta.value = -1
+//       checkInternalStatus = setInterval(async () => {
+//         if (preprocessInfo.value.preprocess.id != '' && preprocessStatus.preprocess == 1) {
+//           // Note: if the task propcessing fast, can not get ETA
+//           getETA(preprocessInfo.value.preprocess.id)
+//           if (eta.value <= 0 || eta.value == null) {
+//             checkPreprocess()
+//           }
+//         } else {
+//           clearInterval(checkInternalStatus)
+//         }
+//       }, 1000)
+//     }
+//   } catch (error) {
+//     errorMessage.value = error.detail[0].msg
+//     showError.value = true
+//     console.error('Error submitting preprocessing task:', error)
+//   }
+// }
 
-const checkPreprocess = async () => {
-  if (preprocessInfo.value.preprocess.id != '') {
-    const url2 = `${API.api}/scan/preprocessing/${preprocessInfo.value.preprocess.id}`
-    try {
-      const data = await API.authFetch(url2, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      })
-      if (data) {
-        console.log(data)
-        outputPath.value = data.target
-        if (data.status == 2 || data.status == -1) {
-          if (data.status == -1) {
-            preprocessStatus.updateStatus('preprocess', -1)
-            console.error('preprocessing task failed')
-          }
-          preprocessStatus.updateStatus('preprocess', 2)
-          preprocessInfo.value.preprocess.id = ''
-          preprocessInfo.value.preprocess.progress = false
-          const index = scanInfo.value.scan.inputType.indexOf(preprocessInfo.value.preprocess.type)
-          if (index === -1) {
-            scanInfo.value.scan.inputType.push(preprocessInfo.value.preprocess.type)
-          }
-          checkInputFolder()
-          preprocessInfo.value.scan.folderPath = outputPath.value
-        }
-      }
-    } catch (error) {
-      console.error('Error check preprocessing task status:', error)
-    }
-  }
-}
+// const checkPreprocess = async () => {
+//   if (preprocessInfo.value.preprocess.id != '') {
+//     const url2 = `${API.api}/scan/preprocessing/${preprocessInfo.value.preprocess.id}`
+//     try {
+//       const data = await API.authFetch(url2, {
+//         method: 'GET',
+//         headers: { 'Content-Type': 'application/json' }
+//       })
+//       if (data) {
+//         console.log(data)
+//         outputPath.value = data.target
+//         if (data.status == 2 || data.status == -1) {
+//           if (data.status == -1) {
+//             preprocessStatus.updateStatus('preprocess', -1)
+//             console.error('preprocessing task failed')
+//           }
+//           preprocessStatus.updateStatus('preprocess', 2)
+//           preprocessInfo.value.preprocess.id = ''
+//           preprocessInfo.value.preprocess.progress = false
+//           const index = scanInfo.value.scan.inputType.indexOf(preprocessInfo.value.preprocess.type)
+//           if (index === -1) {
+//             scanInfo.value.scan.inputType.push(preprocessInfo.value.preprocess.type)
+//           }
+//           checkInputFolder()
+//           preprocessInfo.value.scan.folderPath = outputPath.value
+//         }
+//       }
+//     } catch (error) {
+//       console.error('Error check preprocessing task status:', error)
+//     }
+//   }
+// }
 
-// let debounceTimeout
 // const getETA = async (tid) => {
-//   clearTimeout(debounceTimeout)
 //   const url = `${API.api}/task/${tid}/status`
-//   debounceTimeout = setTimeout(() => {
-//     API.authFetch(url, {
+//   try {
+//     const data = await API.authFetch(url, {
 //       method: 'GET',
 //       headers: { accept: 'application/json' }
 //     })
-//       .then((response) => {
-//         if (!response.ok) {
-//           console.log('can not find task progress')
-//           console.log(eta.value)
-//         }
-//         return response.json()
-//       })
-//       .then((data) => {
-//         if (data.done != 0) {
-//           eta.value = data.eta
-//           if (data.eta == 0) {
-//             eta.value = -1
-//             checkPreprocess()
-//             clearInterval(checkInternalStatus)
-//           }
-//         }
-//       })
-//       .catch((e) => {
-//         console.error('Error getting task status:', e)
-//       })
-//   }, 2000)
+//     // if (!response.ok) {
+//     //   console.log('can not find task progress')
+//     //   console.log(eta.value)
+//     // }
+//     // const data = await response.json()
+//     if (data && data.done != 0) {
+//       eta.value = data.eta
+//       if (data.eta == 0) {
+//         eta.value = -1
+//         checkPreprocess()
+//         clearInterval(checkInternalStatus)
+//       }
+//     }
+//   } catch (error) {
+//     console.error('Error getting task status:', error)
+//   }
 // }
-
-const getETA = async (tid) => {
-  const url = `${API.api}/task/${tid}/status`
-  try {
-    const data = await API.authFetch(url, {
-      method: 'GET',
-      headers: { accept: 'application/json' }
-    })
-    // if (!response.ok) {
-    //   console.log('can not find task progress')
-    //   console.log(eta.value)
-    // }
-    // const data = await response.json()
-    if (data && data.done != 0) {
-      eta.value = data.eta
-      if (data.eta == 0) {
-        eta.value = -1
-        checkPreprocess()
-        clearInterval(checkInternalStatus)
-      }
-    }
-  } catch (error) {
-    console.error('Error getting task status:', error)
-  }
-}
 </script>
 
 <style>
@@ -1729,7 +1833,7 @@ const getETA = async (tid) => {
   margin: 30px;
   border: solid lightgrey 0.5px;
   height: auto;
-  max-height: 400px;
+  max-height: 500px;
   overflow-y: scroll;
   overflow-x: hidden;
 }

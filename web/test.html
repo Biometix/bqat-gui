@@ -1,0 +1,214 @@
+
+let ws = null;
+let es = document.getElementById("engine-selector");
+let face = document.getElementById("face");
+let fingerprint = document.getElementById("fingerprint");
+let iris = document.getElementById("iris");
+function toggleEngineSelector() {
+    if (face.checked) {
+        es.style.display = 'block';
+    } else {
+        es.style.display = 'none';
+    }
+}
+face.addEventListener('change', toggleEngineSelector);
+fingerprint.addEventListener('change', toggleEngineSelector);
+iris.addEventListener('change', toggleEngineSelector);
+toggleEngineSelector();
+
+function connect(event) {
+    let token = document.getElementById("token")
+    let connectionStatus = document.getElementById("status")
+    connectionStatus.innerHTML = "connecting..."
+    ws = new WebSocket("ws://localhost:8848/task/benchmark" + "?token=" + btoa(token.value));
+    
+    ws.onmessage = function(event) {
+        if (event.data === "111") {
+            connectionStatus.innerHTML = "✅"
+        }
+        if (event.data === "000") {
+            connectionStatus.innerHTML = "👾"
+        }
+    };
+
+    ws.onopen = () => {
+        console.log('WebSocket connection established.');
+    };
+
+    ws.onerror = (error) => {
+        console.error('WebSocket Error:', error);
+    };
+
+    ws.onclose = () => {
+        console.log('WebSocket connection closed.');
+        connectionStatus.innerHTML = "👾"
+    };
+    event.preventDefault()
+}
+function sendMessage(event) {
+    var input = document.getElementById("messageText")
+    ws.send(input.value)
+    input.value = ''
+    event.preventDefault()
+}
+function disconnect() {
+    let connectionStatus = document.getElementById("status")
+    connectionStatus.innerHTML = "👾"
+    ws.send("quit");
+}
+function isConencted() {
+    if (typeof ws === "undefined" || ws === null || ws.readyState !== WebSocket.OPEN) {
+            alert("Please connect first");
+            return false;
+    } else {
+        return true;
+    }
+}
+function checkLatency() {
+    if (!isConencted()) {
+        return
+    }
+    let latency = document.getElementById("latency")
+    let timer = Date.now()
+    ws.send("latency");
+    latency.innerHTML = "waiting..."
+    ws.onmessage = function(event) {
+        if (event.data === "latency") {
+            latency.innerHTML = (Date.now() - timer) + " ms";
+        }
+    };
+}
+function testUpload() {
+    if (!isConencted()) {
+        return
+    }
+    let uploadSize = document.getElementById("upload-size")
+    let uploadSpeed = document.getElementById("upload-speed")
+    let uploadTime = document.getElementById("upload-time")
+
+    let file = document.getElementById("file-upload").files[0]
+
+    let timer = Date.now()
+    let offset = 0;
+
+    function uploadFile(file) {
+        const chunkSize = 1024 * 1024; // 1MB per chunk
+        let chunkCount = Math.ceil(file.size / chunkSize);
+
+        function sendNextChunk() {
+            if (offset < file.size) {
+                const chunk = file.slice(offset, offset + chunkSize);
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const data = {
+                        fileName: file.name,
+                        chunkNumber: Math.floor(offset / chunkSize) + 1,
+                        totalChunks: chunkCount,
+                        chunkData: e.target.result
+                    };
+                    ws.send(JSON.stringify(data)); // Send chunk data to server
+
+                    offset += chunkSize;
+                    sendNextChunk(); // Send next chunk
+                };
+
+                reader.readAsArrayBuffer(chunk); // Read the chunk as ArrayBuffer
+                uploadSize.innerHTML = (offset / (1024 * 1024)).toFixed(2) + " / " + (file.size / (1024 * 1024)).toFixed(2) + " MB (" + Math.floor(offset / file.size * 100) + "%)";
+                uploadSpeed.innerHTML = ((offset / (1024 * 1024)) / ((Date.now() - timer) / 1000)).toFixed(2) + " MB/s";
+                uploadTime.innerHTML = ((Date.now() - timer) / 1000).toFixed(2) + " s / " + ((file.size - offset) / (offset / (Date.now() - timer)) / 1000).toFixed(2) + " s";
+            } else {
+                uploadSize.innerHTML = (file.size / (1024 * 1024)).toFixed(2) + " MB";
+                console.log('File upload complete');
+            }
+        }
+        
+        sendNextChunk();
+    }
+
+    if (file) {
+        uploadFile(file);
+    } else {
+        alert('Please select a file to upload.');
+    }
+}
+function startBenchmark() {
+    if (!isConencted()) {
+        return
+    }
+    let spec = document.getElementById("benchmark-spec")
+    let status = document.getElementById("benchmark-status")
+    let info = document.getElementById("benchmark-info")
+
+    let config = {}
+
+
+    console.log('Start benchmarking...')
+    
+    let modalities = document.getElementsByName('modalities');
+    let isModality = false
+    let modality = ""
+    for (let i = 0; i < modalities.length; i++) {
+        if (modalities[i].checked) {
+            config = Object.assign({"Modality": modalities[i].value}, config);
+            isModality = true
+            modality = modalities[i].value
+            break;
+        }
+    }
+    if (isModality) {
+        info.innerHTML = JSON.stringify(config, null, 4);
+    } else {
+        alert("Please choose a modality.")
+        return
+    }
+
+    if (modality === "Face") {
+        let engines = document.getElementsByName('engines');
+        let engine = 0;
+        for (let i = 0; i < engines.length; i++) {
+            if (engines[i].checked) {
+                engine = engine | Number(engines[i].value)
+            }
+        }
+        if (engine !== 0) {
+            config = Object.assign({"Engine": engine}, config);
+            info.innerHTML = JSON.stringify(config, null, 4);
+        } else {
+            alert("Please choose processing engine.")
+            return
+        }
+    }
+
+    let runs = document.getElementsByName('runs');
+    config = Object.assign({"Runs": Number(runs[0].value)}, config);
+    info.innerHTML = JSON.stringify(config, null, 4);
+
+    ws.send("benchmark");
+    ws.send(JSON.stringify(config))
+
+    ws.onmessage = function(event) {
+        let data = JSON.parse(event.data);
+        switch (data.type) {
+            case 'status':
+                status.innerHTML = JSON.stringify(data.content, null, 4)
+                break;
+            case 'spec':
+                spec.innerHTML = JSON.stringify(data.content, null, 4)
+                break;
+            case 'info':
+                config = Object.assign({"Total": `${config.Runs}*${data.content.files}=${config.Runs*data.content.files}`}, config);
+                info.innerHTML = JSON.stringify(config, null, 4);
+                break;
+            default:
+                status.innerHTML = data.content
+                break;
+        }
+    };
+}
+function stopBenchmark() {
+    if (!isConencted()) {
+        return
+    }
+    ws.send("stop")
+}

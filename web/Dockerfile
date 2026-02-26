@@ -1,18 +1,16 @@
-# syntax=docker/dockerfile:1
-
-# build stage
-FROM node:20 AS build-stage
+FROM node:25-slim AS build-stage
 
 WORKDIR /app
 
+RUN npm install -g pnpm
+
 COPY . .
 
-RUN yarn set version stable && \
-    yarn install && \
-    yarn build-only
+RUN pnpm install --frozen-lockfile && \
+    pnpm build-only
 
-# production stage
-FROM nginx AS production-stage
+
+FROM nginx:1.29-alpine AS production-stage
 
 COPY ./nginx.conf /etc/nginx/nginx.conf
 

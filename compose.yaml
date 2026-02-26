@@ -53,7 +53,7 @@ services:
 
   api-lite:
     restart: on-failure
-    image: ghcr.io/biometix/bqat-api:v1.3.0-beta
+    image: ghcr.io/biometix/bqat-api:latest
     shm_size: '8gb'
     depends_on:
       - mongo
@@ -73,7 +73,7 @@ services:
 
   redis:
     restart: on-failure
-    image: redis:latest
+    image: redis:7-alpine
     ports:
       - 6379:6379
     profiles:
@@ -82,7 +82,7 @@ services:
 
   mongo:
     restart: on-failure
-    image: mongo:latest
+    image: mongo:7
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: admin
